@@ -1,9 +1,11 @@
 @import "tailwindcss";
 @plugin 'daisyui' {
-  themes: nord --default, dim --prefersdark;
+  themes: nord --default,  dim --prefersdark;
   root: ":root";
   logs: false;
 }
+
+@custom-variant dark (&:where([data-theme="dim"], [data-theme="dim"] *));
 
 body {
   @apply h-full w-full overflow-hidden m-0 p-0 rounded-b-md bg-base-100;

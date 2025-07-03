@@ -3,16 +3,5 @@
   "references": [
     { "path": "./tsconfig.app.json" },
     { "path": "./tsconfig.node.json" }
-  ],
-  "compilerOptions": {
-    // 解析非相对模块名的基准目录
-    "baseUrl": "./",
-    // 模块名到基于baseUrl的路径映射列表
-    "paths": {
-      "@/*": ["src/*"],
-      "#/*": ["types/*"]
-    }
-  },
-  "include": ["src/**/*.ts", "src/**/*.vue", "src/**/*.d.ts", "vite.config.ts"],
-  "exclude": ["node_modules", "dist"]
+  ]
 }
