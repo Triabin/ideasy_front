@@ -15,9 +15,7 @@ export default defineConfig({
   resolve: {
     alias: [
       /** 设置@指向src目录 */
-      { find: '@', replacement: pathResolve('src') },
-      /** 设置#指向types目录 */
-      { find: '#', replacement: pathResolve('types') },
+      { find: '@', replacement: pathResolve('src') }
     ],
     extensions: ['.vue', '.css', '.mjs', '.js', '.ts', '.jsx', '.tsx', '.json'],
   }
