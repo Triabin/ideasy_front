@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col h-screen w-screen overflow-scroll gap-0.5">
     <!-- 头部 -->
-    <div class="h-16 flex justify-center items-center border-b bg-base-100 border-base-300">
+    <div class="h-16 flex justify-center items-center border-b bg-base-200/50 border-base-300">
       <!-- 头部内容区 -->
       <div class="w-160 md:w-192 lg:w-256 xl:w-320 2xl:w-360 flex items-center">
         <!-- Logo -->

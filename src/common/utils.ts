@@ -1,6 +1,4 @@
-/**
- * @type {Object} 数学工具
- */
+/** 数学工具类 */
 export const MyMathUtils = {
   /**
    * 函数描述：获取指定区间的随机整数
@@ -26,7 +24,7 @@ export const MyMathUtils = {
   }
 };
 
-// 日期对象工具类
+/** 日期对象工具类 */
 export const DateUtils = {
   /**
    * 函数描述：时间格式化工具
@@ -72,3 +70,17 @@ export const DateUtils = {
     return format;
   }
 };
+
+/**
+ * 获取当前操作系统类型
+ * @returns { 'Android' | 'iOS' | 'Windows' | 'MacOS' | 'Linux' | 'Unknown' } 操作系统类型
+ */
+export function getOS(): 'Android' | 'iOS' | 'Windows' | 'MacOS' | 'Linux' | 'Unknown' {
+  const userAgent = navigator.userAgent;
+  if (/Win/i.test(userAgent)) return 'Windows';
+  if (/Mac/i.test(userAgent)) return 'MacOS';
+  if (/android/i.test(userAgent)) return 'Android';
+  if (/iPad|iPhone|iPod/.test(userAgent)) return 'iOS';
+  if (/Linux/i.test(userAgent)) return 'Linux';
+  return 'Unknown';
+}

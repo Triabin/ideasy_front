@@ -25,7 +25,7 @@ routes.push({
   redirect: '/home'
 });
 
-const router = createRouter({
+export const router = createRouter({
   history: createWebHashHistory(),
   routes
 });

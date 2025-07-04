@@ -6,13 +6,13 @@
         role="radio"
         data-theme-switcher="true"
         data-active="false"
-        class="theme-switcher_switch"
-        aria-label="切换到日间模式"
+        :class="'btn btn-ghost btn-circle' + (theme.mode === 'light' ? ' selected' : '')"
+        title="切换到日间模式"
         aria-checked="false"
-        @click="() => themeSwitcher('light')"
+        @click="() => toggleTheme('light')"
     >
       <svg
-          style="color: currentcolor; width: 16px; height: 16px;"
+          class="text-current w-4 h-4"
           width="24"
           viewBox="0 0 24 24"
           stroke-width="1.5"
@@ -23,7 +23,6 @@
           height="24"
           fill="none"
           data-testid="geist-icon"
-          class="icon"
       >
         <circle r="5" cy="12" cx="12"></circle>
         <path d="M12 1v2"></path>
@@ -41,13 +40,13 @@
         role="radio"
         data-theme-switcher="true"
         data-active="false"
-        class="theme-switcher_switch"
-        aria-label="跟随浏览器"
+        :class="'btn btn-ghost btn-circle' + (theme.mode === 'system' ? ' selected' : '')"
+        title="跟随浏览器"
         aria-checked="false"
-        @click="() => themeSwitcher('system')"
+        @click="() => toggleTheme('system')"
     >
       <svg
-          style="color: currentcolor; width: 16px; height: 16px;"
+          class="text-current w-4 h-4"
           width="24"
           viewBox="0 0 24 24"
           stroke-width="1.5"
@@ -58,7 +57,6 @@
           height="24"
           fill="none"
           data-testid="geist-icon"
-          class="icon"
       >
         <rect ry="2" rx="2" height="14" width="20" y="3" x="2"></rect>
         <path d="M8 21h8"></path>
@@ -70,13 +68,13 @@
         role="radio"
         data-theme-switcher="true"
         data-active="true"
-        class="theme-switcher_switch"
-        aria-label="切换到夜间模式"
+        :class="'btn btn-ghost btn-circle' + (theme.mode === 'dark' ? ' selected' : '')"
+        title="切换到夜间模式"
         aria-checked="true"
-        @click="() => themeSwitcher('dark')"
+        @click="() => toggleTheme('dark')"
     >
       <svg
-          style="color: currentcolor; width: 16px; height: 16px;"
+          class="text-current w-4 h-4"
           width="24"
           viewBox="0 0 24 24"
           stroke-width="1.5"
@@ -87,7 +85,6 @@
           height="24"
           fill="none"
           data-testid="geist-icon"
-          class="icon"
       >
         <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path>
       </svg>
@@ -96,63 +93,25 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, onUnmounted } from 'vue';
+import { toRef, onMounted, onUnmounted } from 'vue';
 import useSettingsStore from '@/stores/settingsStore';
 
 const event = window.matchMedia("(prefers-color-scheme: dark)");
-const { theme } = useSettingsStore();
-const themeSwitcher = (mode: 'dark' | 'light' | 'system') => {
-  const darkTheme = theme.darkThemeName || 'dim';
-  const lightTheme = theme.lightThemeName || 'nord';
-  switch (mode) {
-    case 'dark':
-      theme.mode = 'dark';
-      theme.darkThemeName = darkTheme;
-      document.documentElement.setAttribute('data-theme', darkTheme);
-      break;
-    case 'light':
-      theme.mode = 'light';
-      theme.lightThemeName = lightTheme;
-      document.documentElement.setAttribute('data-theme', lightTheme);
-      break;
-    case "system":
-    default:
-      theme.mode = 'system';
-      theme.darkThemeName = darkTheme;
-      theme.lightThemeName = lightTheme;
-      const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      document.documentElement.setAttribute('data-theme', isDarkMode ? darkTheme : lightTheme);
-  }
-};
+const { initTheme, toggleTheme } = useSettingsStore();
+const theme = toRef(useSettingsStore(), 'theme');
 
 onMounted(() => {
-  theme.mode = theme.mode || 'system';
-  themeSwitcher(theme.mode);
-  event.addEventListener('change', themeSwitcher);
+  initTheme();
+  event.addEventListener('change', (e) => toggleTheme);
 });
 
 onUnmounted(() => {
-  event.removeEventListener('change')
+  event.removeEventListener('change', (e) => toggleTheme());
 });
 </script>
 
 <style lang="css" scoped>
-@import "@/styles/index.css";
-
-.theme-switcher_switch {
-  @apply w-8 h-8 flex justify-center items-center rounded-[inherit] border-0 bg-none cursor-pointer;
+.selected {
+  background-color: color-mix(in oklab, var(--btn-color, var(--color-base-200) /* var(--color-base-200) */), #000 7%);
 }
-
-.theme-switcher_switch:hover > .icon {
-  stroke: #323232;
-}
-
-.theme-switcher_switch:active {
-  background-color: rgba(128, 128, 128, 0.35);
-}
-
-.theme-switcher_switch:active > .icon {
-  stroke: white;
-}
-
 </style>
