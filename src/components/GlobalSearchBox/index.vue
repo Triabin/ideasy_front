@@ -36,7 +36,8 @@ const keyDownListener: (event: KeyboardEvent) => void = (e: KeyboardEvent) => {
     e.preventDefault();
     searchInput.value?.focus();
   }
-  if (e.key === 'Escape') {
+  if (searchInput.value == document.activeElement && e.key === 'Escape') {
+    e.preventDefault();
     // 取消聚焦
     searchInput.value?.blur();
   }
