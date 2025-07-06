@@ -1,6 +1,6 @@
 <!-- 首页路由组件 -->
 <template>
-  <div class="flex flex-col items-center justify-center gap-2">
+  <div class="flex flex-col items-center justify-center gap-3">
     <div class="w-full h-80 bg-base-200 rounded-md">
       <DynamicClock :color="currRealMode === 'dark' ? '#FFFFFFA1' : '#283747AF'"
                     font="sans-serif"
@@ -10,7 +10,8 @@
     <div class="w-full h-14">
       <GlobalSearchBox @search="(keyword: string) => console.log(`keyword: ${keyword}`)"/>
     </div>
-    <div class="w-full"></div>
+    <div class="w-full h-240 overflow-y-scroll grid sm:grid-cols-8 sm:gap-3 md:grid-cols-12 md:gap-3 lg:gap-4">
+    </div>
   </div>
 </template>
 <script lang="ts" setup>
@@ -21,6 +22,3 @@ import useSettingsStore from '@/stores/settingsStore';
 
 const currRealMode = toRef(useSettingsStore(), 'currRealMode');
 </script>
-<style lang="css" scoped>
-
-</style>

@@ -16,7 +16,6 @@ export default {
       if (!fileName) return;
       // 使用 PascalCase 命名（首字母大写）
       const componentName = fileName.replace(/(^|-)(\w)/g, (_, __, c) => c.toUpperCase());
-      console.log(componentName);
       // 全局注册组件
       app.component(componentName, (module as any).default);
     });

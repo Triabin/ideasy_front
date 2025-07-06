@@ -50,7 +50,7 @@ const theme = toRef(useSettingsStore(), 'theme');
 
 onMounted(() => {
   initTheme();
-  event.addEventListener('change', (e: Event) => toggleTheme);
+  event.addEventListener('change', (e: Event) => toggleTheme());
 });
 
 onUnmounted(() => {

@@ -18,5 +18,10 @@ export default defineConfig({
       { find: '@', replacement: pathResolve('src') }
     ],
     extensions: ['.vue', '.css', '.mjs', '.js', '.ts', '.jsx', '.tsx', '.json'],
+  },
+
+  server: {
+    host: '0.0.0.0',
+    port: 3000,
   }
 });
