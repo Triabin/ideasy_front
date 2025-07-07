@@ -9,7 +9,7 @@
           <RouterLink to="/"><img src="/favicon.png" alt="灵光"></RouterLink>
         </div>
         <!-- 导航栏路由 -->
-        <div class="flex-2 h-16 flex justify-start items-center">
+        <div class="flex-2 h-16 flex justify-start items-center gap-2">
           <template v-for="route in routes">
             <RouterLink v-if="route.meta?.title" :to="route.path">{{ route.meta.title }}</RouterLink>
           </template>
@@ -23,7 +23,7 @@
     <!-- 主体 -->
     <div class="flex-1 flex justify-center">
       <!-- 主体内容区 -->
-      <div class="w-160 md:w-192 lg:w-256 xl:w-320 2xl:w-360 bg-base-100 overflow-y-scroll">
+      <div class="w-160 md:w-192 lg:w-256 xl:w-320 2xl:w-360 bg-base-100 overflow-y-scroll no-scrollbar">
         <RouterView/>
       </div>
     </div>

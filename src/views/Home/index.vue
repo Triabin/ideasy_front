@@ -1,7 +1,7 @@
 <!-- 首页路由组件 -->
 <template>
   <div class="flex flex-col items-center justify-center gap-1">
-    <div class="w-full h-[25lvh] bg-base-200 rounded-md">
+    <div class="w-full h-[25lvh] bg-base-200 rounded-md mt-2">
       <DynamicClock :color="currRealMode === 'dark' ? '#FFFFFFA1' : '#283747AF'"
                     font="sans-serif"
                     :density="4"

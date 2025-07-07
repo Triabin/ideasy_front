@@ -1,6 +1,6 @@
 <template>
   <div class="w-full pl-1 pr-1">
-    <form @submit.prevent="() => emits('search', keyword)">
+    <form @submit.prevent="search">
       <label class="input w-full">
         <Search/>
         <input ref="searchInput"
@@ -38,6 +38,13 @@ const keyDownListener: (event: KeyboardEvent) => void = (e: KeyboardEvent) => {
     searchInput.value?.blur();
   }
 };
+
+const search = () => {
+  // 取消聚焦
+  searchInput.value?.blur();
+  // 调用父组件的搜索事件
+  emits('search', keyword.value);
+}
 
 onMounted(() => document.addEventListener('keydown', keyDownListener));
 onUnmounted(() => document.removeEventListener('keydown', keyDownListener))
