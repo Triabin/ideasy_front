@@ -57,5 +57,8 @@ export default {
 
     // 4. 使用 provide/inject
     // app.provide('pluginConfig', options);
+
+    // 5. 注册全局方法
+
   }
 }

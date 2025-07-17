@@ -1,12 +1,6 @@
-import {createRouter, createWebHashHistory, type RouteRecordRaw} from 'vue-router';
+import {createRouter, createWebHashHistory, type RouteMeta, type RouteRecordRaw} from 'vue-router';
 
-type Meta = {
-  title: string,
-  icon?: string,
-  menuOrder?: number
-}
-
-const pages: Record<string, Meta> = import.meta.glob('../views/**/_page.ts', {
+const pages: Record<string, RouteMeta> = import.meta.glob('../views/**/_page.ts', {
   eager: true,
   import: 'default'
 });
@@ -24,6 +18,7 @@ routes.push({
   path: '/',
   redirect: '/home'
 });
+routes.sort((r1, r2): number => (r1.meta?.menuOrder as number || 0) - (r2.meta?.menuOrder as number || 0));
 
 export const router = createRouter({
   history: createWebHashHistory(),
