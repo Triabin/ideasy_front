@@ -84,3 +84,22 @@ export function getOS(): 'Android' | 'iOS' | 'Windows' | 'MacOS' | 'Linux' | 'Un
   if (/Linux/i.test(userAgent)) return 'Linux';
   return 'Unknown';
 }
+
+/**
+ * 防抖函数
+ * @param func {Function} 要防抖的函数
+ * @param wait {number} 防抖时间，单位：毫秒，默认300
+ * @returns {Function} 防抖后的函数
+ * @warning 函数必须满足“需要频繁触发”、“耗时操作”、“只关心最终结果（不关心过程）”三个条件才适合使用防抖函数
+ */
+export function debounce<T extends (...args: any[]) => any>(func: T, wait: number = 300): T {
+  let timerId: ReturnType<typeof setTimeout>;
+  return function(this: any, ...args: Parameters<T>) {
+    // 取消之前的等待
+    if (timerId) clearTimeout(timerId);
+    timerId = setTimeout(() => {
+      // 调用函数并透传参数与this
+      func.call(this, ...args)
+    }, wait);
+  } as T;
+}
