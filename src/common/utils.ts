@@ -24,53 +24,6 @@ export const MyMathUtils = {
   }
 };
 
-/** 日期对象工具类 */
-export const DateUtils = {
-  /**
-   * 函数描述：时间格式化工具
-   * @param date {Date} 要格式化的日期对象
-   * @param format {String} 格式（y-年，M-月，d-日，H-时[24]，h-时[12]，m-分，s-秒，S-毫秒(3位数)，q-季度，ap，午前am/午后pm）
-   * @returns {String} 格式化后的字符串
-   */
-  format: (date: Date, format: string = 'yyyy-MM-dd HH:mm:ss'): string => {
-    let o: { [key: string]: number | string } = {
-      'M+': date.getMonth() + 1, // 月份
-      'd+': date.getDate(), // 日
-      'H+': date.getHours(), // 时（24小时制）
-      'h+': date.getHours() % 12 === 0 ? 12 : date.getHours() % 12, // 时（12小时制）
-      'm+': date.getMinutes(), // 分
-      's+': date.getSeconds(), // 秒
-      'q+': Math.floor((date.getMonth() + 3) / 3), // 季度
-      'S': date.getMilliseconds(), // 毫秒
-      'ap': date.getHours() > 12 ? 'am' : 'pm'
-    };
-    let week = ['日', '一', '二', '三', '四', '五', '六'];
-    if (/(y+)/.test(format)) {
-      format = format.replace(RegExp.$1, (date.getFullYear() + '').substr(4 - RegExp.$1.length));
-    }
-    if (/(E+)/.test(format)) {
-      format = format.replace(RegExp.$1, ((RegExp.$1.length > 1) ? (RegExp.$1.length > 2 ? '星期' : '周') : '') + week[date.getDay()]);
-    }
-    for (let k in o) {
-      let el = o[k];
-      if (new RegExp('(' + k + ')').test(format)) {
-        // 原代码中 el 类型为 string | number，而 replace 方法的第二个参数期望是一个函数或字符串，这里将 el 转换为字符串
-        // 同时使用 match 方法替代已弃用的 RegExp.$1，使用 slice 方法替代已弃用的 substr
-        const matchResult = format.match(new RegExp('(' + k + ')'));
-        if (matchResult) {
-          const matchedStr = matchResult[1];
-          const formattedEl = typeof el === 'number' ? el.toString() : el;
-          format = format.replace(
-            matchedStr,
-            matchedStr.length === 1 ? formattedEl : ('00' + formattedEl).slice(-matchedStr.length)
-          );
-        }
-      }
-    }
-    return format;
-  }
-};
-
 /**
  * 获取当前操作系统类型
  * @returns { 'Android' | 'iOS' | 'Windows' | 'MacOS' | 'Linux' | 'Unknown' } 操作系统类型

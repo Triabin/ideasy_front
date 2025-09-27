@@ -4,7 +4,7 @@
 </template>
 <script lang="ts" setup>
 import { ref, useTemplateRef, onMounted } from 'vue';
-import { MyMathUtils, DateUtils } from '@/common/utils.ts';
+import { MyMathUtils } from '@/common/utils.ts';
 
 // 父组件数据
 const props = defineProps({
@@ -121,7 +121,7 @@ let curTimeText: string;
 const update = () => {
   if (!ctx.value || !canvasRef.value) return;
   // 判断差异，避免无意义更新
-  const text = DateUtils.format(new Date(), 'HH:mm:ss');
+  const text = new Date().format('HH:mm:ss');
   if (text === curTimeText) {
     return;
   }
