@@ -10,7 +10,7 @@
         </div>
         <!-- 导航栏路由 -->
         <div class="navbar-center">
-          <TopNav :routes="routes"/>
+          <TopNav :routes="navs"/>
         </div>
         <!-- 功能按钮 -->
         <div class="navbar-end">
@@ -32,4 +32,6 @@
 import ThemeController from '@/components/ThemeController';
 import TopNav from '@/components/TopNav';
 import { routes } from '@/router';
+
+const navs = routes.filter(route => !route.path.startsWith('/tools'));
 </script>

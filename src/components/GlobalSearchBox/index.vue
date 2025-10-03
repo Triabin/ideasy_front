@@ -8,10 +8,12 @@
                class="grow"
                placeholder="你找啥？"
                v-model="keyword"
+               @focus="() => focused = true"
+               @blur="() => focused = false"
         />
-        <kbd v-if="osType === 'MacOS'" class="kbd kbd-md">⌘</kbd>
-        <kbd v-if="osType === 'Windows' || osType === 'Linux'" class="kbd kbd-md">Ctrl</kbd>
-        <kbd v-if="osType === 'Windows' || osType === 'Linux' || osType === 'MacOS'" class="kbd kbd-md">K</kbd>
+        <kbd v-if="!focused && osType === 'MacOS'" class="kbd kbd-md">⌘</kbd>
+        <kbd v-if="!focused && osType === 'Windows' || osType === 'Linux'" class="kbd kbd-md">Ctrl</kbd>
+        <kbd v-if="!focused && osType === 'Windows' || osType === 'Linux' || osType === 'MacOS'" class="kbd kbd-md">K</kbd>
       </label>
     </form>
   </div>
@@ -24,6 +26,7 @@ const osType = toRef(useSettingsStore(), 'osType');
 const emits = defineEmits(['search']);
 const keyword = ref('');
 const searchInput = useTemplateRef<HTMLInputElement>('searchInput');
+const focused = ref(false);
 
 const keyDownListener: (event: KeyboardEvent) => void = (e: KeyboardEvent) => {
   if (((osType.value === 'Windows' || osType.value === 'Linux') && e.ctrlKey && e.key === 'k') // Windows/Linux

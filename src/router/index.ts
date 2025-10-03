@@ -53,7 +53,7 @@ const router = createRouter({
 });
 // 8. 导出路由
 export default router;
-export { routes };
+export { routes, flattenRoute };
 
 /**
  * 利用Map通过路劲信息获取路由所需信息（不存在则创建）
@@ -135,4 +135,30 @@ function sortRoute(routes: RouteRecordRaw[]) {
       sortRoute(route.children);
     }
   });
+}
+
+/**
+ * 将路由扁平化
+ * @param routes {RouteRecordRaw[]} 路由
+ * @param parentPath {string} 父路由路径
+ * @returns {RouteRecordRaw[]} 扁平化的路由
+ */
+function flattenRoute(routes: RouteRecordRaw[], parentPath = ''): RouteRecordRaw[] {
+  if (!routes) return [];
+  let result: RouteRecordRaw[] = [];
+  routes.forEach(route => {
+    let currPath = (route.path.startsWith('/') || parentPath.endsWith('/')) ? parentPath + route.path : `${parentPath}/${route.path}`;
+    if (route.path.startsWith('/') && parentPath.endsWith('/')) currPath = currPath.replace('//', '/');
+    if (route.children && route.children.length > 0) {
+      let children = flattenRoute(route.children, currPath);
+      children && children.length && result.push(...children);
+    }
+    // @ts-ignore
+    result.push({
+      ...route,
+      path: currPath,
+      children: undefined
+    });
+  });
+  return result;
 }
