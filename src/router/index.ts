@@ -1,6 +1,6 @@
 import { createRouter, createWebHashHistory, type RouteMeta, type RouteRecordRaw } from 'vue-router';
 
-/// 存放路由信息的模型
+/** 存放路由信息的模型 */
 type _GenRouteModel = {
   path: string;
   name?: string;
@@ -54,8 +54,6 @@ const router = createRouter({
 // 8. 导出路由
 export default router;
 export { routes };
-
-console.log(routes);
 
 /**
  * 利用Map通过路劲信息获取路由所需信息（不存在则创建）
