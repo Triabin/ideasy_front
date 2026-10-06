@@ -24,9 +24,3 @@
     <path d="M18.36 5.64l1.42-1.42"></path>
   </svg>
 </template>
-<script lang="ts" setup>
-
-</script>
-<style lang="css" scoped>
-
-</style>

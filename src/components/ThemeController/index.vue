@@ -29,10 +29,10 @@
         type="button"
         role="radio"
         data-theme-switcher="true"
-        data-active="true"
+        data-active="false"
         :class="'btn btn-ghost btn-circle' + (theme.mode === 'dark' ? ' selected' : '')"
         title="切换到夜间模式"
-        aria-checked="true"
+        aria-checked="false"
         @click="() => toggleTheme('dark')"
     >
       <Dark/>
@@ -43,6 +43,9 @@
 <script lang="ts" setup>
 import { toRef, onMounted, onUnmounted } from 'vue';
 import useSettingsStore from '@/stores/settingsStore';
+import PCScreen from '@/components/icons/PCScreen.vue';
+import Light from '@/components/icons/Light.vue';
+import Dark from '@/components/icons/Dark.vue';
 
 const event = window.matchMedia("(prefers-color-scheme: dark)");
 const { initTheme, toggleTheme } = useSettingsStore();
@@ -60,6 +63,6 @@ onUnmounted(() => {
 
 <style lang="css" scoped>
 .selected {
-  background-color: color-mix(in oklab, var(--btn-color, var(--color-base-200) /* var(--color-base-200) */), #000 7%);
+  background-color: color-mix(in oklab, var(--btn-color, var(--color-base-200)), #000 7%);
 }
 </style>
