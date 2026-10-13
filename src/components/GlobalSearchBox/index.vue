@@ -2,12 +2,13 @@
   <div class="w-full pl-1 pr-1">
     <form @submit.prevent="search">
       <label class="input w-full">
-        <Search/>
+        <Search class="cursor-pointer"/>
         <input ref="searchInput"
                type="search"
                class="grow"
                placeholder="你找啥？"
-               v-model="keyword"
+               :value="modelValue"
+               @input="onInput"
                @focus="() => focused = true"
                @blur="() => focused = false"
         />
@@ -25,10 +26,15 @@ import { ref, toRef, useTemplateRef, onMounted, onUnmounted } from 'vue';
 import useSettingsStore from '@/stores/settingsStore';
 
 const osType = toRef(useSettingsStore(), 'osType');
-const emits = defineEmits(['search']);
-const keyword = ref('');
+// 支持 v-model 双向绑定搜索关键字
+const props = defineProps<{ modelValue?: string }>();
+const emits = defineEmits(['search', 'update:modelValue']);
 const searchInput = useTemplateRef<HTMLInputElement>('searchInput');
 const focused = ref(false);
+
+const onInput = (e: Event) => {
+  emits('update:modelValue', (e.target as HTMLInputElement).value);
+};
 
 const keyDownListener: (event: KeyboardEvent) => void = (e: KeyboardEvent) => {
   if (((osType.value === 'Windows' || osType.value === 'Linux') && e.ctrlKey && e.key === 'k') // Windows/Linux
@@ -48,7 +54,7 @@ const search = () => {
   // 取消聚焦
   searchInput.value?.blur();
   // 调用父组件的搜索事件
-  emits('search', keyword.value);
+  emits('search', props.modelValue ?? '');
 }
 
 onMounted(() => document.addEventListener('keydown', keyDownListener));

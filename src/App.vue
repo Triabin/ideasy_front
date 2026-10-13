@@ -10,7 +10,7 @@
         </div>
         <!-- 导航栏路由 -->
         <div class="navbar-center">
-          <TopNav :routes="navs"/>
+        <!-- <TopNav :routes="navs"/>-->
         </div>
         <!-- 功能按钮 -->
         <div class="navbar-end">
