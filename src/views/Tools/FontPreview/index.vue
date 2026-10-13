@@ -29,8 +29,8 @@
 
     <!-- 已上传字体列表 -->
     <div v-if="fonts.length" class="flex flex-wrap gap-2">
-      <div v-for="font in fonts" :key="font.id" class="badge badge-lg gap-1 badge-outline">
-        <span :style="{ fontFamily: `'${font.family}'` }">{{ font.name }}</span>
+      <div v-for="font in fonts" :key="font.id" class="badge badge-lg gap-1 badge-outline cursor-pointer">
+        <span class="italic text-base-content text-sm mr-2">{{ font.name }}</span>
         <button class="cursor-pointer hover:text-error" title="移除该字体" @click.stop="removeFont(font.id)">✕</button>
       </div>
     </div>
@@ -55,7 +55,7 @@
     <!-- 预览文本输入 -->
     <textarea
         v-model="previewText"
-        rows="3"
+        rows="6"
         class="textarea textarea-bordered w-full"
         placeholder="请输入要预览的文本内容"
     ></textarea>

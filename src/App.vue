@@ -5,8 +5,8 @@
       <!-- 头部内容区 -->
       <div class="navbar w-160 md:w-3xl lg:w-5xl xl:w-7xl 2xl:w-360 flex items-center">
         <!-- Logo -->
-        <div class="navbar-start">
-          <RouterLink to="/"><img src="/favicon.png" alt="灵光"></RouterLink>
+        <div class="navbar-start text-2xl">
+          <RouterLink to="/"><img src="/favicon.png" class="size-10" alt="灵光"></RouterLink>光
         </div>
         <!-- 导航栏路由 -->
         <div class="navbar-center">
