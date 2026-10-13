@@ -1,7 +1,7 @@
 <!-- 首页路由组件 -->
 <template>
   <div class="flex flex-col items-center justify-center gap-1">
-    <div class="w-full h-[25lvh] bg-base-200 rounded-md mt-2 mb-4">
+    <div class="w-full h-[25lvh] bg-base-200 rounded-md m-4 flex justify-center items-center">
       <DynamicClock :color="currRealMode === 'dark' ? '#FFFFFFA1' : '#283747AF'"
                     font="sans-serif"
                     :density="4"
@@ -21,7 +21,7 @@
            title="点击跳转"
            @click="() => router.push(card.path)"
            class="flex flex-col justify-start gap-2.5 border border-accent/10 rounded-md p-6 overflow-hidden bg-base-200/55
-             shadow-sm cursor-pointer hover:border-primary hover:shadow-[0_0_10px_var(--color-primary)] hover:translate-y-[-5px]
+             shadow-sm cursor-pointer hover:border-primary hover:shadow-[0_0_10px_var(--color-primary)] hover:-translate-y-1.25
              transition-all duration-200 ease-in-out">
         <div class="flex items-center gap-2.5">
           <component v-if="card.meta?.icon" :is="card.meta.icon"/>

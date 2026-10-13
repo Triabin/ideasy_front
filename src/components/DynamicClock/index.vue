@@ -3,8 +3,8 @@
   <canvas ref="canvasRef" class="bg-transparent block w-full h-full"></canvas>
 </template>
 <script lang="ts" setup>
-import { ref, useTemplateRef, onMounted } from 'vue';
-import { MyMathUtils } from '@/common/utils.ts';
+import { ref, computed, useTemplateRef, onMounted, onBeforeUnmount, watch } from 'vue';
+import { MyMathUtils, debounce } from '@/common/utils.ts';
 
 // 父组件数据
 const props = defineProps({
@@ -20,7 +20,7 @@ const props = defineProps({
     default: 'sans-serif'
   },
 
-  // 字体大小
+  // 字体大小（仅作为基准参考值，实际渲染尺寸会根据画布（屏幕）大小自动等比缩放；传0表示完全自适应容器）
   fontSize: {
     type: Number,
     default: 240
@@ -32,6 +32,10 @@ const props = defineProps({
     default: 6
   }
 });
+
+/** 时钟文本的宽高比（HH:mm:ss），保证数字在不同屏幕尺寸下始终保持比例、不变形 */
+const TEXT_ASPECT_RATIO = 8 / 2;
+
 class Particle {
   /** 粒子半径 */
   public r: number;
@@ -39,9 +43,9 @@ class Particle {
   public x: number;
   /** 粒子在画布上的纵坐标 */
   public y: number;
-  constructor(canvas: HTMLCanvasElement) {
-    // 粒子半径
-    this.r = MyMathUtils.randomInt(2 * devicePixelRatio, 7 * devicePixelRatio);
+  constructor(canvas: HTMLCanvasElement, scale: number) {
+    // 粒子半径（随缩放系数等比变化，避免屏幕尺寸变化时粒子比例失真）
+    this.r = MyMathUtils.randomInt(2 * scale, 7 * scale);
     // 环半径
     const ar = Math.min(canvas.width, canvas.height) / 2;
     // 粒子初始位置圆心与环圆心形成的夹角（随机）
@@ -97,6 +101,13 @@ class Particle {
 const canvasRef = useTemplateRef<HTMLCanvasElement>('canvasRef');
 const ctx = ref<null | CanvasRenderingContext2D>(null);
 
+/** 缩放系数：设备像素比 * 基准字号比例，保证数字随屏幕尺寸等比缩放且渲染清晰 */
+const scale = computed(() => {
+  const dpr = window.devicePixelRatio || 1;
+  // fontSize <= 0 表示完全自适应容器；否则以 fontSize 为基准（fontSize/240）整体缩放
+  return props.fontSize > 0 ? dpr * (props.fontSize / 240) : dpr;
+});
+
 // 用于存放粒子的数组
 const particles: Particle[] = [];
 // 清空画布函数
@@ -118,11 +129,15 @@ const draw = () => {
 
 // 更新画布粒子
 let curTimeText: string;
+// resize后强制刷新标记（避免同一秒内尺寸变化但时间文本未变导致不重绘）
+let forceUpdate = false;
 const update = () => {
   if (!ctx.value || !canvasRef.value) return;
-  // 判断差异，避免无意义更新
+  // 判断差异，避免无意义更新（resize后强制刷新一次）
   const text = new Date().format('HH:mm:ss');
-  if (text === curTimeText) {
+  if (forceUpdate) {
+    forceUpdate = false;
+  } else if (text === curTimeText) {
     return;
   }
   curTimeText = text;
@@ -131,7 +146,8 @@ const update = () => {
   const { width, height } = canvasRef.value;
   ctx.value.fillStyle = '#000';
   ctx.value.textBaseline = 'middle';
-  ctx.value.font = `${props.fontSize * devicePixelRatio}px 'DS-Digital', ${props.font}`;
+  // 字号与画布高度挂钩（height/2 = fontSize*scale），保证数字始终占满画布且比例固定
+  ctx.value.font = `${height / 2}px 'DS-Digital', ${props.font}`;
   ctx.value.textAlign = 'center';
   ctx.value.fillText(text, width / 2, height / 2);
 
@@ -143,7 +159,7 @@ const update = () => {
     const [x, y] = points[i];
     let p = particles[i];
     if (!p) {
-      p = new Particle(canvasRef.value);
+      p = new Particle(canvasRef.value, scale.value);
       particles.push(p);
     }
     p.moveTo(x, y);
@@ -158,7 +174,7 @@ const getPoints = () => {
   if (!ctx.value || !canvasRef.value) return [];
   const points = [];
   const { data } = ctx.value.getImageData(0, 0, canvasRef.value.width, canvasRef.value.height);
-  const gap = props.density; // 设置步长，不需要获取所有像素点(步长越大，生成的粒子数量越小)
+  const gap = props.density * scale.value; // 设置步长，不需要获取所有像素点(步长越大，生成的粒子数量越小)；步长随缩放系数变化，保证不同屏幕下粒子密度视觉一致
   for (let i = 0; i < canvasRef.value.width; i += gap) {
     for (let j = 0; j < canvasRef.value.height; j += gap) {
       const index = (i + j * canvasRef.value.width) * 4; // 每连续的四位为一个像素点的信息
@@ -175,12 +191,62 @@ const getPoints = () => {
   return points;
 }
 
+/**
+ * 根据容器实际尺寸设置画布大小：
+ * 画布始终保持固定宽高比（TEXT_ASPECT_RATIO），数字按高度等比缩放，
+ * 从而在任意屏幕尺寸下保持比例、避免拉伸变形。
+ */
+const resizeCanvas = () => {
+  if (!canvasRef.value) return;
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvasRef.value.getBoundingClientRect();
+  let cssWidth: number, cssHeight: number;
+  if (props.fontSize > 0) {
+    // 基准模式：逻辑字号为 fontSize，画布按 fontSize*scale 等比缩放
+    const s = scale.value;
+    cssWidth = props.fontSize * TEXT_ASPECT_RATIO * s / dpr;
+    cssHeight = props.fontSize * 2 * s / dpr;
+    // 若超出容器宽度，则整体等比缩小（只取最小缩放系数，绝不放大超过容器）
+    if (rect.width > 0) {
+      const fit = Math.min(rect.width / cssWidth, rect.height > 0 ? rect.height / cssHeight : 1);
+      if (fit < 1) {
+        cssWidth *= fit;
+        cssHeight *= fit;
+      }
+    }
+  } else {
+    // 完全自适应模式：以容器高度为准，宽度按比例推导；若超宽则以宽度为准反向推导高度
+    cssHeight = rect.height || 100;
+    cssWidth = cssHeight * TEXT_ASPECT_RATIO;
+    if (rect.width > 0 && cssWidth > rect.width) {
+      cssWidth = rect.width;
+      cssHeight = cssWidth / TEXT_ASPECT_RATIO;
+    }
+  }
+  canvasRef.value.style.width = `${cssWidth}px`;
+  canvasRef.value.style.height = `${cssHeight}px`;
+  canvasRef.value.width = Math.round(cssWidth * dpr);
+  canvasRef.value.height = Math.round(cssHeight * dpr);
+  // 尺寸变化后强制重绘一次粒子
+  forceUpdate = true;
+};
+
+// 防抖处理resize事件，避免频繁重建画布
+const onResize = debounce(resizeCanvas, 200);
+
 onMounted(() => {
   if (canvasRef.value) {
     ctx.value = canvasRef.value.getContext('2d', {willReadFrequently: true});
-    canvasRef.value.width = props.fontSize * 8 * devicePixelRatio;
-    canvasRef.value.height = props.fontSize * 2 * devicePixelRatio;
+    resizeCanvas();
     draw();
+    window.addEventListener('resize', onResize);
   }
+});
+
+// 字体/密度等配置变化时同步更新画布尺寸
+watch(scale, resizeCanvas);
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', onResize);
 });
 </script>
