@@ -3,7 +3,7 @@
     <!-- 头部 -->
     <div class="min-h-16 h-16 flex justify-center items-center bg-base-300/50 shadow-sm">
       <!-- 头部内容区 -->
-      <div class="navbar w-160 md:w-192 lg:w-256 xl:w-320 2xl:w-360 flex items-center">
+      <div class="navbar w-160 md:w-3xl lg:w-5xl xl:w-7xl 2xl:w-360 flex items-center">
         <!-- Logo -->
         <div class="navbar-start">
           <RouterLink to="/"><img src="/favicon.png" alt="灵光"></RouterLink>
@@ -19,9 +19,9 @@
       </div>
     </div>
     <!-- 主体 -->
-    <div class="flex-1 flex justify-center">
+    <div class="flex-1 flex justify-center min-h-0">
       <!-- 主体内容区 -->
-      <div class="w-160 md:w-192 lg:w-256 xl:w-320 2xl:w-360 bg-base-100 overflow-y-scroll no-scrollbar">
+      <div class="w-160 h-full md:w-3xl lg:w-5xl xl:w-7xl 2xl:w-360 bg-base-100 overflow-y-scroll no-scrollbar">
         <RouterView/>
       </div>
     </div>

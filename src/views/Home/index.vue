@@ -39,7 +39,4 @@ import { useRouter } from 'vue-router';
 const currRealMode = toRef(useSettingsStore(), 'currRealMode');
 const cardRoutes = computed(() => flattenRoute(routes).filter(route => route.path.startsWith('/tools/')));
 const router = useRouter();
-console.log(cardRoutes.value);
-console.log(flattenRoute(routes));
-console.log(routes);
 </script>

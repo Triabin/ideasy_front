@@ -4,5 +4,5 @@ export default {
   title: '字体预览',
   menuOrder: 4,
   icon: Font,
-  desc: '上传字体，预览字体效果。'
+  desc: '在线预览本地字体效果。'
 }
