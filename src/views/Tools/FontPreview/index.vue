@@ -85,6 +85,7 @@
 </template>
 <script lang="ts" setup>
 import { computed, onBeforeUnmount, ref, toRef, watch } from 'vue';
+import { getFontFamilyFromFile } from '@/common/utils';
 import useSettingsStore from '@/stores/settingsStore';
 import UnderLineMsg from '@/components/UnderLineMsg';
 import Font from '@/components/icons/Font.vue';
@@ -177,7 +178,7 @@ const handleFiles = async (files: FileList | null) => {
  */
 const addFont = async (file: File) => {
   const url = URL.createObjectURL(file);
-  const family = `ideasy-font-${++fontIdSeed}`;
+  const family = await getFontFamilyFromFile(file);
   try {
     const face = new FontFace(family, `url(${url})`);
     await face.load();

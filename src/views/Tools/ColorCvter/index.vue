@@ -128,15 +128,15 @@
     </div>
 
     <!-- 历史记录 -->
-    <div v-if="history.length" class="card bg-base-200 shadow-sm">
+    <div v-if="cvtColorHistories.length" class="card bg-base-200 shadow-sm">
       <div class="card-body py-3 gap-2">
         <div class="flex items-center justify-between">
           <h2 class="card-title text-sm">最近使用</h2>
-          <button class="btn btn-xs btn-ghost" @click="clearHistory">清空</button>
+          <button class="btn btn-xs btn-ghost" @click="clearCvtColorHistory">清空</button>
         </div>
         <div class="flex flex-wrap gap-2">
           <button
-              v-for="(h, i) in history"
+              v-for="(h, i) in cvtColorHistories"
               :key="i"
               class="badge badge-lg gap-1 badge-outline font-mono cursor-pointer hover:bg-base-300"
               @click="setInput(h)"
@@ -151,7 +151,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, ref, toRef } from 'vue';
 import Copy from '@/components/icons/Copy.vue';
 import Copied from '@/components/icons/Copied.vue';
 import UnderLineMsg from '@/components/UnderLineMsg';
@@ -160,6 +160,7 @@ import {
   adjustLightness, rgbToHsl, hslToRgb, relativeLuminance,
   ColorParseError, type Rgba,
 } from './colorConverter';
+import useAppDataStore from '@/stores/appData';
 
 const msgRef = ref<any>();
 const inputText = ref<string>('#FF5733');
@@ -249,23 +250,8 @@ const currentContrast = computed(() => {
 /* ------------------------- 交互 ------------------------- */
 
 /** 历史颜色（本地存储） */
-const HISTORY_KEY = 'color-cvter-history';
-const history = ref<string[]>([]);
-
-const loadHistory = () => {
-  try {
-    history.value = JSON.parse(localStorage.getItem(HISTORY_KEY) ?? '[]');
-  } catch { history.value = []; }
-};
-const pushHistory = (hex: string) => {
-  const list = [hex, ...history.value.filter((h) => h !== hex)].slice(0, 12);
-  history.value = list;
-  localStorage.setItem(HISTORY_KEY, JSON.stringify(list));
-};
-const clearHistory = () => {
-  history.value = [];
-  localStorage.removeItem(HISTORY_KEY);
-};
+const cvtColorHistories = toRef(useAppDataStore(), 'cvtColorHistories');
+const { pushCvtColorHistory, clearCvtColorHistory } = useAppDataStore();
 
 /**
  * 应用输入框内容：解析成功则更新颜色并记入历史
@@ -275,7 +261,7 @@ const applyInput = () => {
     color.value = parseColor(inputText.value);
     parseError.value = '';
     inputText.value = formatHex(color.value);
-    pushHistory(formatHex(color.value));
+    pushCvtColorHistory(formatHex(color.value));
     msgRef.value?.showMsg('解析成功', 'success', 1500);
   } catch (e: any) {
     parseError.value = e?.message ?? '解析失败';
@@ -300,7 +286,7 @@ const onPickerInput = (e: Event) => {
 const shiftLightness = (delta: number) => {
   color.value = adjustLightness(color.value, delta);
   inputText.value = formatHex(color.value);
-  pushHistory(formatHex(color.value));
+  pushCvtColorHistory(formatHex(color.value));
 };
 
 /** 复制到剪贴板 */
@@ -322,8 +308,6 @@ const copy = async (text: string) => {
   if (copyTimer) clearTimeout(copyTimer);
   copyTimer = setTimeout(() => (copiedText.value = ''), 1500);
 };
-
-onMounted(loadHistory);
 </script>
 
 <style scoped>

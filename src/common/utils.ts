@@ -1,3 +1,5 @@
+import opentype from 'opentype.js';
+
 /** 数学工具类 */
 export const MyMathUtils = {
   /**
@@ -77,4 +79,39 @@ export const clickDownload = (
   link.download = nameGetter();
   link.click();
   URL.revokeObjectURL(url);
+}
+
+/**
+ * 通过字体文件获取字体font-family（英文有限、中文次之）
+ * @param file {File} 字体文件
+ * @returns {string} 字体家族名
+ */
+export async function getFontFamilyFromFile(file: File): Promise<string> {
+  const buf = await file.arrayBuffer()
+  const font = opentype.parse(buf)
+  const names = font.names as any;
+  if (!names) return '';
+  const familyMeta: Record<string, string> = names.preferredFamily
+    || names.fontFamily
+    || names.windows?.fontFamily
+    || names.macintosh?.fontFamily
+    || {};
+  // 优先取英文 family 名
+  return familyMeta.en || familyMeta.zh || Object.values(familyMeta)[0] || '';
+}
+
+/**
+ * 通过字体文件获取所有字体font-family
+ * @param file {File} 字体文件
+ * @returns {Record<string, string>} 所有字体家族名
+ */
+export async function getFontFamiliesFromFile(file: File): Promise<Record<string, string>> {
+  const buf = await file.arrayBuffer()
+  const font = opentype.parse(buf)
+  const names = font.names as any;
+  return names.preferredFamily
+    || names.fontFamily
+    || names.windows?.fontFamily
+    || names.macintosh?.fontFamily
+    || {};
 }
