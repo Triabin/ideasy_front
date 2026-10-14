@@ -1,6 +1,6 @@
 <!-- 歌词调整组件 -->
 <template>
-  <h1 class="card-title mt-4">Lrc 歌词时间轴调整</h1>
+  <h1 class="w-full text-center text-3xl mt-4">Lrc 歌词时间轴调整</h1>
   <div class="tools-lyric-adjuster">
     <textarea v-model="lyricContent"
               rows="10"
