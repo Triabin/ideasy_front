@@ -12,7 +12,7 @@
                @focus="() => focused = true"
                @blur="() => focused = false"
         />
-        <span v-if="!focused">
+        <span v-if="!focused && (osType === 'Windows' || osType === 'MacOS' || osType === 'Linux')">
           <kbd v-if="osType === 'MacOS'" class="kbd kbd-md">⌘</kbd>
           <kbd v-else class="kbd kbd-md">Ctrl</kbd>
           <kbd class="kbd kbd-md">K</kbd>
