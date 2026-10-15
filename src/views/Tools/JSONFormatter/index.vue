@@ -49,8 +49,10 @@
           </label>
           <div class="ml-auto flex flex-wrap items-center gap-2">
             <label class="input input-sm join-item items-center gap-2 w-56">
-              <span class="opacity-60 shrink-0 text-xs">路径</span>
-              <input type="text" class="grow font-mono text-xs" v-model="queryPath" placeholder="$.users.0.name" @keyup.enter="doQuery"/>
+              <span class="opacity-75 shrink-0 text-xs cursor-pointer" title="在树形结构中查看指定字段，“$”表示根路径">
+                路径
+              </span>
+              <input type="text" class="grow font-mono text-xs" v-model="queryPath" placeholder="示例：$.users.0.name" @keyup.enter="doQuery"/>
             </label>
             <button class="btn btn-sm" @click="doQuery">查询</button>
             <button class="btn btn-sm btn-ghost" title="上传 .json / .txt 文件" @click="fileRef?.click()">打开文件</button>
@@ -64,7 +66,7 @@
     </div>
 
     <!-- 编辑区 / 输出区 -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 grow min-h-[24rem]">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 grow min-h-96">
       <!-- 输入 -->
       <div class="card bg-base-200 shadow-sm">
         <div class="card-body p-3 gap-2">
@@ -102,7 +104,7 @@
                 <button class="btn btn-xs join-item" :class="{ 'btn-active': viewMode === 'tree' }" @click="viewMode = 'tree'" :disabled="parseError !== null">树形</button>
               </div>
               <button v-show="viewMode === 'tree'" class="btn btn-xs btn-ghost" @click="toggleCollapseAll">{{ allCollapsed ? '全部展开' : '全部收起' }}</button>
-              <button class="btn btn-sm btn-ghost" title="复制结果" @click="copy(outputText)" :disabled="!outputText || viewMode === 'tree'">
+              <button class="btn btn-sm btn-ghost" :class="(!outputText || viewMode === 'tree') ? 'btn-disabled btn-square' : ''" title="复制结果" @click="copy(outputText)" :disabled="!outputText || viewMode === 'tree'">
                 <Copied v-if="copiedText === outputText && copiedText" :size="16" :twClasses="['fill-success']"/>
                 <Copy v-else :size="16"/>
               </button>
@@ -113,12 +115,12 @@
           <!-- 文本视图 -->
           <pre
               v-show="viewMode === 'text'"
-              class="w-full grow min-h-72 max-h-[32rem] overflow-auto thin-scrollbar font-mono text-sm leading-relaxed rounded-lg bg-base-300/50 p-3 whitespace-pre"
+              class="w-full grow min-h-72 max-h-128 overflow-auto thin-scrollbar font-mono text-sm leading-relaxed rounded-lg bg-base-300/50 p-3 whitespace-pre"
           ><template v-for="(line, li) in highlightedLines" :key="li"><span v-html="line"></span>
 </template></pre>
 
           <!-- 树形视图 -->
-          <div v-show="viewMode === 'tree'" class="w-full grow min-h-72 max-h-[32rem] overflow-auto thin-scrollbar font-mono text-sm rounded-lg bg-base-300/50 p-2">
+          <div v-show="viewMode === 'tree'" class="w-full grow min-h-72 max-h-128 overflow-auto thin-scrollbar font-mono text-sm rounded-lg bg-base-300/50 p-2">
             <div
                 v-for="node in treeNodes"
                 :key="node.path"
@@ -176,14 +178,23 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from 'vue';
+import {computed, ref, watch} from 'vue';
 import Copy from '@/components/icons/Copy.vue';
 import Copied from '@/components/icons/Copied.vue';
 import UnderLineMsg from '@/components/UnderLineMsg';
 import {
-  parseJsonLoose, stringifyJson, analyzeJson, flattenTree, getJsonValue,
-  collectContainerPaths, JsonParseError,
-  type JsonValue, type SortType, type JsonTreeNode, type JsonStats, type IndentChar,
+  analyzeJson,
+  collectContainerPaths,
+  flattenTree,
+  getJsonValue,
+  type IndentChar,
+  JsonParseError,
+  type JsonStats,
+  type JsonTreeNode,
+  type JsonValue,
+  parseJsonLoose,
+  type SortType,
+  stringifyJson,
 } from './jsonUtils';
 
 const msgRef = ref<any>();
@@ -262,8 +273,7 @@ const doParse = (): boolean => {
     return false;
   }
   try {
-    const value = parseJsonLoose(text);
-    parsed.value = value;
+    parsed.value = parseJsonLoose(text);
     parseError.value = null;
     return true;
   } catch (e: any) {
@@ -283,8 +293,7 @@ const renderOutput = () => {
   outputText.value = stringifyJson(parsed.value, formatOpts());
   // 折叠集合中已不存在的路径自动剔除
   const valid = new Set(collectContainerPaths(parsed.value));
-  const next = new Set([...collapsed.value].filter(p => valid.has(p)));
-  collapsed.value = next;
+  collapsed.value = new Set([...collapsed.value].filter(p => valid.has(p)));
 };
 
 /** 当前格式化选项 */
@@ -452,7 +461,8 @@ const copy = async (text: string) => {
     ta.value = text;
     document.body.appendChild(ta);
     ta.select();
-    document.execCommand('copy');
+    // eslint-disable-next-line @typescript-eslint/no-deprecated
+    (document as any).execCommand('copy');
     ta.remove();
   }
   copiedText.value = text;
