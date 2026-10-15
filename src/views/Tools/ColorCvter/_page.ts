@@ -4,5 +4,5 @@ export default {
   title: '颜色转换',
   menuOrder: 3,
   icon: ColorCvter,
-  desc: '在线预览颜色代码实际效果并转换为各种格式。'
+  desc: '输入 HEX / RGB / HSL / HSV / CMYK 任意格式，自动转换为其他格式并预览效果。'
 }

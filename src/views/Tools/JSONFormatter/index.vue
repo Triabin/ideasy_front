@@ -104,11 +104,13 @@
                 <button class="btn btn-xs join-item" :class="{ 'btn-active': viewMode === 'tree' }" @click="viewMode = 'tree'" :disabled="parseError !== null">树形</button>
               </div>
               <button v-show="viewMode === 'tree'" class="btn btn-xs btn-ghost" @click="toggleCollapseAll">{{ allCollapsed ? '全部展开' : '全部收起' }}</button>
-              <button class="btn btn-sm btn-ghost" :class="(!outputText || viewMode === 'tree') ? 'btn-disabled btn-square' : ''" title="复制结果" @click="copy(outputText)" :disabled="!outputText || viewMode === 'tree'">
-                <Copied v-if="copiedText === outputText && copiedText" :size="16" :twClasses="['fill-success']"/>
-                <Copy v-else :size="16"/>
-              </button>
-              <button class="btn btn-sm btn-ghost" title="下载为 .json 文件" @click="downloadOutput" :disabled="!outputText">下载</button>
+              <div class="bg-base-100 rounded-md">
+                <button class="btn btn-sm btn-ghost" :class="(!outputText || viewMode === 'tree') ? 'btn-disabled btn-square' : ''" title="复制结果" @click="copy(outputText)" :disabled="!outputText || viewMode === 'tree'">
+                  <Copied v-if="copiedText === outputText && copiedText" :size="16" :twClasses="['fill-success']"/>
+                  <Copy v-else :size="16"/>
+                </button>
+                <button class="btn btn-sm btn-ghost" title="下载为 .json 文件" @click="downloadOutput" :disabled="!outputText">下载</button>
+              </div>
             </div>
           </div>
 
