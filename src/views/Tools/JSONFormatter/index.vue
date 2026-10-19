@@ -118,8 +118,7 @@
           <pre
               v-show="viewMode === 'text'"
               class="w-full grow min-h-72 max-h-128 overflow-auto thin-scrollbar font-mono text-sm leading-relaxed rounded-lg bg-base-300/50 p-3 whitespace-pre"
-          ><template v-for="(line, li) in highlightedLines" :key="li"><span v-html="line"></span>
-</template></pre>
+          ><template v-for="(line, li) in highlightedLines" :key="li"><span v-html="line"></span></template></pre>
 
           <!-- 树形视图 -->
           <div v-show="viewMode === 'tree'" class="w-full grow min-h-72 max-h-128 overflow-auto thin-scrollbar font-mono text-sm rounded-lg bg-base-300/50 p-2">

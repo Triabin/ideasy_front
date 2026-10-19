@@ -7,9 +7,11 @@
         <!-- Logo -->
         <div class="navbar-start text-2xl">
           <RouterLink to="/"><img src="/favicon.png" class="size-10" alt="灵光"></RouterLink>
-          <div class="text-xl ml-2 italic overflow-hidden whitespace-nowrap text-ellipsis">
-            能网页&nbsp;&nbsp;不软件
-          </div>
+          <RouterLink to="/">
+            <div class="text-xl ml-2 italic overflow-hidden whitespace-nowrap text-ellipsis">
+              能网页&nbsp;&nbsp;不软件
+            </div>
+          </RouterLink>
         </div>
         <!-- 导航栏路由 -->
         <div class="navbar-center">
@@ -33,8 +35,4 @@
 
 <script lang="ts" setup>
 import ThemeController from '@/components/ThemeController';
-import TopNav from '@/components/TopNav';
-import { routes } from '@/router';
-
-const navs = routes.filter(route => !route.path.startsWith('/tools'));
 </script>

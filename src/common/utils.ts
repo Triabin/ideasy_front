@@ -115,3 +115,64 @@ export async function getFontFamiliesFromFile(file: File): Promise<Record<string
     || names.macintosh?.fontFamily
     || {};
 }
+
+/**
+ * 复制文本到剪切板
+ * @param text {string} 要复制的文本
+ */
+export async function copyText(text: string): Promise<void> {
+  if (!text) return;
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    // eslint-disable-next-line @typescript-eslint/no-deprecated
+    (document as any).execCommand('copy');
+    ta.remove();
+  }
+}
+
+/**
+ * 提示信息弹窗
+ * @param content {string} 提示内容（可以是HTML字符串）
+ * @param type 弹窗类型，默认none
+ * @param duration 弹窗持续时间（默认3000，单位毫秒）
+ * @param horizontalPos 水平位置，默认center
+ * @param verticalPos 垂直位置，默认center
+ */
+export const popupTip = (
+  content: string,
+  type: 'none' | 'success' | 'warning' | 'error' | 'dash' = 'none',
+  duration: number = 3000,
+  horizontalPos: 'start' | 'center' | 'end' = 'center',
+  verticalPos: 'top' | 'middle' | 'bottom' = 'middle'
+) => {
+  let typeClass = '';
+  switch (type) {
+    case 'none':
+      typeClass = '';
+      break;
+    case 'success':
+      typeClass = 'alert-success';
+      break;
+    case 'warning':
+      typeClass = 'alert-warning';
+      break;
+    case 'error':
+      typeClass = 'alert-error';
+      break;
+    case 'dash':
+      typeClass = 'alert-dash';
+      break;
+  }
+  const tipElement = document.createElement('div');
+  tipElement.classList.add('toast', `toast-${verticalPos}`, `toast-${horizontalPos}`);
+  tipElement.innerHTML = `<div class="alert ${typeClass}">${content}</div>`;
+  document.body.appendChild(tipElement);
+  setTimeout(() => {
+    document.body.removeChild(tipElement);
+  }, duration);
+}
