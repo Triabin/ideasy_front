@@ -135,6 +135,7 @@ export async function copyText(text: string): Promise<void> {
   }
 }
 
+let popupTipTimerId: ReturnType<typeof setTimeout>;
 /**
  * 提示信息弹窗
  * @param content {string} 提示内容（可以是HTML字符串）
@@ -168,11 +169,15 @@ export const popupTip = (
       typeClass = 'alert-dash';
       break;
   }
-  const tipElement = document.createElement('div');
-  tipElement.classList.add('toast', `toast-${verticalPos}`, `toast-${horizontalPos}`);
-  tipElement.innerHTML = `<div class="alert ${typeClass}">${content}</div>`;
-  document.body.appendChild(tipElement);
-  setTimeout(() => {
-    document.body.removeChild(tipElement);
-  }, duration);
+  const popupTip = document.getElementById('popup-tip') ||  document.createElement('div');
+  popupTip.setAttribute('id', 'popup-tip');
+  popupTip.classList.add('toast', `toast-${verticalPos}`, `toast-${horizontalPos}`);
+  const tipItem = document.createElement('div');
+  tipItem.classList.add('alert', typeClass);
+  tipItem.append(content);
+  popupTip.appendChild(tipItem);
+  setTimeout(() => tipItem.remove(), duration);
+  document.body.appendChild(popupTip);
+  if (popupTipTimerId) clearTimeout(popupTipTimerId);
+  popupTipTimerId = setTimeout(() => document.body.removeChild(popupTip), duration);
 }

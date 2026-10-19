@@ -4,5 +4,5 @@ export default {
   title: '进制转换',
   menuOrder: 5,
   icon: BaseCvter,
-  desc: '数字在各个进制之间互相转换'
+  desc: '在任意进制（2 ~ 36）之间转换整数，支持超大数值、前缀识别与按位分组显示。'
 }
