@@ -41,7 +41,10 @@ import { routes, flattenRoute } from '@/router';
 import { useRouter } from 'vue-router';
 
 const currRealMode = toRef(useSettingsStore(), 'currRealMode');
-const cardRoutes = computed(() => flattenRoute(routes).filter(route => route.path.startsWith('/tools/')));
+const cardRoutes = computed(() => flattenRoute(routes)
+    .filter(route => !route.meta?.hidden)
+    .filter(route => route.path.startsWith('/tools/'))
+);
 const router = useRouter();
 // 搜索关键字
 const keyword = ref('');

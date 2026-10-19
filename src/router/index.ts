@@ -143,7 +143,7 @@ function sortRoute(routes: RouteRecordRaw[]) {
  * @param parentPath {string} 父路由路径
  * @returns {RouteRecordRaw[]} 扁平化的路由
  */
-function flattenRoute(routes: RouteRecordRaw[], parentPath = ''): RouteRecordRaw[] {
+function flattenRoute(routes: RouteRecordRaw[], parentPath: string = ''): RouteRecordRaw[] {
   if (!routes) return [];
   let result: RouteRecordRaw[] = [];
   routes.forEach(route => {
