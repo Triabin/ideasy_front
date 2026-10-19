@@ -61,7 +61,6 @@
             <button class="btn btn-sm btn-ghost" title="清空" @click="clearAll">清空</button>
           </div>
         </div>
-        <UnderLineMsg ref="msgRef"/>
       </div>
     </div>
 
@@ -179,10 +178,9 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, ref, watch} from 'vue';
+import { computed, ref, watch } from 'vue';
 import Copy from '@/components/icons/Copy.vue';
 import Copied from '@/components/icons/Copied.vue';
-import UnderLineMsg from '@/components/UnderLineMsg';
 import {
   analyzeJson,
   collectContainerPaths,
@@ -197,8 +195,8 @@ import {
   type SortType,
   stringifyJson,
 } from './jsonUtils';
+import { copyText, popupTip } from '@/common/utils.ts';
 
-const msgRef = ref<any>();
 const fileRef = ref<HTMLInputElement>();
 
 /* ------------------------- 状态 ------------------------- */
@@ -280,7 +278,7 @@ const doParse = (): boolean => {
   } catch (e: any) {
     parsed.value = undefined;
     parseError.value = e instanceof JsonParseError ? e : null;
-    if (!(e instanceof JsonParseError)) msgRef.value?.showMsg(e?.message ?? '解析失败', 'fail', 2500);
+    if (!(e instanceof JsonParseError)) popupTip(e?.message ?? '解析失败', 'error', 2500);
     return false;
   }
 };
@@ -303,37 +301,37 @@ const formatOpts = () => ({ indentChar: indentChar.value, indentSize: indentSize
 /** 格式化 */
 const doFormat = () => {
   if (!doParse()) {
-    if (inputText.value.trim()) msgRef.value?.showMsg(parseError.value?.message ?? '解析失败', 'fail', 3000);
+    if (inputText.value.trim()) popupTip(parseError.value?.message ?? '解析失败', 'error', 3000);
     renderOutput();
     return;
   }
   renderOutput();
-  msgRef.value?.showMsg('格式化成功', 'success', 1500);
+  popupTip('格式化成功', 'success', 1500);
 };
 
 /** 压缩为一行 */
 const doMinify = () => {
   if (!doParse()) {
-    if (inputText.value.trim()) msgRef.value?.showMsg(parseError.value?.message ?? '解析失败', 'fail', 3000);
+    if (inputText.value.trim()) popupTip(parseError.value?.message ?? '解析失败', 'error', 3000);
     return;
   }
   outputText.value = stringifyJson(parsed.value!, { ...formatOpts(), indentSize: 0 });
-  msgRef.value?.showMsg(`压缩完成，共 ${outputText.value.length} 字符`, 'success', 1500);
+  popupTip(`压缩完成，共${outputText.value.length}字符`, 'success', 1500);
 };
 
 /** 仅校验 */
 const doValidate = () => {
   if (!inputText.value.trim()) {
-    msgRef.value?.showMsg('请先输入内容', 'warning', 1500);
+    popupTip('请先输入内容', 'warning', 1500);
     return;
   }
   if (doParse()) {
     renderOutput();
-    msgRef.value?.showMsg('✓ JSON 合法', 'success', 2000);
+    popupTip('✓ JSON合法', 'success', 2000);
   } else {
-    msgRef.value?.showMsg(
-        `✗ ${parseError.value?.message ?? '不合法'}（第 ${parseError.value?.line ?? '?'} 行 第 ${parseError.value?.column ?? '?'} 列）`,
-        'fail', 4000
+    popupTip(
+        `✗ ${parseError.value?.message ?? '不合法'}（第${parseError.value?.line ?? '?'}行 第${parseError.value?.column ?? '?'}列）`,
+        'error', 4000
     );
   }
 };
@@ -342,14 +340,14 @@ const doValidate = () => {
 const doQuery = () => {
   queryHitPath.value = '';
   if (parsed.value === undefined) {
-    msgRef.value?.showMsg('请先成功解析 JSON', 'warning', 1500);
+    popupTip('请先成功解析 JSON', 'warning', 1500);
     return;
   }
   const path = queryPath.value.trim();
   if (!path) return;
   const hit = getJsonValue(parsed.value, path);
   if (hit === undefined) {
-    msgRef.value?.showMsg(`路径 ${path} 不存在`, 'fail', 2500);
+    popupTip(`路径 ${path} 不存在`, 'error', 2500);
     return;
   }
   // 展开命中路径的所有父级
@@ -361,7 +359,7 @@ const doQuery = () => {
   collapsed.value = next;
   queryHitPath.value = path;
   viewMode.value = 'tree';
-  msgRef.value?.showMsg(`已定位 ${path}`, 'success', 2000);
+  popupTip(`已定位 ${path}`, 'success', 2000);
 };
 
 /** 折叠/展开节点 */
@@ -417,9 +415,9 @@ const onFileChange = (e: Event) => {
   reader.onload = () => {
     inputText.value = String(reader.result ?? '');
     doFormat();
-    msgRef.value?.showMsg(`已载入文件 ${file.name}`, 'success', 2000);
+    popupTip(`已载入文件 ${file.name}`, 'success', 2000);
   };
-  reader.onerror = () => msgRef.value?.showMsg('文件读取失败', 'fail', 2500);
+  reader.onerror = () => popupTip('文件读取失败', 'error', 2500);
   reader.readAsText(file);
   (e.target as HTMLInputElement).value = '';
 };
@@ -429,13 +427,13 @@ const pasteFromClipboard = async () => {
   try {
     const text = await navigator.clipboard.readText();
     if (!text) {
-      msgRef.value?.showMsg('剪贴板为空', 'warning', 1500);
+      popupTip('剪贴板为空', 'warning', 1500);
       return;
     }
     inputText.value = text;
     doFormat();
   } catch {
-    msgRef.value?.showMsg('无法访问剪贴板，请手动粘贴（Ctrl+V）', 'warning', 2500);
+    popupTip('无法访问剪贴板，请手动粘贴（Ctrl+V）', 'warning', 2500);
   }
 };
 
@@ -454,20 +452,9 @@ const downloadOutput = () => {
 /** 复制到剪贴板 */
 let copyTimer: ReturnType<typeof setTimeout> | null = null;
 const copy = async (text: string) => {
-  if (!text) return;
-  try {
-    await navigator.clipboard.writeText(text);
-  } catch {
-    const ta = document.createElement('textarea');
-    ta.value = text;
-    document.body.appendChild(ta);
-    ta.select();
-    // eslint-disable-next-line @typescript-eslint/no-deprecated
-    (document as any).execCommand('copy');
-    ta.remove();
-  }
+  await copyText(text);
   copiedText.value = text;
-  msgRef.value?.showMsg('已复制到剪贴板', 'success', 1500);
+  popupTip('已复制到剪贴板', 'success', 1500);
   if (copyTimer) clearTimeout(copyTimer);
   copyTimer = setTimeout(() => (copiedText.value = ''), 1500);
 };

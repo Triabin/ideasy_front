@@ -38,7 +38,6 @@
             <button class="btn btn-sm btn-ghost shrink-0" title="应用输入" @click="applyInput">转换</button>
           </label>
         </div>
-        <UnderLineMsg ref="msgRef"/>
 
         <!-- 常用色板 -->
         <div class="flex flex-wrap gap-2">
@@ -154,15 +153,23 @@
 import { computed, ref, toRef } from 'vue';
 import Copy from '@/components/icons/Copy.vue';
 import Copied from '@/components/icons/Copied.vue';
-import UnderLineMsg from '@/components/UnderLineMsg';
 import {
-  parseColor, formatHex, formatCss, formatHslCss, formatHsv, formatCmyk,
-  adjustLightness, rgbToHsl, hslToRgb, relativeLuminance,
-  ColorParseError, type Rgba,
+  adjustLightness,
+  ColorParseError,
+  formatCmyk,
+  formatCss,
+  formatHex,
+  formatHslCss,
+  formatHsv,
+  hslToRgb,
+  parseColor,
+  relativeLuminance,
+  type Rgba,
+  rgbToHsl,
 } from './colorConverter';
+import { copyText, popupTip } from '@/common/utils.ts';
 import useAppDataStore from '@/stores/appData';
 
-const msgRef = ref<any>();
 const inputText = ref<string>('#FF5733');
 const parseError = ref<string>('');
 const copiedText = ref<string>('');
@@ -262,10 +269,10 @@ const applyInput = () => {
     parseError.value = '';
     inputText.value = formatHex(color.value);
     pushCvtColorHistory(formatHex(color.value));
-    msgRef.value?.showMsg('解析成功', 'success', 1500);
+    popupTip('解析成功', 'success', 1500);
   } catch (e: any) {
     parseError.value = e?.message ?? '解析失败';
-    msgRef.value?.showMsg(e instanceof ColorParseError ? e.message : '无法识别的颜色格式', 'fail', 2500);
+    popupTip(e instanceof ColorParseError ? e.message : '无法识别的颜色格式', 'error', 2500);
   }
 };
 
@@ -277,8 +284,7 @@ const setInput = (value: string) => {
 
 /** 系统取色器（不支持 alpha） */
 const onPickerInput = (e: Event) => {
-  const value = (e.target as HTMLInputElement).value;
-  inputText.value = value;
+  inputText.value = (e.target as HTMLInputElement).value;
   applyInput();
 };
 
@@ -292,19 +298,9 @@ const shiftLightness = (delta: number) => {
 /** 复制到剪贴板 */
 let copyTimer: ReturnType<typeof setTimeout> | null = null;
 const copy = async (text: string) => {
-  try {
-    await navigator.clipboard.writeText(text);
-  } catch {
-    // 非安全上下文降级方案
-    const ta = document.createElement('textarea');
-    ta.value = text;
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand('copy');
-    ta.remove();
-  }
+  await copyText(text);
   copiedText.value = text;
-  msgRef.value?.showMsg(`已复制 ${text}`, 'success', 1500);
+  popupTip(`已复制 ${text}`, 'success', 1500);
   if (copyTimer) clearTimeout(copyTimer);
   copyTimer = setTimeout(() => (copiedText.value = ''), 1500);
 };
