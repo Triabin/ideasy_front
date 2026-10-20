@@ -63,10 +63,12 @@ pnpm dev
 
 ![哈希计算](/doc-images/hash-calc.png)
 
-二维码生成
+### 单位换算
 
-图片压缩
+![单位换算](/doc-images/unit-cvt.png)
 
 密码生成
 
-单位换算
+二维码生成
+
+图片压缩
