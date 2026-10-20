@@ -4,7 +4,7 @@ export default {
   title: 'UUID生成',
   menuOrder: 11,
   icon: UUID,
-  hidden: true,
-  tags: ['UUID'],
-  desc: 'UUID生成'
+  hidden: false,
+  tags: ['UUID', '唯一标识符'],
+  desc: '批量生成UUID（v4/v1/v6/v7），支持大写、小写与不带连字符“-”等格式，点击任意结果即可复制。'
 }

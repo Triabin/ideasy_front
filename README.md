@@ -55,7 +55,9 @@ pnpm dev
 
 ![文本Diff](/doc-images/text-diff.png)
 
-UUID生成
+### UUID生成
+
+![UUID生成](/doc-images/uuid-gen.png)
 
 哈希计算
 
