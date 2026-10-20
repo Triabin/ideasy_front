@@ -59,7 +59,9 @@ pnpm dev
 
 ![UUID生成](/doc-images/uuid-gen.png)
 
-哈希计算
+### 哈希计算
+
+![哈希计算](/doc-images/hash-calc.png)
 
 二维码生成
 
