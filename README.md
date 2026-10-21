@@ -67,7 +67,9 @@ pnpm dev
 
 ![单位换算](/doc-images/unit-cvt.png)
 
-密码生成
+### 密码生成
+
+![密码生成](/doc-images/pwd-gen.png)
 
 二维码生成
 
