@@ -31,7 +31,9 @@
           <span v-for="(tag, ti) in cardTags(card)"
                 :key="ti"
                 class="badge badge-sm border-none text-white/90 font-medium"
-                :style="{ backgroundColor: tagColor(tag) }">{{ tag }}</span>
+                :style="{ backgroundColor: tagColor(tag) }"
+                @click.stop="() => keyword = tag"
+          >{{ tag }}</span>
         </div>
         <p class="font-normal">{{ card.meta?.desc }}</p>
       </div>
