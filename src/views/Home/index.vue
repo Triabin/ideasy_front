@@ -27,6 +27,12 @@
           <component v-if="card.meta?.icon" :is="card.meta.icon"/>
           <h2 class="text-xl font-semibold">{{ card.meta?.title }}</h2>
         </div>
+        <div v-if="cardTags(card).length" class="flex flex-wrap gap-1.5">
+          <span v-for="(tag, ti) in cardTags(card)"
+                :key="ti"
+                class="badge badge-sm border-none text-white/90 font-medium"
+                :style="{ backgroundColor: tagColor(tag) }">{{ tag }}</span>
+        </div>
         <p class="font-normal">{{ card.meta?.desc }}</p>
       </div>
     </div>
@@ -38,7 +44,7 @@ import DynamicClock from '@/components/DynamicClock';
 import GlobalSearchBox from '@/components/GlobalSearchBox';
 import useSettingsStore from '@/stores/settingsStore';
 import { routes, flattenRoute } from '@/router';
-import { useRouter } from 'vue-router';
+import { useRouter, type RouteRecordRaw } from 'vue-router';
 
 const currRealMode = toRef(useSettingsStore(), 'currRealMode');
 const cardRoutes = computed(() => flattenRoute(routes)
@@ -48,17 +54,46 @@ const cardRoutes = computed(() => flattenRoute(routes)
 const router = useRouter();
 // 搜索关键字
 const keyword = ref('');
+
+/**
+ * 获取卡片路由的标签列表
+ * @param card {RouteRecordRaw} 卡片路由
+ */
+const cardTags = (card: RouteRecordRaw): string[] => {
+  return (card.meta?.tags as string[] | undefined) ?? [];
+};
+
+/** 标签颜色调色板（保证同名标签颜色稳定） */
+const TAG_COLORS = [
+  '#EF4444', '#F97316', '#F59E0B', '#84CC16', '#22C55E', '#14B8A6',
+  '#06B6D4', '#3B82F6', '#6366F1', '#8B5CF6', '#A855F7', '#D946EF',
+  '#EC4899', '#F43F5E',
+];
+
+/**
+ * 根据标签文本生成稳定的彩色背景色
+ * @param tag {string} 标签文本
+ */
+const tagColor = (tag: string): string => {
+  let hash = 0;
+  for (let i = 0; i < tag.length; i++) {
+    hash = ((hash << 5) - hash + tag.charCodeAt(i)) | 0;
+  }
+  return TAG_COLORS[Math.abs(hash) % TAG_COLORS.length];
+};
+
 /**
  * 根据关键字过滤工具卡片
- * 匹配各工具页面 _page.ts 导出对象的 title 和 desc 字段（不区分大小写）
+ * 匹配各工具页面 _page.ts 导出对象的 title、desc 与 tags 字段（不区分大小写，支持空格分隔多关键词）
  */
 const filteredCardRoutes = computed(() => {
-  const kw = keyword.value.trim().toLowerCase();
-  if (!kw) return cardRoutes.value;
+  const kws = keyword.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  if (kws.length === 0) return cardRoutes.value;
   return cardRoutes.value.filter(card => {
     const title = (card.meta?.title as string ?? '').toLowerCase();
     const desc = (card.meta?.desc as string ?? '').toLowerCase();
-    return title.includes(kw) || desc.includes(kw);
+    const tags = cardTags(card).map(t => t.toLowerCase());
+    return kws.every(kw => title.includes(kw) || desc.includes(kw) || tags.some(tag => tag.includes(kw)));
   });
 });
 </script>
