@@ -94,8 +94,8 @@
             <h2 class="card-title text-base">
               输出
               <span v-if="parsed !== undefined && !parseError" class="badge badge-success badge-sm gap-1">
-                  <Copied :size="14" :twClasses="['fill-success']"/>合法
-                </span>
+                ✓&nbsp;&nbsp;合法
+              </span>
             </h2>
             <div class="flex items-center gap-2">
               <div class="join">
@@ -116,11 +116,11 @@
           <!-- 文本视图 -->
           <pre
               v-show="viewMode === 'text'"
-              class="w-full grow min-h-72 max-h-128 overflow-auto thin-scrollbar font-mono text-sm leading-relaxed rounded-lg bg-base-300/50 p-3 whitespace-pre"
-          ><template v-for="(line, li) in highlightedLines" :key="li"><span v-html="line"></span></template></pre>
+              class="w-full grow min-h-72 overflow-auto thin-scrollbar font-mono text-sm leading-relaxed rounded-lg bg-base-300/50 p-3 whitespace-pre"
+          ><template v-for="(line, li) in highlightedLines" :key="li"><span class="hl-line" v-html="line"></span>{{ '\n' }}</template></pre>
 
           <!-- 树形视图 -->
-          <div v-show="viewMode === 'tree'" class="w-full grow min-h-72 max-h-128 overflow-auto thin-scrollbar font-mono text-sm rounded-lg bg-base-300/50 p-2">
+          <div v-show="viewMode === 'tree'" class="w-full grow min-h-72 overflow-auto thin-scrollbar font-mono text-sm rounded-lg bg-base-300/50 p-2">
             <div
                 v-for="node in treeNodes"
                 :key="node.path"
@@ -539,5 +539,6 @@ const tabWidth = computed(() => indentChar.value === 'tab' ? indentSize.value * 
 /* 树行悬停时显示复制按钮 */
 .tree-row:hover button { opacity: 1 !important; }
 
-:deep(pre span) { white-space: pre; }
+/* 文本视图：高亮行渲染 */
+:deep(pre .hl-line) { white-space: pre; display: inline; }
 </style>
