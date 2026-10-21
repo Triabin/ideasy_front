@@ -71,6 +71,8 @@ pnpm dev
 
 ![密码生成](/doc-images/pwd-gen.png)
 
-二维码生成
+### 图片压缩
 
-图片压缩
+![图片压缩](/doc-images/compress-img.png)
+
+二维码生成
