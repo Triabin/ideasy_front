@@ -135,7 +135,6 @@ export async function copyText(text: string): Promise<void> {
   }
 }
 
-let popupTipTimerId: ReturnType<typeof setTimeout>;
 /**
  * 提示信息弹窗
  * @param content {string} 提示内容（可以是HTML字符串）
@@ -150,34 +149,16 @@ export const popupTip = (
   duration: number = 3000,
   horizontalPos: 'start' | 'center' | 'end' = 'center',
   verticalPos: 'top' | 'middle' | 'bottom' = 'middle'
-) => {
-  let typeClass = '';
-  switch (type) {
-    case 'none':
-      typeClass = '';
-      break;
-    case 'success':
-      typeClass = 'alert-success';
-      break;
-    case 'warning':
-      typeClass = 'alert-warning';
-      break;
-    case 'error':
-      typeClass = 'alert-error';
-      break;
-    case 'dash':
-      typeClass = 'alert-dash';
-      break;
-  }
-  const popupTip = document.getElementById('popup-tip') ||  document.createElement('div');
-  popupTip.setAttribute('id', 'popup-tip');
-  popupTip.classList.add('toast', `toast-${verticalPos}`, `toast-${horizontalPos}`);
-  const tipItem = document.createElement('div');
-  tipItem.classList.add('alert', typeClass);
-  tipItem.append(content);
-  popupTip.appendChild(tipItem);
-  setTimeout(() => tipItem.remove(), duration);
-  document.body.appendChild(popupTip);
-  if (popupTipTimerId) clearTimeout(popupTipTimerId);
-  popupTipTimerId = setTimeout(() => document.body.removeChild(popupTip), duration);
+): void => {
+  const popupTip = document.getElementById('popup-tip');
+  if (!popupTip) return;
+  popupTip.className = `toast toast-${horizontalPos} toast-${verticalPos}`;
+  const alert = document.createElement('div');
+  alert.className = 'alert' + (type === 'none' ? '' : ` alert-${type}`);
+  alert.innerHTML = content;
+  popupTip.appendChild(alert);
+  setTimeout(() => {
+    popupTip.removeChild(alert);
+    if (!popupTip.innerHTML) popupTip.removeAttribute('class');
+  }, duration);
 }

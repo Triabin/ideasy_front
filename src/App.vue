@@ -36,3 +36,11 @@
 <script lang="ts" setup>
 import ThemeController from '@/components/ThemeController';
 </script>
+
+<style lang="css" scoped>
+/*
+没有出现在SFC文件中的tailwindcss类名无法被打包，因此在这里写在注释中
+强制保留daisyUI类名:
+  toast toast-start toast-center toast-end toast-top toast-middle toast-bottom
+*/
+</style>
