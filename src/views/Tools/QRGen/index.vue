@@ -97,6 +97,12 @@
 
             <!-- 位置 -->
             <div v-else-if="quickType === 'geo'" class="flex flex-col gap-3 text-sm">
+              <div class="flex items-center justify-between gap-2">
+                <p class="text-xs opacity-60">可手动填写，或打开地图直接点选位置自动录入。</p>
+                <button class="btn btn-sm btn-primary shrink-0" @click="openGeoPicker">
+                  <MapPin :size="14"/> 地图选点
+                </button>
+              </div>
               <div class="flex flex-wrap gap-3">
                 <label class="form-control grow min-w-32">
                   <span class="label-text mb-1">纬度<i class="text-error">*</i></span>
@@ -215,12 +221,17 @@
         </div>
       </div>
     </div>
+
+    <!-- 地图选点弹窗 -->
+    <GeoPickerModal :open="geoPickerOpen" @confirm="onGeoPicked" @closed="geoPickerOpen = false"/>
   </div>
 </template>
 
 <script lang="ts" setup>
 import Copy from '@/components/icons/Copy.vue';
 import Copied from '@/components/icons/Copied.vue';
+import MapPin from '@/components/icons/MapPin.vue';
+import GeoPickerModal from '@/components/GeoPickerModal.vue';
 import { computed, onBeforeUnmount, ref, watch, nextTick } from 'vue';
 import { copyText, popupTip } from '@/common/utils';
 import {
@@ -255,6 +266,22 @@ const sms = ref({ number: '', body: '' });
 const email = ref({ address: '', subject: '', body: '' });
 /** 位置表单 */
 const geo = ref({ lat: '', lng: '', label: '' });
+/** 地图选点弹窗开关 */
+const geoPickerOpen = ref(false);
+
+/** 打开地图选点弹窗 */
+function openGeoPicker() {
+  geoPickerOpen.value = true;
+}
+
+/** 地图选点确认后回填经纬度与地名 */
+function onGeoPicked(payload: { lat: string; lng: string; label: string }) {
+  geo.value.lat = payload.lat;
+  geo.value.lng = payload.lng;
+  if (payload.label) geo.value.label = payload.label;
+  geoPickerOpen.value = false;
+  popupTip('已录入地图选点的位置信息', 'success', 1500);
+}
 
 /** 样式参数 */
 const width = ref<number>(256);
@@ -366,15 +393,15 @@ async function regenerate() {
   } catch (e) {
     svgText.value = '';
     errorMsg.value = e instanceof Error && e.message.includes('too long')
-      ? '内容过长，超出二维码容量上限，请精简内容或降低容错等级。'
-      : `生成失败：${e instanceof Error ? e.message : String(e)}`;
+        ? '内容过长，超出二维码容量上限，请精简内容或降低容错等级。'
+        : `生成失败：${e instanceof Error ? e.message : String(e)}`;
   }
   await renderPreview();
 }
 
 // 监听所有影响输出的参数，实时重新生成
 watch([rawInput, wifi, tel, sms, email, geo, quickType, width, margin, ecLevel, darkColor, lightColor, darkAlpha, lightAlpha],
-  debounceRegen(), { deep: true });
+    debounceRegen(), { deep: true });
 
 /** 防抖包装（避免高频输入时反复生成） */
 let regenTimer: ReturnType<typeof setTimeout> | null = null;
@@ -448,8 +475,8 @@ onBeforeUnmount(() => {
 .checkerboard-bg {
   background-color: var(--color-base-100, #fff);
   background-image:
-    linear-gradient(45deg, rgba(128, 128, 128, 0.15) 25%, transparent 25%, transparent 75%, rgba(128, 128, 128, 0.15) 75%),
-    linear-gradient(45deg, rgba(128, 128, 128, 0.15) 25%, transparent 25%, transparent 75%, rgba(128, 128, 128, 0.15) 75%);
+      linear-gradient(45deg, rgba(128, 128, 128, 0.15) 25%, transparent 25%, transparent 75%, rgba(128, 128, 128, 0.15) 75%),
+      linear-gradient(45deg, rgba(128, 128, 128, 0.15) 25%, transparent 25%, transparent 75%, rgba(128, 128, 128, 0.15) 75%);
   background-size: 16px 16px;
   background-position: 0 0, 8px 8px;
 }
