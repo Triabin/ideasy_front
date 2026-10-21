@@ -150,11 +150,15 @@ export const popupTip = (
   horizontalPos: 'start' | 'center' | 'end' = 'center',
   verticalPos: 'top' | 'middle' | 'bottom' = 'middle'
 ): void => {
+  // 一定要全类名，不然构建的时候不会将tailwindcss/daisyUI类名的样式打包进去
+  const types = { none: '', success: 'alert-success', warning: 'alert-warning', error: 'alert-danger', dash: 'alert-danger' };
+  const horis = { start: 'toast-start', center: 'toast-center', end: 'toast-end' };
+  const verts = { top: 'toast-top', middle: 'toast-middle', bottom: 'toast-bottom' };
   const popupTip = document.getElementById('popup-tip');
   if (!popupTip) return;
-  popupTip.className = `toast toast-${horizontalPos} toast-${verticalPos}`;
+  popupTip.className = `toast ${horis[horizontalPos]} ${verts[verticalPos]}`;
   const alert = document.createElement('div');
-  alert.className = 'alert' + (type === 'none' ? '' : ` alert-${type}`);
+  alert.className = `alert ${types[type]}`.trim();
   alert.innerHTML = content;
   popupTip.appendChild(alert);
   setTimeout(() => {
