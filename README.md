@@ -75,4 +75,6 @@ pnpm dev
 
 ![图片压缩](/doc-images/compress-img.png)
 
-二维码生成
+### 二维码生成
+
+![二维码生成](/doc-images/qr-gen.png)
