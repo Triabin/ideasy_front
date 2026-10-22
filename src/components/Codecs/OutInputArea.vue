@@ -54,7 +54,7 @@
         </div>
       </div>
       <pre v-text="props.outputText || '转换结果将显示在这里'"
-           class="w-full grow min-h-72 max-h-128 overflow-auto thin-scrollbar font-mono text-sm leading-relaxed
+           class="w-full grow min-h-72 overflow-auto thin-scrollbar font-mono text-sm leading-relaxed
                   rounded-lg bg-base-300/50 p-3 whitespace-pre-wrap break-all"/>
     </div>
   </div>

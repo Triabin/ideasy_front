@@ -36,3 +36,8 @@ interface Date {
    */
   format(format: string = 'yyyy-MM-dd HH:mm:ss'): string;
 }
+
+interface Window {
+  _hmt?: any[] // 百度统计
+  clarity?: (...args: any[]) => void // 微软 Clarity
+}
