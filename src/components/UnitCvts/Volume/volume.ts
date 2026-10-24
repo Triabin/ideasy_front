@@ -1,5 +1,8 @@
 import type {UnitDef} from "@/components/UnitCvts/units.ts";
 
+/** 基准单位ID（升） */
+export const BASE_ID = 'dm3';
+
 /** 所有支持的单位 */
 export const UNITS: UnitDef[] = [
   { id: 'mm3', name: '立方毫米', symbol: 'mm³', factor: 1e-6 },

@@ -1,5 +1,8 @@
 import type { UnitDef } from '../units.ts';
 
+/** 基准单位ID */
+export const BASE_ID = 'deg';
+
 /** 所有支持的单位 */
 export const UNITS: UnitDef[] = [
   { id: 'deg', name: '度', symbol: '°', factor: 1 },

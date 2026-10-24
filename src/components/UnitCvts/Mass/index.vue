@@ -52,9 +52,9 @@ import {
 /** 输入的内容 */
 const inputText = ref<string>('1');
 /** 待转单位ID */
-const srcId = ref<string>('kg');
+const srcId = ref<string>('jin');
 /** 目标单位ID */
-const dstId = ref<string>('jin');
+const dstId = ref<string>('kg');
 /** 待转单位 */
 const srcUnit = computed<UnitDef | undefined>(() => UNITS.find(u => u.id === srcId.value));
 /** 目标单位 */

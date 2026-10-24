@@ -54,7 +54,7 @@ const inputText = ref<string>('1');
 /** 待转单位ID */
 const srcId = ref<string>('m3');
 /** 目标单位ID */
-const dstId = ref<string>('haom');
+const dstId = ref<string>('dm3');
 /** 待转单位 */
 const srcUnit = computed<UnitDef | undefined>(() => UNITS.find(u => u.id === srcId.value));
 /** 目标单位 */

@@ -1,5 +1,8 @@
 import type {UnitDef} from "@/components/UnitCvts/units.ts";
 
+/** 基准单位ID */
+export const BASE_ID = 's';
+
 /** 所有支持的单位 */
 export const UNITS: UnitDef[] = [
   { id: 'ns', name: '纳秒', symbol: 'ns', factor: 1e-9 },

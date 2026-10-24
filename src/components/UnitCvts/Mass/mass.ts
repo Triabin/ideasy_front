@@ -1,5 +1,8 @@
 import type {UnitDef} from "@/components/UnitCvts/units.ts";
 
+/** 基准单位ID */
+export const BASE_ID = 'kg';
+
 /** 所有支持的单位 */
 export const UNITS: UnitDef[] = [
   { id: 'mg', name: '毫克', symbol: 'mg', factor: 1e-6 },

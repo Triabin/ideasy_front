@@ -9,11 +9,7 @@
       <InputUnits
           :units="UNITS"
           :parse-error="parseError"
-          :init-data="{
-            inputText: '100',
-            srcId: 'c',
-            dstId: 'f',
-          }"
+          :init-data="{ inputText, srcId, dstId }"
           @input-com-update-data="inputComUpdateData"
       />
 
@@ -54,11 +50,11 @@ import {
 } from '../units.ts';
 
 /** 输入的内容 */
-const inputText = ref<string>('100');
+const inputText = ref<string>('75.2');
 /** 待转单位ID */
-const srcId = ref<string>('c');
+const srcId = ref<string>('f');
 /** 目标单位ID */
-const dstId = ref<string>('f');
+const dstId = ref<string>('c');
 /** 待转单位 */
 const srcUnit = computed<UnitDef | undefined>(() => UNITS.find(u => u.id === srcId.value));
 /** 目标单位 */

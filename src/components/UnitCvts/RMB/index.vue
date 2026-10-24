@@ -9,11 +9,7 @@
       <InputUnits
           :units="UNITS"
           :parse-error="parseError"
-          :init-data="{
-            inputText: '100',
-            srcId: 'yuan',
-            dstId: 'fen',
-          }"
+          :init-data="{ inputText, srcId, dstId }"
           @input-com-update-data="inputComUpdateData"
       />
 

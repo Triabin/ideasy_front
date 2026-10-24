@@ -1,5 +1,8 @@
 import type { UnitDef } from '../units.ts';
 
+/** 基准单位ID */
+export const BASE_ID = 'm2';
+
 /** 所有支持的单位 */
 export const UNITS: UnitDef[] = [
   { id: 'mm2', name: '平方毫米', symbol: 'mm²', factor: 1e-6 },

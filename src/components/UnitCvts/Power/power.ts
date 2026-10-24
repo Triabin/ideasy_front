@@ -1,5 +1,8 @@
 import type {UnitDef} from "@/components/UnitCvts/units.ts";
 
+/** 基准单位ID */
+export const BASE_ID = 'W';
+
 /** 所有支持的单位 */
 export const UNITS: UnitDef[] = [
   { id: 'W', name: '瓦特', symbol: 'W', factor: 1 },

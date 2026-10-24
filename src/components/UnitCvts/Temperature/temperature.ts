@@ -1,6 +1,6 @@
 import { type UnitDef } from '../units.ts';
 
-/** 基准单位ID */
+/** 基准单位ID（温度单位之间互转都是先转为摄氏度再转为目标温度） */
 export const BASE_ID = 'c';
 
 /** 所有支持的单位 */

@@ -13,7 +13,7 @@ export const UNITS: UnitDef[] = [
 ];
 
 /** 常用换算关系（包括俗语） */
-export const COMMONS: [string, string][] = [
+export const COMMONS: Array<[string, string]> = [
   ['1 元（块）', '10 角（毛）'],
   ['1 角（毛）', '10 分'],
   ['1 元（块）', '100 分'],

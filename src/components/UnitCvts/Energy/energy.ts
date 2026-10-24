@@ -1,5 +1,8 @@
 import type {UnitDef} from "@/components/UnitCvts/units.ts";
 
+/** 基准单位ID */
+export const BASE_ID = 'J';
+
 /** 所有支持的单位 */
 export const UNITS: UnitDef[] = [
   { id: 'J', name: '焦耳', symbol: 'J', factor: 1 },
