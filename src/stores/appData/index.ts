@@ -14,7 +14,15 @@ export type PasswordGenRecord = {
   /** 是否PIN模式 */
   isPin: boolean;
   /** 字符集选项快照 */
-  options: { lower: boolean; upper: boolean; digit: boolean; special: boolean; excludeChars?: string };
+  options: {
+    lower: boolean;
+    upper: boolean;
+    digit: boolean;
+    special: boolean;
+    /** 本次生成使用的特殊字符集合（勾选特殊字符时） */
+    specialChars?: string;
+    excludeChars?: string;
+  };
 };
 
 const useAppDataStore = defineStore('appData', () => {

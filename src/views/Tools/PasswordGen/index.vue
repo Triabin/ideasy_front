@@ -54,16 +54,26 @@
           <div v-if="mode === 'password'" class="shrink-0">
             <span class="opacity-60 mr-2">字符类型：</span>
             <div class="inline-flex flex-wrap gap-1 align-middle">
-              <label
-                  v-for="c in CHAR_CLASSES"
-                  :key="c.value"
-                  class="label cursor-pointer gap-1 rounded-lg border border-base-300 bg-base-100 px-2 py-1 hover:shadow transition-shadow"
-                  :class="{ 'border-primary!': charSets.includes(c.value) }"
-                  :title="c.desc"
-              >
-                <input type="checkbox" class="checkbox checkbox-sm" :value="c.value" v-model="charSets"/>
-                <span class="label-text text-xs">{{ c.label }}</span>
-              </label>
+              <template v-for="c in CHAR_CLASSES" :key="c.value">
+                <label
+                    class="label cursor-pointer gap-1 rounded-lg border border-base-300 bg-base-100 px-2 py-1 hover:shadow transition-shadow"
+                    :class="{ 'border-primary!': charSets.includes(c.value) }"
+                    :title="c.value === 'special' ? `常用在前，可在旁边输入框中编辑本次参与生成的特殊字符` : c.desc"
+                >
+                  <input type="checkbox" class="checkbox checkbox-sm" :value="c.value" v-model="charSets"/>
+                  <span class="label-text text-xs">{{ c.label }}</span>
+                </label>
+                <!-- 特殊字符勾选时，出现可编辑的本次参与生成的特殊字符输入框 -->
+                <input
+                    v-if="c.value === 'special' && charSets.includes('special')"
+                    type="text"
+                    class="input input-sm w-48 font-mono"
+                    title="本次加入密码生成的特殊字符，可编辑；清空则使用默认全量集合"
+                    placeholder="_ * - …"
+                    v-model="specialCharsInput"
+                    maxlength="64"
+                />
+              </template>
             </div>
           </div>
           <p v-else class="text-sm opacity-60 shrink-0">PIN码内容只包含数字（0-9）。</p>
@@ -102,6 +112,7 @@
           <span v-if="list.length" class="badge badge-outline font-mono shrink-0">共 {{ list.length }} 条</span>
         </div>
         <p v-if="mode === 'password' && !charSets.length" class="text-error text-sm">请至少勾选一种字符类型。</p>
+        <p v-else-if="specialError" class="text-error text-sm">{{ specialError }}</p>
       </div>
     </div>
 
@@ -224,15 +235,19 @@ const CHARSET_MAP = {
   lower: 'abcdefghijklmnopqrstuvwxyz',
   upper: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
   digit: '0123456789',
-  special: '!@#$%^&*()-_=+[]{};:,.<>?/~',
+  /** 默认特殊字符集：常用符号（_ - * 等）排在前面，勾选特殊字符时作为输入框初始值 */
+  special: '_-*+@#&=!?.~/%^()[]{},:;<>$`"\'\\|',
 } as const;
+
+/** 特殊字符集默认值（同时作为输入框的初始内容） */
+const DEFAULT_SPECIAL_CHARS = CHARSET_MAP.special;
 
 /** 字符类型选项定义 */
 const CHAR_CLASSES = [
   { value: 'lower', label: '小写字母', desc: 'a-z' },
   { value: 'upper', label: '大写字母', desc: 'A-Z' },
   { value: 'digit', label: '数字', desc: '0-9' },
-  { value: 'special', label: '特殊字符', desc: /*'!@#$%^&* 等'*/CHARSET_MAP.special },
+  { value: 'special', label: '特殊字符', desc: `常用在前：${CHARSET_MAP.special.slice(0, 10)}…，可编辑` },
 ] as const;
 
 type CharSetValue = (typeof CHAR_CLASSES)[number]['value'];
@@ -247,6 +262,8 @@ const length = ref<number>(PWD_LEN_RANGE.def);
 const count = ref<number>(1);
 /** 勾选的字符类型 */
 const charSets = ref<CharSetValue[]>(['lower', 'upper', 'digit'/*, 'special'*/]);
+/** 特殊字符输入框内容（本次加入密码生成的特殊字符，可编辑；勾选特殊字符时生效） */
+const specialCharsInput = ref<string>(DEFAULT_SPECIAL_CHARS);
 /** 是否启用排除字符 */
 const excludeEnabled = ref<boolean>(false);
 /** 需要排除的字符 */
@@ -260,6 +277,27 @@ const records = computed<PasswordGenRecord[]>(() => appDataStore.passwordGenReco
 
 /** 当前长度限制范围 */
 const lengthRange = computed(() => mode.value === 'pin' ? PIN_LEN_RANGE : PWD_LEN_RANGE);
+
+/** 去重后的本次特殊字符集合（输入框为空时回退为默认全量集合） */
+const activeSpecialChars = computed(() => {
+  const input = [...new Set(specialCharsInput.value)].join('');
+  return input || DEFAULT_SPECIAL_CHARS;
+});
+
+/** 各字符类型对应的实际字符集（特殊字符取用户编辑后的集合） */
+const effectiveCharsets = computed<Record<string, string>>(() => ({
+  ...CHARSET_MAP,
+  special: activeSpecialChars.value,
+}));
+
+/** 勾选特殊字符但输入的全是空白等导致无有效字符时的提示 */
+const specialError = computed(() => {
+  if (mode.value !== 'password' || !charSets.value.includes('special')) return '';
+  if (![...activeSpecialChars.value].some(c => !/\s/.test(c))) {
+    return '特殊字符不能全部为空白字符';
+  }
+  return '';
+});
 
 /** 密码模式下用户上次使用的长度（切回密码模式时恢复） */
 let lastPwdLength = PWD_LEN_RANGE.def;
@@ -295,7 +333,7 @@ const excludeError = computed(() => {
 const activePool = computed(() => {
   const raw = mode.value === 'pin'
       ? CHARSET_MAP.digit
-      : charSets.value.map(k => CHARSET_MAP[k]).join('');
+      : charSets.value.map(k => effectiveCharsets.value[k]).join('');
   if (!excludeEnabled.value || !excludedSet.value) return raw;
   const ex = new Set(excludedSet.value);
   return [...raw].filter(c => !ex.has(c)).join('');
@@ -305,18 +343,27 @@ const activePool = computed(() => {
 const poolSize = computed(() => activePool.value.length);
 
 /** 是否可生成 */
-const canGenerate = computed(() => poolSize.value > 0);
+const canGenerate = computed(() => poolSize.value > 0 && !specialError.value);
 
 /** 熵值（bit） */
 const entropy = computed(() => poolSize.value ? Math.log2(poolSize.value) * length.value : 0);
 
 /** 强度样式 */
 const strengthClass = computed(() =>
-    entropy.value >= 80 ? 'progress-success' : entropy.value >= 60 ? 'progress-info' : entropy.value >= 40 ? 'progress-warning' : 'progress-error');
+    entropy.value >= 80 ? 'progress-success' :
+        entropy.value >= 60 ? 'progress-info' :
+            entropy.value >= 40 ? 'progress-warning' :
+                'progress-error');
 const strengthTextClass = computed(() =>
-    entropy.value >= 80 ? 'text-success' : entropy.value >= 60 ? 'text-info' : entropy.value >= 40 ? 'text-warning' : 'text-error');
+    entropy.value >= 80 ? 'text-success' :
+        entropy.value >= 60 ? 'text-info' :
+            entropy.value >= 40 ? 'text-warning' :
+                'text-error');
 const strengthText = computed(() =>
-    entropy.value >= 80 ? '很强' : entropy.value >= 60 ? '较强' : entropy.value >= 40 ? '一般' : '较弱');
+    entropy.value >= 80 ? '很强' :
+        entropy.value >= 60 ? '较强' :
+            entropy.value >= 40 ? '一般' :
+                '较弱');
 
 /**
  * 使用加密安全随机数从池中取一个字符
@@ -333,7 +380,10 @@ function classPools(): string[] {
   if (mode.value === 'pin') return [];
   const ex = excludeEnabled.value ? new Set(excludedSet.value) : null;
   return charSets.value
-      .map(k => ex ? [...CHARSET_MAP[k]].filter(c => !ex.has(c)).join('') : CHARSET_MAP[k])
+      .map(k => {
+        const set = effectiveCharsets.value[k];
+        return ex ? [...set].filter(c => !ex.has(c)).join('') : set;
+      })
       .filter(p => p.length > 0);
 }
 
@@ -362,8 +412,16 @@ function generateOne(): string {
 
 /** 批量生成并自动存入最近记录 */
 function generateAll() {
+  if (mode.value === 'password' && !charSets.value.length) {
+    popupTip('请至少勾选一种字符类型', 'warning');
+    return;
+  }
+  if (specialError.value) {
+    popupTip(specialError.value, 'warning');
+    return;
+  }
   if (!canGenerate.value) {
-    popupTip(mode.value === 'password' && !charSets.value.length ? '请至少勾选一种字符类型' : '排除后已无可生成字符', 'warning');
+    popupTip('排除后已无可生成字符', 'warning');
     return;
   }
   const r = lengthRange.value;
@@ -391,6 +449,7 @@ function saveToHistory(values: string[] = list.value) {
       upper: charSets.value.includes('upper'),
       digit: charSets.value.includes('digit'),
       special: charSets.value.includes('special'),
+      specialChars: charSets.value.includes('special') ? activeSpecialChars.value : '',
       excludeChars: excludeEnabled.value ? excludedSet.value : '',
     },
   });
@@ -413,8 +472,9 @@ async function copyAll() {
  * @param options {PasswordGenRecord['options']} 字符集快照
  */
 function describeCharSets(options: PasswordGenRecord['options']): string {
-  const names = Object.entries(options).filter(([k, v]) => k !== 'excludeChars' && v).map(([k]) =>
+  const names = Object.entries(options).filter(([k, v]) => k !== 'excludeChars' && k !== 'specialChars' && v).map(([k]) =>
       CHAR_CLASSES.find(c => c.value === k)?.label ?? k);
+  if (options.special) names.push(`特殊字符[${options.specialChars || DEFAULT_SPECIAL_CHARS}]`);
   if (options.excludeChars) names.push(`排除${options.excludeChars}`);
   return names.join('/') || '无';
 }
