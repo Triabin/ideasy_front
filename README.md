@@ -78,3 +78,7 @@ pnpm dev
 ### 二维码生成
 
 ![二维码生成](/doc-images/qr-gen.png)
+
+### JWT加解密
+
+![JWT加解密](/doc-images/jwt-cryp.png)
