@@ -1,6 +1,6 @@
 <!-- UUID生成页面路由组件 -->
 <template>
-  <div id="uuid" class="h-full max-h-full w-full flex flex-col gap-4 p-4 overflow-y-auto">
+  <div id="uuid" class="w-full flex flex-col gap-4 p-4 overflow-y-auto no-scrollbar">
     <h1 class="w-full text-center text-3xl mt-2">UUID生成</h1>
     <p class="text-sm opacity-70 text-center">批量生成UUID（v4/v1/v6/v7），支持大写、小写与不带连字符“-”等格式，点击任意结果即可复制。</p>
 
@@ -266,8 +266,5 @@ const copy = async (text: string, dontTip: boolean = false) => {
 
 // 初始化预览
 refreshSample();
-
-onBeforeUnmount(() => {
-  if (copyTimer) clearTimeout(copyTimer);
-});
+onBeforeUnmount(() => copyTimer && clearTimeout(copyTimer));
 </script>

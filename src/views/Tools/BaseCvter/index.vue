@@ -1,6 +1,6 @@
 <!-- 进制转换页面路由组件 -->
 <template>
-  <div class="h-full max-h-full w-full flex flex-col gap-4 p-4 overflow-y-auto">
+  <div class="w-full flex flex-col gap-4 p-4 overflow-y-auto">
     <h1 class="w-full text-center text-3xl mt-2">进制转换</h1>
     <p class="text-sm opacity-70 text-center">在任意进制（2 ~ 36）之间转换整数，支持超大数值、前缀识别与按位分组显示。</p>
 

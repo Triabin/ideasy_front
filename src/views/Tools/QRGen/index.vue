@@ -1,6 +1,6 @@
 <!-- 二维码生成页面路由组件 -->
 <template>
-  <div id="qr-gen" class="h-full max-h-full w-full flex flex-col gap-4 p-4 overflow-y-auto">
+  <div id="qr-gen" class="w-full flex flex-col gap-4 p-4 overflow-y-auto">
     <h1 class="w-full text-center text-3xl mt-2">二维码生成</h1>
     <p class="text-sm opacity-70 text-center">将文本、网址、Wi-Fi等常见内容生成二维码，支持尺寸、容错等级与颜色设置，可下载 PNG / SVG。</p>
 

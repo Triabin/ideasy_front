@@ -1,6 +1,6 @@
 <!-- 密码/PIN生成页面路由组件 -->
 <template>
-  <div id="password-gen" class="h-full max-h-full w-full flex flex-col gap-4 p-4 overflow-y-auto">
+  <div id="password-gen" class="w-full flex flex-col gap-4 p-4 overflow-y-auto">
     <h1 class="w-full text-center text-3xl mt-2">密码生成</h1>
     <p class="text-sm opacity-70 text-center">
       可配置字符类型（小写字母/大写字母/数字/特殊字符）、长度与数量，支持PIN码模式（仅数字，长度3~12位），最近100条生成记录本地保存。

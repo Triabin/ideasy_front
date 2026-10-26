@@ -1,6 +1,6 @@
 <!-- 编解码页面路由组件 -->
 <template>
-  <div class="h-full max-h-full w-full flex flex-col gap-4 p-4 overflow-y-auto">
+  <div class="w-full flex flex-col gap-4 p-4 overflow-y-auto">
     <h1 class="w-full text-center text-3xl mt-2">编解码工具</h1>
     <p class="text-sm opacity-70 text-center">
       常用字符串编解码工具，包括Base64、URL编解码等。

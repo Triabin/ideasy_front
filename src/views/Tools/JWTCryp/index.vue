@@ -1,6 +1,6 @@
 <!-- JWT加解密页面路由组件 -->
 <template>
-  <div class="h-full max-h-full w-full flex flex-col gap-4 p-4 overflow-y-auto">
+  <div class="w-full flex flex-col gap-4 p-4 overflow-y-auto">
     <h1 class="w-full text-center text-3xl mt-2">JWT加解密</h1>
     <p class="text-sm opacity-70 text-center">
       JSON Web Token 解析、签名验证与生成工具，支持 HS256 / HS384 / HS512，所有计算均在本地浏览器完成。

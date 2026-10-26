@@ -1,6 +1,6 @@
 <!-- JSON格式化路由组件 -->
 <template>
-  <div class="h-full max-h-full w-full flex flex-col gap-4 p-4 overflow-y-auto thin-scrollbar">
+  <div class="w-full flex flex-col gap-4 p-4 overflow-y-auto thin-scrollbar">
     <h1 class="w-full text-center text-3xl mt-2">JSON 格式化</h1>
     <p class="text-sm opacity-70 text-center">粘贴 JSON 文本，一键格式化 / 压缩 / 校验；支持注释、单引号、尾随逗号等宽松语法，并提供树形浏览与错误定位。</p>
 

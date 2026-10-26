@@ -1,6 +1,6 @@
 <!-- 时间戳转换工具路由页面 -->
 <template>
-  <div class="h-full max-h-full w-full flex flex-col gap-4 p-4 overflow-y-auto">
+  <div class="w-full flex flex-col gap-4 p-4 overflow-y-auto">
     <h1 class="w-full text-center text-3xl mt-2">时间戳转换</h1>
     <p class="text-sm opacity-70 text-center">获取当前时间戳，支持秒/毫秒/微秒/纳秒与日期时间互转、多格式展示与时区选择。</p>
 

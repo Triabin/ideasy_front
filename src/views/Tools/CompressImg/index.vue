@@ -1,6 +1,6 @@
 <!-- 图片压缩页面路由组件 -->
 <template>
-  <div id="img-compress" class="h-full max-h-full w-full flex flex-col gap-4 p-4 overflow-y-auto">
+  <div id="img-compress" class="w-full flex flex-col gap-4 p-4 overflow-y-auto">
     <h1 class="w-full text-center text-3xl mt-2">图片压缩</h1>
     <p class="text-sm opacity-70 text-center">
       支持质量压缩、压缩到指定大小、最长边缩放与 JPG / WebP / PNG 格式转换，全部在浏览器本地完成，图片不会上传到任何服务器。

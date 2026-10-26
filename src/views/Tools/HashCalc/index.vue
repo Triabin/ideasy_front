@@ -1,6 +1,6 @@
 <!-- 哈希计算页面路由组件 -->
 <template>
-  <div class="h-full max-h-full w-full flex flex-col gap-4 p-4 overflow-y-auto">
+  <div class="w-full flex flex-col gap-4 p-4 overflow-y-auto">
     <h1 class="w-full text-center text-3xl mt-2">哈希计算</h1>
     <p class="text-sm opacity-70 text-center">支持 MD5 / SHA1 / SHA256 三种算法，可对字符串和文件进行哈希值计算，所有计算均在本地浏览器完成。</p>
 

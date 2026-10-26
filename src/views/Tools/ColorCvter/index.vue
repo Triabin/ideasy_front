@@ -1,6 +1,6 @@
 <!-- 颜色转换 -->
 <template>
-  <div class="h-full max-h-full w-full flex flex-col gap-4 p-4 overflow-y-auto thin-scrollbar">
+  <div class="w-full flex flex-col gap-4 p-4 overflow-y-auto thin-scrollbar">
     <h1 class="w-full text-center text-3xl mt-2">颜色转换</h1>
     <p class="text-sm opacity-70 text-center">输入 HEX / RGB / HSL / HSV / CMYK 任意格式，自动转换为其他格式并预览效果。</p>
 

@@ -1,6 +1,6 @@
 <!-- 文本Diff工具路由页面 -->
 <template>
-  <div class="h-full max-h-full w-full flex flex-col gap-4 p-4 overflow-y-auto">
+  <div class="w-full flex flex-col gap-4 p-4 overflow-y-auto">
     <h1 class="w-full text-center text-3xl mt-2">文本Diff</h1>
     <p class="text-sm opacity-70 text-center">逐行比较两段文本差异，支持行号显示、词级高亮、忽略空白/大小写、并排与统一视图。</p>
 
@@ -76,7 +76,7 @@
 
     <!-- Diff结果：并排视图 -->
     <div v-if="hasInput && !tooLarge && viewMode === 'side'" class="card bg-base-200 shadow-sm overflow-hidden">
-      <div class="overflow-auto max-h-[60vh] font-mono text-[13px] leading-6">
+      <div class="overflow-auto font-mono text-[13px] leading-6">
         <table class="table w-full border-separate border-spacing-0">
           <thead class="sticky top-0 z-10">
           <tr class="bg-base-300 text-xs">
@@ -130,7 +130,7 @@
 
     <!-- Diff结果：统一视图 -->
     <div v-if="hasInput && !tooLarge && viewMode === 'unified'" class="card bg-base-200 shadow-sm overflow-hidden">
-      <div class="overflow-auto max-h-[60vh] font-mono text-[13px] leading-6">
+      <div class="overflow-auto font-mono text-[13px] leading-6">
         <table class="table w-full border-separate border-spacing-0">
           <tbody>
           <template v-for="item in displayItems" :key="item.key">
