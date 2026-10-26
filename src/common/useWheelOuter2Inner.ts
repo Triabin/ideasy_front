@@ -1,5 +1,10 @@
 import { useTemplateRef, onMounted, onBeforeUnmount } from 'vue';
 
+/**
+ * 鼠标在外部元素区域滚动时，内部元素同步滚动
+ * @param outerElement 外部元素对象
+ * @param innerElement 内部元素对象
+ */
 const useWheelOuter2Inner = (
   outerElement: ReturnType<typeof useTemplateRef<HTMLElement>>,
   innerElement: ReturnType<typeof useTemplateRef<HTMLElement>>
