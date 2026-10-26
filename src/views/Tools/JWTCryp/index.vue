@@ -67,7 +67,7 @@
           <div class="card-body gap-3">
             <h2 class="card-title text-base">
               签名验证（{{ decoded.header.alg }}）
-              <i class="text-xs text-info-content/50 font-normal">
+              <i v-if="!verifySecret || verifyState !== 'pass'" class="text-xs text-info-content/50 font-normal">
                 ⚠️&nbsp;输入服务端用于签发该 Token 的密钥，验证签名是否被篡改
               </i>
             </h2>
@@ -173,7 +173,7 @@
         <div class="card-body gap-3">
           <h2 class="card-title text-base">
             密钥（Secret）
-            <i class="text-xs text-info-content/50 font-normal">
+            <i v-if="!encodeSecret" class="text-xs text-info-content/50 font-normal">
               ⚠️&nbsp;输入服务端用于签发该 Token 的密钥，对编码结果进行加密
             </i>
           </h2>

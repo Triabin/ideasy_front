@@ -1,21 +1,21 @@
 <!-- 首页路由组件 -->
 <template>
   <div class="flex flex-col items-center justify-center gap-1">
+    <!-- 粒子时钟 -->
     <div class="w-full h-[25lvh] bg-base-200 rounded-md m-4 flex justify-center items-center">
-      <DynamicClock :color="currRealMode === 'dark' ? '#FFFFFFA1' : '#283747AF'"
-                    font="sans-serif"
-                    :density="4"
-      />
+      <DynamicClock :color="currRealMode === 'dark' ? '#FFFFFFA1' : '#283747AF'" :density="4"/>
     </div>
+    <!-- 搜索框 -->
     <div class="w-full h-[5lvh] flex justify-center items-center">
       <GlobalSearchBox v-model="keyword"/>
     </div>
-    <div class="w-full h-[70lvh] grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] grid-rows-[repeat(auto-fill,minmax(200px,1fr))]
-       gap-5 overflow-y-scroll no-scrollbar pt-10">
-      <div v-if="filteredCardRoutes.length === 0"
+    <!-- 卡片网格 -->
+    <div class="w-full min-h-[70lvh] grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] grid-rows-[repeat(auto-fill,minmax(200px,1fr))] gap-5 p-5">
+      <div v-if="keyword.trim() && filteredCardRoutes.length === 0"
            class="col-span-full flex items-center justify-center text-base-content/60">
         没有找到与“{{ keyword.trim() }}”匹配的工具
       </div>
+      <!-- 卡片 -->
       <div v-for="(card, index) in filteredCardRoutes"
            :key="index"
            title="点击跳转"
@@ -23,10 +23,14 @@
            class="flex flex-col justify-start gap-2.5 border border-accent/10 rounded-md p-6 overflow-hidden bg-base-200/55
              shadow-sm cursor-pointer hover:border-primary hover:shadow-[0_0_10px_var(--color-primary)] hover:-translate-y-1.25
              transition-all duration-200 ease-in-out">
+        <!-- 卡片标题 -->
         <div class="flex items-center gap-2.5">
+          <!-- 卡片图标 -->
           <component v-if="card.meta?.icon" :is="card.meta.icon"/>
+          <!-- 卡片标题 -->
           <h2 class="text-xl font-semibold">{{ card.meta?.title }}</h2>
         </div>
+        <!-- 卡片标签 -->
         <div v-if="cardTags(card).length" class="flex flex-wrap gap-1.5">
           <span v-for="(tag, ti) in cardTags(card)"
                 :key="ti"
@@ -35,6 +39,7 @@
                 @click.stop="() => keyword = tag"
           >{{ tag }}</span>
         </div>
+        <!-- 描述 -->
         <p class="font-normal">{{ card.meta?.desc }}</p>
       </div>
     </div>
@@ -55,7 +60,7 @@ const cardRoutes = computed(() => flattenRoute(routes)
 );
 const router = useRouter();
 // 搜索关键字
-const keyword = ref('');
+const keyword = ref<string>('');
 
 /**
  * 获取卡片路由的标签列表

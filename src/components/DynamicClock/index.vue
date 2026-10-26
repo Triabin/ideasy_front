@@ -7,30 +7,20 @@ import { ref, computed, useTemplateRef, onMounted, onBeforeUnmount, watch } from
 import { MyMathUtils, debounce } from '@/common/utils.ts';
 
 // 父组件数据
-const props = defineProps({
-  // 粒子颜色
-  color: {
-    type: String,
-    default: "#5445544D"
-  },
-
-  // 字体
-  font: {
-    type: String,
-    default: 'sans-serif'
-  },
-
-  // 字体大小（仅作为基准参考值，实际渲染尺寸会根据画布（屏幕）大小自动等比缩放；传0表示完全自适应容器）
-  fontSize: {
-    type: Number,
-    default: 240
-  },
-
-  // 粒子密度
-  density: {
-    type: Number,
-    default: 6
-  }
+const props = withDefaults(defineProps<{
+  /** 粒子颜色 */
+  color: string;
+  /** 字体 */
+  font?: string;
+  /** 字体大小（仅作为基准参考值，实际渲染尺寸会根据画布（屏幕）大小自动等比缩放；传0表示完全自适应容器） */
+  fontSize?: number;
+  /** 粒子密度 */
+  density: number;
+}>(), {
+  color: '#5445544D',
+  font: 'sans-serif',
+  fontSize: 240,
+  density: 6
 });
 
 /** 时钟文本的宽高比（HH:mm:ss），保证数字在不同屏幕尺寸下始终保持比例、不变形 */
@@ -204,7 +194,8 @@ const resizeCanvas = () => {
   if (props.fontSize > 0) {
     // 基准模式：逻辑字号为 fontSize，画布按 fontSize*scale 等比缩放
     const s = scale.value;
-    cssWidth = props.fontSize * TEXT_ASPECT_RATIO * s / dpr;
+    // 手动+30，解决边缘切割问题
+    cssWidth = props.fontSize * TEXT_ASPECT_RATIO * s / dpr + 30;
     cssHeight = props.fontSize * 2 * s / dpr;
     // 若超出容器宽度，则整体等比缩小（只取最小缩放系数，绝不放大超过容器）
     if (rect.width > 0) {
