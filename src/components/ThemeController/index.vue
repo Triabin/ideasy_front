@@ -1,6 +1,6 @@
 <!-- 主题切换组件 -->
 <template>
-  <div role="radiogroup" class="p-1 w-fit flex rounded-full border border-solid border-gray-500">
+  <div role="radiogroup" class="p-1 gap-1 flex rounded-full border border-solid border-gray-300">
     <button
         type="button"
         role="radio"
@@ -11,7 +11,7 @@
         aria-checked="false"
         @click="() => toggleTheme('light')"
     >
-      <Light/>
+      <ThemeLight/>
     </button>
     <button
         type="button"
@@ -23,7 +23,7 @@
         aria-checked="false"
         @click="() => toggleTheme('system')"
     >
-      <PCScreen/>
+      <ThemeAuto/>
     </button>
     <button
         type="button"
@@ -35,7 +35,7 @@
         aria-checked="false"
         @click="() => toggleTheme('dark')"
     >
-      <Dark/>
+      <ThemeDark/>
     </button>
   </div>
 </template>
@@ -43,9 +43,9 @@
 <script lang="ts" setup>
 import { toRef, onMounted, onUnmounted } from 'vue';
 import useSettingsStore from '@/stores/settingsStore';
-import PCScreen from '@/components/icons/PCScreen.vue';
-import Light from '@/components/icons/Light.vue';
-import Dark from '@/components/icons/Dark.vue';
+import ThemeAuto from '@/components/icons/ThemeAuto.vue';
+import ThemeLight from '@/components/icons/ThemeLight.vue';
+import ThemeDark from '@/components/icons/ThemeDark.vue';
 
 const event = window.matchMedia("(prefers-color-scheme: dark)");
 const { initTheme, toggleTheme } = useSettingsStore();
