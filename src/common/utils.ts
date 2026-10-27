@@ -26,6 +26,125 @@ export const MyMathUtils = {
   }
 };
 
+/** 文件工具 */
+export const MyFileUtils = {
+  /** 常见扩展名 → MIME 类型映射（当 File.type 为空时兜底） */
+  EXT_MIME_MAP: {
+    png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', gif: 'image/gif', webp: 'image/webp',
+    bmp: 'image/bmp', svg: 'image/svg+xml', ico: 'image/x-icon', avif: 'image/avif', tiff: 'image/tiff',
+    mp4: 'video/mp4', webm: 'video/webm', ogg: 'audio/ogg', m4a: 'audio/mp4', mp3: 'audio/mpeg',
+    wav: 'audio/wav', flac: 'audio/flac', aac: 'audio/aac', opus: 'audio/opus',
+    pdf: 'application/pdf', zip: 'application/zip', gz: 'application/gzip', rar: 'application/vnd.rar',
+    '7z': 'application/x-7z-compressed', tar: 'application/x-tar',
+    json: 'application/json', xml: 'application/xml', txt: 'text/plain', md: 'text/markdown',
+    csv: 'text/csv', html: 'text/html', css: 'text/css', js: 'text/javascript',
+    wasm: 'application/wasm', woff: 'font/woff', woff2: 'font/woff2', ttf: 'font/ttf', otf: 'font/otf',
+  } as Record<string, string>,
+
+  /**
+   * 获取文件mimetype
+   * @param file {File} 文件对象
+   */
+  getMimeType: function (file: File): string {
+    if (file.type) return file.type;
+    const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
+    return this.EXT_MIME_MAP[ext] ?? 'application/octet-stream';
+  },
+
+  /**
+   * 将 ArrayBuffer分块转成base64（避免String.fromCharCode一次性展开超长参数列表导致栈溢出）
+   * @param buffer {ArrayBuffer} 二进制数据
+   */
+  bufferToBase64: function (buffer: ArrayBuffer): string {
+    const bytes = new Uint8Array(buffer);
+    const CHUNK = 0x8000; // 32KB 一块
+    const parts: string[] = [];
+    for (let i = 0; i < bytes.length; i += CHUNK) {
+      parts.push(String.fromCharCode(...bytes.subarray(i, i + CHUNK)));
+    }
+    return btoa(parts.join(''));
+  },
+
+  /**
+   * 分块读取超大文件的兜底方案：先尝试FileReader，失败后按切片逐块base64再拼接
+   * @param file {File} 要读取的文件对象
+   * @returns {string} base64字符串
+   */
+  readByChunks: async function (file: File): Promise<string> {
+    // 每片大小必须是 3 的倍数（base64 以 3 字节为一组编码），否则分块结果无法直接拼接；
+    // 取 999K（333*3*1024，可被 3 整除）近似 1MB
+    const CHUNK_SIZE = 333 * 3 * 1024;
+    const parts: string[] = [];
+    for (let offset = 0; offset < file.size; offset += CHUNK_SIZE) {
+      const blob = file.slice(offset, Math.min(offset + CHUNK_SIZE, file.size));
+      const buf = await blob.arrayBuffer();
+      parts.push(this.bufferToBase64(buf));
+    }
+    return parts.join('');
+  },
+
+  /**
+   * 使用FileReader读取文件并转换为DataURI
+   * @param file
+   */
+  readByFileReader2URI: function (file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result));
+      reader.onerror = () => reject(reader.error ?? new Error('文件读取失败'));
+      reader.readAsDataURL(file);
+    });
+  },
+
+  /**
+   * 格式化字节长度单位（B/KB/MB/GB/TB/PB/EB/ZB/YB）
+   * @param byteLen {number} 字节数量
+   * @param decimal {number} 保留的小数位数，默认2
+   * @param space {boolean} 单位与数字之间是否有空格，默认true
+   */
+  fmtByteSize: function (byteLen: number, decimal: number = 2, space: boolean = true): string {
+    if (byteLen < 0) {
+      throw new Error('byteLen must be non-negative');
+    }
+    const sep = space ? ' ' : '';
+    if (byteLen === 0) {
+      return `0${sep}B`;
+    }
+    const units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+    const unitIndex = Math.floor(Math.log(byteLen) / Math.log(1024));
+    const clampedIndex = Math.min(unitIndex, units.length - 1);
+    const value = byteLen / Math.pow(1024, clampedIndex);
+    return `${value.toFixed(decimal)}${sep}${units[clampedIndex]}`;
+  },
+
+  /**
+   * 将文件转换为Base64DataURI。FileReader失败时自动降级为分块读取
+   * @param file {File} 目标文件
+   * @param onProgress {(ratio:number)=>void} 进度回调（0~1）
+   * @return {Promise<[string, string]>} 转换结果[DataURI, mimetype]
+   */
+  fileToBase64URI: async function (
+    file: File,
+    onProgress?: (ratio: number) => void
+  ): Promise<[string, string]> {
+    const mimeType = this.getMimeType(file);
+    onProgress?.(0.05);
+    try {
+      const uri = await this.readByFileReader2URI(file);
+      onProgress?.(1);
+      return [uri, mimeType];
+    } catch (e) {
+      // FileReader 对超大文件可能因内存限制失败，降级为分块读取
+      console.warn('FileReader读取失败，尝试分块读取', e);
+      onProgress?.(0.4);
+      const base64 = await this.readByChunks(file);
+      const uri = `data:${mimeType};base64,${base64}`;
+      onProgress?.(1);
+      return [uri, mimeType];
+    }
+  }
+};
+
 /**
  * 获取当前操作系统类型
  * @returns { 'Android' | 'iOS' | 'Windows' | 'MacOS' | 'Linux' | 'Unknown' } 操作系统类型
