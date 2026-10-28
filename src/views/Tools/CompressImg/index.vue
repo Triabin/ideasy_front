@@ -7,16 +7,12 @@
     </p>
 
     <!-- 拖拽/点击上传区 -->
-    <div
-        class="rounded-xl border-2 border-dashed transition-colors cursor-pointer flex flex-col items-center justify-center gap-2 py-8 px-4"
-        :class="dragOver ? 'border-primary bg-base-200' : 'border-base-300 hover:border-primary/60'"
+    <div class="rounded-xl border-2 border-dashed transition-colors cursor-pointer flex flex-col items-center justify-center
+                gap-2 py-8 px-4 border-base-300 hover:border-primary/60"
         @click="fileInputRef?.click()"
-        @dragover.prevent="dragOver = true"
-        @dragleave.prevent="dragOver = false"
-        @drop.prevent="onDrop"
     >
       <ImgCompress :size="40" :twClasses="['fill-base-content','opacity-60']"/>
-      <p class="text-sm opacity-70">将图片拖到这里，或点击选择文件（支持多选）</p>
+      <p class="text-sm opacity-70">将图片拖到这里（或页面任意位置），或点击选择文件（支持多选，含文件夹）</p>
       <p class="text-xs opacity-50">支持 JPG / PNG / WebP / GIF / BMP / SVG 等常见格式</p>
       <input ref="fileInputRef" type="file" accept="image/*" multiple class="hidden" @change="onFileChange"/>
     </div>
@@ -145,10 +141,10 @@
             <div class="min-w-0 grow">
               <p class="truncate font-medium" :title="item.file.name">{{ item.file.name }}</p>
               <p class="text-xs opacity-60 font-mono whitespace-nowrap">
-                {{ item.width }}×{{ item.height }} · {{ fmtSize(item.file.size) }}
+                {{ item.width }}×{{ item.height }} · {{ MyFileUtils.fmtByteSize(item.file.size) }}
                 <template v-if="item.result">
                   → {{ item.result.width }}×{{ item.result.height }} ·
-                  <span :class="resultBadgeClass(item)">{{ fmtSize(item.result.blob.size) }}（{{ diffText(item) }}）</span>
+                  <span :class="resultBadgeClass(item)">{{ MyFileUtils.fmtByteSize(item.result.blob.size) }}（{{ diffText(item) }}）</span>
                   <span v-if="targetSizeEnabled && item.result.withinTarget === false" class="text-warning">· 未达标</span>
                 </template>
               </p>
@@ -179,7 +175,7 @@
 <script lang="ts" setup>
 import ImgCompress from '@/components/icons/ImgCompress.vue';
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
-import { popupTip } from '@/common/utils';
+import { popupTip, MyFileUtils } from '@/common/utils';
 import {
   compressImage,
   downloadAsZip,
@@ -190,6 +186,7 @@ import {
   type LoadedImage,
   type OutputFormat,
 } from './imageCompressor';
+import useFullScreenDropFile from '@/common/useFullScreenDropFile.ts';
 
 /** 列表项状态 */
 type ItemStatus = 'idle' | 'busy' | 'done' | 'error';
@@ -220,8 +217,6 @@ let nextId = 1;
 
 /** 文件输入框引用 */
 const fileInputRef = ref<HTMLInputElement>();
-/** 是否拖拽悬停中 */
-const dragOver = ref<boolean>(false);
 /** 列表数据 */
 const items = ref<ListItem[]>([]);
 /** 输出格式 */
@@ -279,21 +274,6 @@ const totalSavedPercent = computed(() => {
 });
 
 /**
- * 格式化文件大小
- * @param bytes {number} 字节数
- */
-function fmtSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  const units = ['KB', 'MB', 'GB'];
-  let v = bytes / 1024, ui = 0;
-  while (v >= 1024 && ui < units.length - 1) {
-    v /= 1024;
-    ui++;
-  }
-  return `${v.toFixed(v >= 100 || ui === 0 ? 0 : 1)} ${units[ui]}`;
-}
-
-/**
  * 生成单张图片的体积变化描述
  * @param item {ListItem} 列表项
  */
@@ -341,13 +321,6 @@ function onFileChange(e: Event) {
   const input = e.target as HTMLInputElement;
   if (input.files?.length) addFiles(input.files);
   input.value = '';
-}
-
-/** 拖放回调 */
-function onDrop(e: DragEvent) {
-  dragOver.value = false;
-  const files = e.dataTransfer?.files;
-  if (files?.length) addFiles(files);
 }
 
 /**
@@ -541,4 +514,16 @@ function clearAll() {
 }
 
 onBeforeUnmount(clearAll);
+useFullScreenDropFile(fileInputRef, {
+  accept: 'image/*',
+  maxSize: 50 * 1024 * 1024,
+  overlayText: '松开鼠标，添加要压缩的图片（支持文件夹）',
+  onReject: (rejected, reason) => {
+    if (reason === 'size') {
+      popupTip(`已忽略超过 50MB 的图片：${rejected.map(f => f.name).join('、')}`, 'warning', 2500);
+    } else if (reason === 'type') {
+      popupTip(`已忽略 ${rejected.length} 个非图片文件`, 'warning', 2000);
+    }
+  },
+});
 </script>

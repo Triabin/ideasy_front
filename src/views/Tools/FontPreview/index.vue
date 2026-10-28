@@ -5,16 +5,12 @@
     <p class="text-sm opacity-70">将字体文件拖动到此页面或者点击上传按钮，然后输入预览内容即可，最多支持上传{{ maxCount }}种字体。</p>
 
     <!-- 上传区域：拖拽 + 点击选择 -->
-    <div
-        class="w-full bg-base-200 rounded-2xl border-2 border-dashed transition-colors cursor-pointer flex flex-col items-center justify-center gap-2 py-8 px-4"
-        :class="dragOver ? 'border-primary bg-base-300' : 'border-base-300'"
-        @dragover.prevent="dragOver = true"
-        @dragleave.prevent="dragOver = false"
-        @drop.prevent="onDrop"
+    <div class="w-full bg-base-200 rounded-2xl border-2 border-dashed transition-colors cursor-pointer flex flex-col
+                items-center justify-center gap-2 py-8 px-4 border-base-300"
         @click="fileInputRef?.click()"
     >
       <Font class="w-10 h-10 opacity-60"/>
-      <span>将字体文件（.ttf / .otf / .woff / .woff2）拖到此处，或点击选择文件</span>
+      <span>将字体文件（.ttf / .otf / .woff / .woff2）拖到此处（或页面任意位置），或点击选择文件</span>
       <input
           ref="fileInputRef"
           type="file"
@@ -73,7 +69,7 @@
       >
         <div class="card-body gap-1 overflow-hidden">
           <h2 class="card-title text-base truncate">{{ font.name }}</h2>
-          <i class="text-xs opacity-60">家族名：{{ font.family }} · 大小：{{ formatSize(font.size) }}</i>
+          <i class="text-xs opacity-60">家族名：{{ font.family }} · 大小：{{ MyFileUtils.fmtByteSize(font.size) }}</i>
           <div
               class="whitespace-pre-wrap break-all leading-none"
               :style="previewStyle(font.family)"
@@ -85,7 +81,8 @@
 </template>
 <script lang="ts" setup>
 import { computed, onBeforeUnmount, ref, toRef, watch } from 'vue';
-import { getFontFamilyFromFile } from '@/common/utils';
+import { getFontFamilyFromFile, MyFileUtils } from '@/common/utils';
+import useFullScreenDropFile from '@/common/useFullScreenDropFile.ts';
 import useSettingsStore from '@/stores/settingsStore';
 import UnderLineMsg from '@/components/UnderLineMsg';
 import Font from '@/components/icons/Font.vue';
@@ -141,16 +138,6 @@ const previewStyle = (family: string) => ({
   fontSize: `${fontSize.value}px`,
   lineHeight: lineHeight.value,
 });
-
-/**
- * 格式化文件大小
- * @param bytes {number} 字节数
- */
-const formatSize = (bytes: number): string => {
-  if (bytes >= 1024 * 1024) return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
-  if (bytes >= 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${bytes} B`;
-};
 
 /**
  * 函数描述：处理用户选择的字体文件（点击或拖拽入口共用）
@@ -210,18 +197,23 @@ const clearAllFonts = () => {
   msgRef.value?.showMsg('已清空全部字体', 'info', 2000);
 };
 
-/** input[type=file] change 回调 */
+/** input[type=file] change 回调（点击选择与全屏拖拽注入共用入口） */
 const onFileInputChange = (e: Event) => {
   const input = e.target as HTMLInputElement;
   void handleFiles(input.files);
   input.value = ''; // 允许重复选择同一文件
 };
 
-/** 拖拽释放回调 */
-const onDrop = (e: DragEvent) => {
-  dragOver.value = false;
-  void handleFiles(e.dataTransfer?.files ?? null);
-};
+useFullScreenDropFile(fileInputRef, {
+  accept: ['.ttf', '.otf', '.woff', '.woff2', '.ttc', 'font/*'],
+  maxSize: 30 * 1024 * 1024,
+  maxCount,
+  overlayText: `松开鼠标，添加字体文件（最多 ${maxCount} 种）`,
+  onReject: (rejected, reason) => {
+    if (reason === 'type') msgRef.value?.showMsg(`已忽略 ${rejected.length} 个非字体文件`, 'warning');
+    else if (reason === 'size') msgRef.value?.showMsg(`已忽略超过 30MB 的字体：${rejected.map(f => f.name).join('、')}`, 'warning');
+  },
+});
 
 onBeforeUnmount(() => {
   // 组件销毁时释放字体与URL资源

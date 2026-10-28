@@ -40,13 +40,8 @@
     <!-- 文件输入区 -->
     <div v-else class="card bg-base-200 shadow-sm">
       <div class="card-body gap-3">
-        <div
-            class="rounded-xl border-2 border-dashed p-8 text-center transition-colors cursor-pointer select-none"
-            :class="dragOver ? 'border-primary bg-primary/5' : 'border-base-300'"
-            @click="fileInput?.click()"
-            @dragover.prevent="dragOver = true"
-            @dragleave.prevent="dragOver = false"
-            @drop.prevent="onDrop"
+        <div class="rounded-xl border-2 border-dashed p-8 text-center transition-colors cursor-pointer select-none"
+             @click="fileInput?.click()"
         >
           <Hash :size="40" :twClasses="['fill-base-content', 'opacity-40', 'mx-auto', 'mb-2']"/>
           <p class="text-sm opacity-70">点击选择文件，或将文件拖拽到此处</p>
@@ -122,6 +117,7 @@ import {
   type HashAlgorithm,
 } from './hashCalculator';
 import { copyText, popupTip } from '@/common/utils.ts';
+import useFullScreenDropFile from '@/common/useFullScreenDropFile.ts';
 
 /* ------------------------- 状态 ------------------------- */
 
@@ -213,7 +209,6 @@ watch([inputText, mode], () => {
 
 const fileInput = ref<HTMLInputElement>();
 const currentFile = ref<File | null>(null);
-const dragOver = ref(false);
 const progress = ref(0);
 
 const onFileChange = (e: Event) => {
@@ -221,12 +216,6 @@ const onFileChange = (e: Event) => {
   if (file) setFile(file);
   // 允许重复选择同一文件
   (e.target as HTMLInputElement).value = '';
-};
-
-const onDrop = (e: DragEvent) => {
-  dragOver.value = false;
-  const file = e.dataTransfer?.files?.[0];
-  if (file) setFile(file);
 };
 
 function setFile(file: File) {
@@ -309,8 +298,16 @@ const copy = async (text: string) => {
   copyTimer = setTimeout(() => (copiedText.value = ''), 1500);
 };
 
+const { addEvent, removeEvent } = useFullScreenDropFile(fileInput, {}, true);
 // 计算出错时提示
 watch(error, (err) => {
   if (err) popupTip(err, 'error', 2500);
+});
+watch(mode, (val) => {
+  if (val === 'string') {
+    removeEvent && removeEvent();
+  } else if (val === 'file') {
+    addEvent && addEvent();
+  }
 });
 </script>

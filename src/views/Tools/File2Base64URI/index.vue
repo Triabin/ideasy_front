@@ -7,16 +7,12 @@
     </p>
 
     <!-- 拖拽/点击上传区 -->
-    <div
-        class="rounded-xl border-2 border-dashed transition-colors cursor-pointer flex flex-col items-center justify-center gap-2 py-8 px-4"
-        :class="dragOver ? 'border-primary bg-base-200' : 'border-base-300 hover:border-primary/60'"
-        @click="fileInputRef?.click()"
-        @dragover.prevent="dragOver = true"
-        @dragleave.prevent="dragOver = false"
-        @drop.prevent="onDrop"
+    <div class="rounded-xl border-2 border-dashed transition-colors cursor-pointer flex flex-col items-center justify-center
+                gap-2 py-8 px-4 border-base-300 hover:border-primary/60"
+         @click="fileInputRef?.click()"
     >
       <Base64Edit :size="40" :twClasses="['fill-base-content','opacity-60']"/>
-      <p class="text-sm opacity-70">将文件拖到这里，或点击选择文件（支持多选）</p>
+      <p class="text-sm opacity-70">将文件拖到这里（或页面任意位置），或点击选择文件（支持多选，含文件夹）</p>
       <p class="text-xs opacity-50">任意类型文件均可转换；添加后会自动按体积告警体系进行分级提示</p>
       <input ref="fileInputRef" type="file" multiple class="hidden" @change="onFileChange"/>
     </div>
@@ -202,7 +198,7 @@
 
 <script lang="ts" setup>
 import Base64Edit from '@/components/icons/Base64Edit.vue';
-import { computed, onBeforeUnmount, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, ref, watch, useTemplateRef } from 'vue';
 import { copyText, MyFileUtils, popupTip, clickDownload } from '@/common/utils';
 import {
   type ConvertResult,
@@ -211,6 +207,7 @@ import {
   fileToBase64URI,
   getSizeAlertLevel,
 } from './file2Base64URI.ts';
+import useFullScreenDropFile from '@/common/useFullScreenDropFile.ts';
 
 /** 列表项数据 */
 interface ListItem {
@@ -233,11 +230,9 @@ const DEFAULT_INFO = 1, DEFAULT_WARN = 5, DEFAULT_DANGER = 20;
 let nextId = 1;
 
 /** 文件输入引用 */
-const fileInputRef = ref<HTMLInputElement>();
+const fileInputRef = useTemplateRef<HTMLInputElement>('fileInputRef');
 /** 模态框引用 */
 const modalRef = ref<HTMLDialogElement>();
-/** 拖拽悬停 */
-const dragOver = ref<boolean>(false);
 /** 列表 */
 const items = ref<ListItem[]>([]);
 /** 是否有任务进行中 */
@@ -389,19 +384,15 @@ function addFiles(files: FileList | File[]) {
   else if (infoCnt) popupTip(`有 ${infoCnt} 个文件体积偏大，输出 Base64 后长度约为原文件的 1.37 倍`, 'dash', 3000);
 }
 
-/** 文件选择回调 */
+/** 文件选择回调（点击选择与全屏拖拽注入共用入口） */
 function onFileChange(e: Event) {
   const input = e.target as HTMLInputElement;
   if (input.files?.length) addFiles(input.files);
   input.value = '';
 }
 
-/** 拖放回调 */
-function onDrop(e: DragEvent) {
-  dragOver.value = false;
-  const files = e.dataTransfer?.files;
-  if (files?.length) addFiles(files);
-}
+// 全屏拖拽上传：拖入页面任意位置均可释放，支持多文件/文件夹递归展开；不限制类型与大小
+useFullScreenDropFile(fileInputRef, { overlayText: '松开鼠标，添加要转换的文件（支持文件夹）' });
 
 /**
  * 执行单个文件的转换（内部方法，不做告警拦截）
