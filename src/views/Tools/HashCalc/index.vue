@@ -44,7 +44,7 @@
              @click="fileInput?.click()"
         >
           <Hash :size="40" :twClasses="['fill-base-content', 'opacity-40', 'mx-auto', 'mb-2']"/>
-          <p class="text-sm opacity-70">点击选择文件，或将文件拖拽到此处</p>
+          <p class="text-sm opacity-70">点击选择文件，或将文件拖拽到页面任意位置</p>
           <input ref="fileInput" type="file" class="hidden" @change="onFileChange"/>
         </div>
         <div v-if="currentFile" class="flex flex-wrap items-center gap-3 text-sm">
@@ -104,10 +104,10 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, reactive, ref, watch } from 'vue';
 import Copy from '@/components/icons/Copy.vue';
 import Copied from '@/components/icons/Copied.vue';
 import Hash from '@/components/icons/Hash.vue';
+import { computed, reactive, ref, watch } from 'vue';
 import {
   ALGORITHMS,
   hashString,
@@ -116,7 +116,7 @@ import {
   formatFileSize,
   type HashAlgorithm,
 } from './hashCalculator';
-import { copyText, popupTip } from '@/common/utils.ts';
+import { copyText, popupTip, debounce } from '@/common/utils.ts';
 import useFullScreenDropFile from '@/common/useFullScreenDropFile.ts';
 
 /* ------------------------- 状态 ------------------------- */
@@ -196,13 +196,10 @@ async function computeAll(source: 'string' | 'file'): Promise<void> {
 const byteLength = computed(() => new TextEncoder().encode(inputText.value).length);
 
 // 字符串输入变化时防抖重新计算
-let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+const debouncedCompute = debounce(() => computeAll('string'));
 watch([inputText, mode], () => {
   for (const a of ALGORITHMS) delete digests[a.value];
-  if (mode.value === 'string') {
-    if (debounceTimer) clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => computeAll('string'), 200);
-  }
+  if (mode.value === 'string') debouncedCompute();
 }, { immediate: true });
 
 /* ------------------------- 文件模式 ------------------------- */
@@ -232,15 +229,21 @@ const clearFile = () => {
   error.value = '';
 };
 
-const clearInput = () => {
-  inputText.value = '';
-};
+const clearInput = () => inputText.value = '';
 
-// 切换到文件模式且已选文件时补算；切回字符串时重算
+/** 手动增删全屏文件拖拽上传事件 */
+const { addEvent, removeEvent } = useFullScreenDropFile(fileInput, { maxCount: 1 }, true);
+/** 切换到文件模式且已选文件时补算；切回字符串时重算 */
 watch(mode, (m) => {
   if (m === 'file') {
+    // 添加全屏拖拽文件上传事件
+    addEvent && addEvent();
+    // 触发哈希计算
     if (currentFile.value) computeAll('file');
   } else {
+    // 删除全屏拖拽文件上传事件
+    removeEvent && removeEvent();
+    // 触发哈希计算
     computeAll('string');
   }
 });
@@ -298,16 +301,6 @@ const copy = async (text: string) => {
   copyTimer = setTimeout(() => (copiedText.value = ''), 1500);
 };
 
-const { addEvent, removeEvent } = useFullScreenDropFile(fileInput, {}, true);
 // 计算出错时提示
-watch(error, (err) => {
-  if (err) popupTip(err, 'error', 2500);
-});
-watch(mode, (val) => {
-  if (val === 'string') {
-    removeEvent && removeEvent();
-  } else if (val === 'file') {
-    addEvent && addEvent();
-  }
-});
+watch(error, (err) => err && popupTip(err, 'error', 2500));
 </script>

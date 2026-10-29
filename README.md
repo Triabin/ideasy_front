@@ -38,6 +38,8 @@
 
 [JWT加解密](#jwt加解密)
 
+[文件转Base64URI](#文件转Base64URI)
+
 ## 想在自己本地运行这个项目
 
 自己直接拉取项目然后运行即可，这就是一个普通的vite项目，技术框架：`vite8 + typescript + vue3 + tailwindcss + daisyUI`。
@@ -116,3 +118,7 @@ pnpm dev
 ### JWT加解密
 
 ![JWT加解密](./doc-images/jwt-cryp.png)
+
+### 文件转Base64URI
+
+![文件转Base64URI](./doc-images/file2-data-uri.png)
