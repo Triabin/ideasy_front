@@ -11,11 +11,14 @@
       <div class="navbar w-160 md:w-3xl lg:w-5xl xl:w-7xl 2xl:w-360 flex items-center">
         <!-- Logo -->
         <div class="navbar-start text-2xl">
-          <RouterLink to="/"><img src="/favicon.png" class="size-10" alt="灵光"></RouterLink>
           <RouterLink to="/">
-            <div class="text-xl ml-2 italic overflow-hidden whitespace-nowrap text-ellipsis">
+            <div class="rounded-2xl size-9 bg-red-500 flex justify-center items-center font-bold text-primary-content round-font"
+            >灵</div>
+          </RouterLink>
+          <RouterLink to="/">
+            <span class="text-xl ml-2 font-bold overflow-hidden whitespace-nowrap text-ellipsis">
               能网页&nbsp;&nbsp;不软件
-            </div>
+            </span>
           </RouterLink>
         </div>
         <!-- 导航栏路由 -->

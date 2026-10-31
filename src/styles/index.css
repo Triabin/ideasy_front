@@ -42,4 +42,8 @@ body {
   .no-scrollbar::-webkit-scrollbar {
     display: none;  /* Chrome, Safari, Opera */
   }
+  /* 圆体字体 */
+  .round-font {
+    font-family: 'Yuanti SC', 'YouYuan', '汉仪润圆', '方正粗圆', ui-rounded, 'PingFang SC', 'Microsoft YaHei', 'HarmonyOS Sans SC', 'Noto Sans CJK SC', 'WenQuanYi Micro Hei', system-ui, sans-serif;
+  }
 }

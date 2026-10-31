@@ -206,8 +206,8 @@ export const clickDownload = (
  * @returns {string} 字体家族名
  */
 export async function getFontFamilyFromFile(file: File): Promise<string> {
-  const buf = await file.arrayBuffer()
-  const font = opentype.parse(buf)
+  const buf = await file.arrayBuffer();
+  const font = opentype.parse(buf);
   const names = font.names as any;
   if (!names) return '';
   const familyMeta: Record<string, string> = names.preferredFamily

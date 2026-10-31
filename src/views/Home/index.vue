@@ -19,7 +19,7 @@
       <div v-for="(card, index) in filteredCardRoutes"
            :key="index"
            title="点击跳转"
-           @click="() => router.push(card.path)"
+           @click="cardClick(card.path)"
            class="flex flex-col justify-start gap-2.5 border border-accent/10 rounded-md p-6 overflow-hidden bg-base-200/55
              shadow-sm cursor-pointer hover:border-primary hover:shadow-[0_0_10px_var(--color-primary)] hover:-translate-y-1.25
              transition-all duration-200 ease-in-out">
@@ -103,4 +103,8 @@ const filteredCardRoutes = computed(() => {
     return kws.every(kw => title.includes(kw) || desc.includes(kw) || tags.some(tag => tag.includes(kw)));
   });
 });
+
+const cardClick = (path: string) => {
+  router.push(path);
+}
 </script>
