@@ -198,6 +198,7 @@ export const clickDownload = (
   link.download = nameGetter();
   link.click();
   URL.revokeObjectURL(url);
+  link.remove();
 }
 
 /**
@@ -284,4 +285,19 @@ export const popupTip = (
     popupTip.removeChild(alert);
     if (!popupTip.innerHTML) popupTip.removeAttribute('class');
   }, duration);
+}
+
+/** 读取本地字体 */
+export const loadLocalFonts = async () => {
+  try {
+    // 触发浏览器权限弹窗
+    return await window.queryLocalFonts();
+  } catch (err: any) {
+    if (err.name === 'NotAllowedError') {
+      popupTip('您拒绝了字体访问权限。请在浏览器设置中允许本站访问字体。', 'error');
+    } else {
+      popupTip(`读取失败: ${err.message || '未知错误'}`, 'error');
+    }
+    console.error(err);
+  }
 }

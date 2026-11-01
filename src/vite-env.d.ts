@@ -41,3 +41,14 @@ interface Window {
   _hmt?: any[] // 百度统计
   clarity?: (...args: any[]) => void // 微软 Clarity
 }
+
+interface Window {
+  queryLocalFonts(): Promise<FontData[]>;
+}
+interface FontData {
+  family: string;
+  fullName: string;
+  postscriptName: string;
+  style: string;
+  blob(): Promise<Blob>;
+}

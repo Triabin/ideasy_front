@@ -25,9 +25,9 @@
 
     <!-- 已上传字体列表 -->
     <div v-if="fonts.length" class="flex flex-wrap gap-2">
-      <div v-for="font in fonts" :key="font.id" class="badge badge-lg gap-1 badge-outline cursor-pointer">
+      <div v-for="font in fonts" :key="font.family" class="badge badge-lg gap-1 badge-outline cursor-pointer">
         <span class="italic text-base-content text-sm mr-2">{{ font.name }}</span>
-        <button class="cursor-pointer hover:text-error" title="移除该字体" @click.stop="removeFont(font.id)">✕</button>
+        <button class="cursor-pointer hover:text-error" title="移除该字体" @click.stop="removeFont(font.family)">✕</button>
       </div>
     </div>
 
@@ -63,7 +63,7 @@
     <div v-else class="flex flex-col gap-3 pb-4">
       <div
           v-for="font in fonts"
-          :key="font.id"
+          :key="font.family"
           class="card shadow-sm"
           :class="darkBg ? 'bg-neutral text-neutral-content' : 'bg-base-200'"
       >
@@ -81,7 +81,7 @@
 </template>
 <script lang="ts" setup>
 import { computed, onBeforeUnmount, ref, toRef, watch } from 'vue';
-import { getFontFamilyFromFile, MyFileUtils } from '@/common/utils';
+import { getFontFamilyFromFile, MyFileUtils, popupTip } from '@/common/utils';
 import useFullScreenDropFile from '@/common/useFullScreenDropFile.ts';
 import useSettingsStore from '@/stores/settingsStore';
 import UnderLineMsg from '@/components/UnderLineMsg';
@@ -89,7 +89,6 @@ import Font from '@/components/icons/Font.vue';
 
 /** 已加载的字体信息 */
 type LoadedFont = {
-  id: number; // 唯一标识
   name: string; // 文件名
   family: string; // FontFace 注册的家族名
   size: number; // 文件大小（字节）
@@ -97,7 +96,7 @@ type LoadedFont = {
   face: FontFace; // 字体对象
 };
 
-const defaultPreviewText = '永字八法 AaBbGg 0123456789\nThe quick brown fox jumps over the lazy dog.\n天地玄黄 宇宙洪荒 日月盈昃 辰宿列张';
+const defaultPreviewText = '天地玄黄，宇宙洪荒。日月盈昃，辰宿列张。（繁體：黃張）\nABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz\n0123456789 *_-+`!@#$%^&()=';
 const maxCount = 20; // 最多支持的字体数量
 
 const previewText = ref<string>('');
@@ -105,7 +104,6 @@ const fonts = ref<LoadedFont[]>([]);
 const fontSize = ref<number>(32);
 const lineHeight = ref<number>(1.5);
 const darkBg = ref<boolean>(false);
-const dragOver = ref<boolean>(false);
 const fileInputRef = ref<HTMLInputElement>();
 const msgRef = ref<any>();
 const theme = toRef(useSettingsStore(), 'currRealMode');
@@ -115,8 +113,6 @@ watch(theme, (mode) => {
     darkBg.value = false;
   }
 });
-
-let fontIdSeed = 0;
 
 /**
  * TS 内置 lib.dom.d.ts 中 FontFaceSet 类型未声明 add/delete 方法（浏览器实际支持），此处做类型补充
@@ -151,10 +147,6 @@ const handleFiles = async (files: FileList | null) => {
       msgRef.value?.showMsg(`最多支持上传${maxCount}种字体，剩余文件已忽略`, 'warning');
       break;
     }
-    if (fonts.value.some(f => f.name === file.name && f.size === file.size)) {
-      msgRef.value?.showMsg(`字体“${file.name}”已存在，已跳过`, 'warning');
-      continue;
-    }
     await addFont(file);
   }
 };
@@ -166,24 +158,30 @@ const handleFiles = async (files: FileList | null) => {
 const addFont = async (file: File) => {
   const url = URL.createObjectURL(file);
   const family = await getFontFamilyFromFile(file);
+  if (fonts.value.findIndex(font => font.family === family) > -1) {
+    popupTip(`已存在family为${family}的字体`, 'warning', 2500);
+    return;
+  }
   try {
     const face = new FontFace(family, `url(${url})`);
     await face.load();
     fontSet.add(face);
-    fonts.value.push({ id: fontIdSeed, name: file.name, family, size: file.size, url, face });
+    fonts.value.push({ name: file.name, family, size: file.size, url, face });
     msgRef.value?.showMsg(`字体“${file.name}”加载成功`, 'success', 2000);
   } catch (e) {
-    URL.revokeObjectURL(url);
+    console.error(e);
     msgRef.value?.showMsg(`字体“${file.name}”加载失败，请确认文件是否为有效字体`, 'fail');
+  } finally {
+    URL.revokeObjectURL(url);
   }
 };
 
 /**
  * 函数描述：移除指定字体并释放资源
- * @param id {number} 字体id
+ * @param family {string} 字体家族名
  */
-const removeFont = (id: number) => {
-  const index = fonts.value.findIndex(f => f.id === id);
+const removeFont = (family: string) => {
+  const index = fonts.value.findIndex(f => f.family === family);
   if (index === -1) return;
   const font = fonts.value[index];
   fontSet.delete(font.face);
@@ -193,7 +191,7 @@ const removeFont = (id: number) => {
 
 /** 清空全部字体 */
 const clearAllFonts = () => {
-  [...fonts.value].forEach(f => removeFont(f.id));
+  [...fonts.value].forEach(f => removeFont(f.family));
   msgRef.value?.showMsg('已清空全部字体', 'info', 2000);
 };
 
