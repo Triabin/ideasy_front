@@ -305,13 +305,13 @@ async function addFiles(files: FileList | File[]) {
   const all = Array.from(files);
   const list = all.filter(f => f.type.startsWith('image/') || /\.(jpe?g|png|webp|gif|bmp|ico|avif|svg)$/i.test(f.name));
   const skipped = all.length - list.length;
-  if (skipped > 0) popupTip(`已忽略 ${skipped} 个非图片文件`, 'warning', 2000);
+  if (skipped > 0) popupTip(`已忽略 ${skipped} 个非图片文件`, { duration: 2000, type: 'warning' });
   for (const file of list) {
     try {
       const loaded = await loadImageFromFile(file);
       items.value.push({ ...loaded, id: nextId++, status: 'idle', checked: true });
     } catch {
-      popupTip(`图片 "${file.name}" 解码失败，已跳过`, 'error', 2500);
+      popupTip(`图片 "${file.name}" 解码失败，已跳过`, { duration: 2500, type: 'error' });
     }
   }
 }
@@ -393,14 +393,14 @@ function validateOptions(): boolean {
   if (targetSizeEnabled.value) {
     const v = Math.trunc(targetSizeKB.value) || 0;
     if (v < 1) {
-      popupTip('最大体积需设置为不小于 1 的数值', 'warning');
+      popupTip('最大体积需设置为不小于 1 的数值', { type: 'warning' });
       return false;
     }
   }
   if (!targetSizeEnabled.value && resizeEnabled.value) {
     const m = Math.trunc(maxDimension.value) || 0;
     if (m < 16) {
-      popupTip('最长边限制需在 16 ~ 10000 px 之间', 'warning');
+      popupTip('最长边限制需在 16 ~ 10000 px 之间', { type: 'warning' });
       return false;
     }
   }
@@ -428,7 +428,7 @@ async function compressAll() {
       (checkedCount.value ? checkedItems.value : items.value).map(i => i.id),
   );
   if (!targetIds.size) {
-    popupTip('请先添加或勾选要压缩的图片', 'warning');
+    popupTip('请先添加或勾选要压缩的图片', { type: 'warning' });
     return;
   }
   busy.value = true;
@@ -446,11 +446,11 @@ async function compressAll() {
     busy.value = false;
   }
   if (!done) {
-    popupTip(`压缩失败：共 ${failed} 张，请检查图片或调整参数后重试`, 'error', 3000);
+    popupTip(`压缩失败：共 ${failed} 张，请检查图片或调整参数后重试`, { duration: 3000, type: 'error' });
   } else if (failed) {
-    popupTip(`压缩完成：成功 ${done} 张，失败 ${failed} 张`, 'warning', 2500);
+    popupTip(`压缩完成：成功 ${done} 张，失败 ${failed} 张`, { duration: 2500, type: 'warning' });
   } else {
-    popupTip(`压缩完成：共 ${done} 张，可点击下载按钮保存`, 'success', 2000);
+    popupTip(`压缩完成：共 ${done} 张，可点击下载按钮保存`, { duration: 2000, type: 'success' });
   }
 }
 
@@ -478,7 +478,7 @@ async function downloadChecked() {
   // 只下载压缩成功的图片，避免把未压缩的勾选项算进来后误报“没有可下载的结果”
   const targets = successItems.value.filter(i => checkedCount.value ? i.checked : true);
   if (!targets.length) {
-    popupTip('没有可下载的压缩结果，请先勾选图片并点击“开始压缩”', 'warning');
+    popupTip('没有可下载的压缩结果，请先勾选图片并点击“开始压缩”', { type: 'warning' });
     return;
   }
   zipping.value = true;
@@ -487,10 +487,10 @@ async function downloadChecked() {
         targets.map(item => ({ blob: item.result!.blob, name: outName(item) })),
         `压缩图片_${targets.length}张`,
     );
-    if (targets.length > 1) popupTip(`已打包 ${targets.length} 张图片为ZIP下载`, 'success', 2000);
+    if (targets.length > 1) popupTip(`已打包 ${targets.length} 张图片为ZIP下载`, { duration: 2000, type: 'success' });
   } catch (e) {
     console.error('批量下载失败', e);
-    popupTip('打包下载失败，请尝试逐张下载', 'error', 2500);
+    popupTip('打包下载失败，请尝试逐张下载', { duration: 2500, type: 'error' });
   } finally {
     zipping.value = false;
   }
@@ -520,9 +520,9 @@ useFullScreenDropFile(fileInputRef, {
   overlayText: '松开鼠标，添加要压缩的图片（支持文件夹）',
   onReject: (rejected, reason) => {
     if (reason === 'size') {
-      popupTip(`已忽略超过 50MB 的图片：${rejected.map(f => f.name).join('、')}`, 'warning', 2500);
+      popupTip(`已忽略超过 50MB 的图片：${rejected.map(f => f.name).join('、')}`, { duration: 2000, type: 'warning' });
     } else if (reason === 'type') {
-      popupTip(`已忽略 ${rejected.length} 个非图片文件`, 'warning', 2000);
+      popupTip(`已忽略 ${rejected.length} 个非图片文件`, { duration: 2000, type: 'warning' });
     }
   },
 });

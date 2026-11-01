@@ -42,11 +42,11 @@ const copy = async (text: string) => {
   try {
     await copyText(text);
     copiedText.value = text;
-    props.popupTip && popupTip(`已复制 ${truncate(text)}`, 'success', props.duration);
+    props.popupTip && popupTip(`已复制 ${truncate(text)}`, { type: 'success', duration: props.duration });
     if (copyTimer) clearTimeout(copyTimer);
     copyTimer = setTimeout(() => (copiedText.value = ''), props.duration);
   } catch (e: any) {
-    props.popupTip && popupTip(e.message ?? '复制失败', 'error', 2500);
+    props.popupTip && popupTip(e.message ?? '复制失败', { type: 'error', duration: 2500 });
   }
 }
 onBeforeUnmount(() => copyTimer && clearTimeout(copyTimer));

@@ -258,27 +258,42 @@ export async function copyText(text: string): Promise<void> {
 /**
  * 提示信息弹窗
  * @param content {string} 提示内容（可以是HTML字符串）
- * @param type 弹窗类型，默认none
- * @param duration 弹窗持续时间（默认3000，单位毫秒）
- * @param horizontalPos 水平位置，默认center
- * @param verticalPos 垂直位置，默认center
+ * @param options 弹窗参数选项
+ * @param options.duration 弹窗持续时间（默认3000，单位毫秒）
+ * @param options.type 弹窗类型
+ * @param options.horizontal 水平位置，默认center
+ * @param options.vertical 垂直位置，默认center
+ * @param options.style 弹窗分隔，outline：实线边框，dash：虚线边框，soft：浅色填充
  */
 export const popupTip = (
   content: string,
-  type: 'none' | 'success' | 'warning' | 'error' | 'dash' = 'none',
-  duration: number = 3000,
-  horizontalPos: 'start' | 'center' | 'end' = 'center',
-  verticalPos: 'top' | 'middle' | 'bottom' = 'middle'
-): void => {
+  options?: {
+    duration?: number;
+    type?: 'info' | 'success' | 'warning' | 'error',
+    horizontal?: 'start' | 'center' | 'end',
+    vertical?: 'top' | 'middle' | 'bottom',
+    style?: '' | 'outline' | 'dash' | 'soft'
+  }): void => {
+  const {
+    duration = 3000,
+    type = '',
+    horizontal = 'center',
+    vertical = 'middle',
+    style = '',
+  } = options || {};
+  const classList: string[] = [];
   // 一定要全类名，不然构建的时候不会将tailwindcss/daisyUI类名的样式打包进去
-  const types = { none: '', success: 'alert-success', warning: 'alert-warning', error: 'alert-danger', dash: 'alert-danger' };
   const horis = { start: 'toast-start', center: 'toast-center', end: 'toast-end' };
   const verts = { top: 'toast-top', middle: 'toast-middle', bottom: 'toast-bottom' };
+  const types = { info: 'alert-info', success: 'alert-success', warning: 'alert-warning', error: 'alert-error' };
+  const styles = { outline: 'alert-outline', dash: 'alert-dash', soft: 'alert-soft' };
   const popupTip = document.getElementById('popup-tip');
   if (!popupTip) return;
-  popupTip.className = `toast ${horis[horizontalPos]} ${verts[verticalPos]}`;
+  popupTip.className = `toast ${horis[horizontal]} ${verts[vertical]}`;
   const alert = document.createElement('div');
-  alert.className = `alert ${types[type]}`.trim();
+  type && types[type] && classList.push(types[type]);
+  style && styles[style] && classList.push(styles[style]);
+  alert.className = `alert ${classList.length > 0 ? classList.join(' ') : ''}`.trim();
   alert.innerHTML = content;
   popupTip.appendChild(alert);
   setTimeout(() => {
@@ -294,9 +309,9 @@ export const loadLocalFonts = async () => {
     return await window.queryLocalFonts();
   } catch (err: any) {
     if (err.name === 'NotAllowedError') {
-      popupTip('您拒绝了字体访问权限。请在浏览器设置中允许本站访问字体。', 'error');
+      popupTip('您拒绝了字体访问权限。请在浏览器设置中允许本站访问字体。', { type: 'error' });
     } else {
-      popupTip(`读取失败: ${err.message || '未知错误'}`, 'error');
+      popupTip(`读取失败: ${err.message || '未知错误'}`, { type: 'error' });
     }
     console.error(err);
   }

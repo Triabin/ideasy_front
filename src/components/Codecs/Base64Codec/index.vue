@@ -67,7 +67,7 @@ const codec = (dontTip: boolean = true) => {
   errorMsg.value = '';
   if (!inputText.value) {
     outputText.value = '';
-    !dontTip && popupTip('请输入内容', 'warning', 1500);
+    !dontTip && popupTip('请输入内容', { type: 'warning', duration: 1500 });
     return;
   }
   try {

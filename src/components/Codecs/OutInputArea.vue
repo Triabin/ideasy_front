@@ -129,7 +129,7 @@ const pasteFromClipboard = async () => {
   try {
     const text = await navigator.clipboard.readText();
     if (!text) {
-      popupTip('剪贴板为空', 'warning', 1500);
+      popupTip('剪贴板为空', { type: 'warning', duration: 1500 });
       return;
     }
     inputText.value = text;
@@ -140,7 +140,7 @@ const pasteFromClipboard = async () => {
     } else if (osType.value === 'MacOS') {
       msg += '（⌘+V）';
     }
-    popupTip(msg, 'warning', 2500);
+    popupTip(msg, { type: 'warning', duration: 2500 });
   }
 };
 
@@ -168,7 +168,7 @@ const copy = async (text: string) => {
   if (!text) return;
   await copyText(text);
   copiedText.value = text;
-  popupTip('已复制到剪贴板', 'success', 1500);
+  popupTip('已复制到剪贴板', { type: 'success', duration: 1500 });
   if (copyTimer) clearTimeout(copyTimer);
   copyTimer = setTimeout(() => (copiedText.value = ''), 1500);
 }

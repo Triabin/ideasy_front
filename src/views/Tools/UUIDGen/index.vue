@@ -229,7 +229,7 @@ function refreshSample() {
 /** 批量生成 */
 function generateAll() {
   if (!formats.value.length) {
-    popupTip('请至少勾选一种输出格式', 'warning');
+    popupTip('请至少勾选一种输出格式', { type: 'warning' });
     return;
   }
   const n = Math.min(Math.max(Math.trunc(count.value) || 1, 1), 1000);
@@ -246,7 +246,7 @@ function generateAll() {
 async function copyAll() {
   const text = list.value.map(row => row.join('\t')).join('\n');
   await copy(text, true);
-  popupTip(`已复制${list.value.length}条`, 'success', 1500);
+  popupTip(`已复制${list.value.length}条`, { type: 'success', duration: 1500 });
 }
 
 /** 复制图标定时切换事件 */
@@ -259,7 +259,7 @@ let copyTimer: ReturnType<typeof setTimeout> | null = null;
 const copy = async (text: string, dontTip: boolean = false) => {
   await copyText(text);
   copiedText.value = text;
-  !dontTip && popupTip(`已复制 ${text.length > 16 ? text.slice(0, 8) + '…' + text.slice(-6) : text}`, 'success', 1500);
+  !dontTip && popupTip(`已复制 ${text.length > 16 ? text.slice(0, 8) + '…' + text.slice(-6) : text}`, { type: 'success', duration: 1500 });
   if (copyTimer) clearTimeout(copyTimer);
   copyTimer = setTimeout(() => (copiedText.value = ''), 1500);
 };

@@ -379,9 +379,9 @@ function addFiles(files: FileList | File[]) {
     else if (level === 'danger') dangerCnt++;
   }
   // 添加阶段的汇总告警（只提示，不阻断）
-  if (dangerCnt) popupTip(`有 ${dangerCnt} 个文件超过危险阈值（${dangerMB.value}MB），将被拦截，需强制运行`, 'error', 3500);
-  else if (warnCnt) popupTip(`有 ${warnCnt} 个文件超过警告阈值（${warnMB.value}MB），转换前需确认`, 'warning', 3000);
-  else if (infoCnt) popupTip(`有 ${infoCnt} 个文件体积偏大，输出 Base64 后长度约为原文件的 1.37 倍`, 'dash', 3000);
+  if (dangerCnt) popupTip(`有 ${dangerCnt} 个文件超过危险阈值（${dangerMB.value}MB），将被拦截，需强制运行`, { duration: 3500, type: 'error' });
+  else if (warnCnt) popupTip(`有 ${warnCnt} 个文件超过警告阈值（${warnMB.value}MB），转换前需确认`, { type: 'warning' });
+  else if (infoCnt) popupTip(`有 ${infoCnt} 个文件体积偏大，输出 Base64 后长度约为原文件的 1.37 倍`);
 }
 
 /** 文件选择回调（点击选择与全屏拖拽注入共用入口） */
@@ -409,7 +409,7 @@ async function runConvert(item: ListItem) {
     console.error('文件转换失败', e);
     item.status = 'error';
     item.error = e instanceof Error ? e.message : String(e);
-    popupTip(`"${item.file.name}" 转换失败：${item.error}`, 'error', 3000);
+    popupTip(`"${item.file.name}" 转换失败：${item.error}`, { type: 'error' });
   }
 }
 
@@ -419,7 +419,7 @@ function closeModal(confirmed: boolean) {
   const targets = pendingItems.value.splice(0, pendingItems.value.length);
   forceChecked.value = false;
   if (!confirmed) {
-    popupTip('已取消危险级文件的转换', 'dash', 2000);
+    popupTip('已取消危险级文件的转换', { type: 'info', duration: 2500 });
     return;
   }
   void (async () => {
@@ -429,7 +429,7 @@ function closeModal(confirmed: boolean) {
     } finally {
       busy.value = false;
     }
-    popupTip(`已完成 ${targets.length} 个危险级文件的强制转换`, 'success', 2500);
+    popupTip(`已完成 ${targets.length} 个危险级文件的强制转换`, { type: 'success', duration: 2500 });
   })();
 }
 
@@ -454,7 +454,7 @@ async function convertOne(item: ListItem) {
       `预计输出约 ${MyFileUtils.fmtByteSize(estimateLen(item.file.size))} 字符。\n\n点击“确定”继续转换（强制运行），点击“取消”中止。`,
     );
     if (!ok) {
-      popupTip('已取消该文件的转换', 'dash', 2000);
+      popupTip('已取消该文件的转换', { type: 'info', duration: 2000 });
       return;
     }
   }
@@ -494,7 +494,7 @@ async function convertAll() {
       } finally {
         busy.value = false;
       }
-      popupTip(`已强制转换 ${dangers.length} 个危险级文件`, 'success', 2500);
+      popupTip(`已强制转换 ${dangers.length} 个危险级文件`, { type: 'success', duration: 2500 });
     } else {
       // 弹出统一确认模态框
       pendingItems.value = [...dangers];
@@ -513,9 +513,9 @@ async function copyResult(item: ListItem) {
   if (!item.result) return;
   try {
     await copyText(item.result.uri);
-    popupTip(`已复制 "${item.file.name}" 的完整 DataURI（${item.result.uri.length.toLocaleString()} 字符）`, 'success', 2000);
+    popupTip(`已复制 "${item.file.name}" 的完整 DataURI（${item.result.uri.length.toLocaleString()} 字符）`, { type: 'success', duration: 2000 });
   } catch (e) {
-    popupTip(e instanceof Error ? e.message : '复制失败', 'error', 2500);
+    popupTip(e instanceof Error ? e.message : '复制失败', { type: 'error', duration: 2500 });
   }
 }
 

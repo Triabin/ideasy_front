@@ -257,7 +257,7 @@ function addTileLayer(name: TileName = tileName.value) {
     if (failCount >= 6 && name !== 'osm' && !triedTiles.has('osm')) {
       triedTiles.add('osm');
       tileName.value = 'osm';
-      popupTip('当前底图加载失败，已自动切换到 OSM 备选源', 'warning');
+      popupTip('当前底图加载失败，已自动切换到 OSM 备选源', { type: 'warning' });
       addTileLayer('osm');
     }
   });
@@ -369,10 +369,10 @@ async function doSearch() {
       map?.setView(pos, 15);
       placeMarker(lat, lng, r.name || shortName(r.display_name));
     } else {
-      popupTip('未找到该地点，请尝试更换关键词', 'warning');
+      popupTip('未找到该地点，请尝试更换关键词', { type: 'warning' });
     }
   } catch (e) {
-    popupTip(`搜索失败：${e instanceof Error ? e.message : String(e)}（可能是网络问题，请稍后重试）`, 'error');
+    popupTip(`搜索失败：${e instanceof Error ? e.message : String(e)}（可能是网络问题，请稍后重试）`, { type: 'error' });
   } finally {
     searching.value = false;
   }
@@ -421,7 +421,7 @@ async function reverseGeocode(lat: number, lng: number) {
 /** 定位到当前位置：浏览器 Geolocation（GPS 原生 WGS84），成功后打点并飞行过去 */
 function locateMe() {
   if (!navigator.geolocation) {
-    popupTip('当前浏览器不支持定位功能', 'error');
+    popupTip('当前浏览器不支持定位功能', { type: 'error' });
     return;
   }
   locating.value = true;
@@ -432,14 +432,14 @@ function locateMe() {
         const disp: [number, number] = currentCrsIsGcj() ? wgs84ToGcj02(lat, lng) : [lat, lng];
         map?.setView(disp, Math.max(map.getZoom(), 16));
         placeMarker(lat, lng, undefined, { lat: disp[0], lng: disp[1] });
-        popupTip('已定位到当前位置', 'success', 1500);
+        popupTip('已定位到当前位置', { type: 'success', duration: 1500 });
       },
       (err) => {
         locating.value = false;
         const msg = err.code === err.PERMISSION_DENIED ? '定位权限被拒绝，请在浏览器设置中允许本页面获取位置'
             : err.code === err.TIMEOUT ? '定位超时，请检查网络或稍后重试'
                 : '定位失败，无法获取当前位置';
-        popupTip(msg, 'error');
+        popupTip(msg, { type: 'error' });
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 },
   );
@@ -458,11 +458,11 @@ function flyToPicked() {
 function confirmPick() {
   const lat = Number(pickLat.value), lng = Number(pickLng.value);
   if (!picked.value || isNaN(lat) || isNaN(lng)) {
-    popupTip('经纬度格式不正确', 'error');
+    popupTip('经纬度格式不正确', { type: 'error' });
     return;
   }
   if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
-    popupTip('经纬度超出有效范围（纬度±90，经度±180）', 'error');
+    popupTip('经纬度超出有效范围（纬度±90，经度±180）', { type: 'error' });
     return;
   }
   emit('confirm', { lat: fmt(lat), lng: fmt(lng), label: pickLabel.value.trim() });

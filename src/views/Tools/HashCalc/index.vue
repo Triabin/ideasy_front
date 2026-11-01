@@ -296,11 +296,11 @@ const copy = async (text: string) => {
   if (!text) return;
   await copyText(text);
   copiedText.value = text;
-  popupTip(`已复制 ${truncate(text)}`, 'success', 1500);
+  popupTip(`已复制 ${truncate(text)}`, { duration: 1500, type: 'success' });
   if (copyTimer) clearTimeout(copyTimer);
   copyTimer = setTimeout(() => (copiedText.value = ''), 1500);
 };
 
 // 计算出错时提示
-watch(error, (err) => err && popupTip(err, 'error', 2500));
+watch(error, (err) => err && popupTip(err, { duration: 2500, type: 'error' }));
 </script>

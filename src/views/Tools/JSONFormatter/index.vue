@@ -278,7 +278,7 @@ const doParse = (): boolean => {
   } catch (e: any) {
     parsed.value = undefined;
     parseError.value = e instanceof JsonParseError ? e : null;
-    if (!(e instanceof JsonParseError)) popupTip(e?.message ?? '解析失败', 'error', 2500);
+    if (!(e instanceof JsonParseError)) popupTip(e?.message ?? '解析失败', { type: 'error', duration: 2500 });
     return false;
   }
 };
@@ -301,38 +301,39 @@ const formatOpts = () => ({ indentChar: indentChar.value, indentSize: indentSize
 /** 格式化 */
 const doFormat = () => {
   if (!doParse()) {
-    if (inputText.value.trim()) popupTip(parseError.value?.message ?? '解析失败', 'error', 3000);
+    if (inputText.value.trim()) popupTip(parseError.value?.message ?? '解析失败', { type: 'error' });
     renderOutput();
     return;
   }
   renderOutput();
-  popupTip('格式化成功', 'success', 1500);
+  popupTip('格式化成功', { type: 'success', duration: 1500 });
 };
 
 /** 压缩为一行 */
 const doMinify = () => {
   if (!doParse()) {
-    if (inputText.value.trim()) popupTip(parseError.value?.message ?? '解析失败', 'error', 3000);
+    if (inputText.value.trim()) popupTip(parseError.value?.message ?? '解析失败', { type: 'error' });
     return;
   }
   outputText.value = stringifyJson(parsed.value!, { ...formatOpts(), indentSize: 0 });
-  popupTip(`压缩完成，共${outputText.value.length}字符`, 'success', 1500);
+  popupTip(`压缩完成，共${outputText.value.length}字符`, { type: 'success', duration: 1500 });
 };
 
 /** 仅校验 */
 const doValidate = () => {
   if (!inputText.value.trim()) {
-    popupTip('请先输入内容', 'warning', 1500);
+    popupTip('请先输入内容', { type: 'warning', duration: 1500 });
     return;
   }
   if (doParse()) {
     renderOutput();
-    popupTip('✓ JSON合法', 'success', 2000);
+    popupTip('✓ JSON合法', { type: 'success', duration: 2000 });
   } else {
     popupTip(
-        `✗ ${parseError.value?.message ?? '不合法'}（第${parseError.value?.line ?? '?'}行 第${parseError.value?.column ?? '?'}列）`,
-        'error', 4000
-    );
+        `✗ ${parseError.value?.message ?? '不合法'}（第${parseError.value?.line ?? '?'}行 第${parseError.value?.column ?? '?'}列）`, {
+          type: 'error',
+          duration: 4000
+        });
   }
 };
 
@@ -340,14 +341,14 @@ const doValidate = () => {
 const doQuery = () => {
   queryHitPath.value = '';
   if (parsed.value === undefined) {
-    popupTip('请先成功解析 JSON', 'warning', 1500);
+    popupTip('请先成功解析 JSON', { type: 'warning', duration: 1500 });
     return;
   }
   const path = queryPath.value.trim();
   if (!path) return;
   const hit = getJsonValue(parsed.value, path);
   if (hit === undefined) {
-    popupTip(`路径 ${path} 不存在`, 'error', 2500);
+    popupTip(`路径 ${path} 不存在`, { type: 'error', duration: 2500 });
     return;
   }
   // 展开命中路径的所有父级
@@ -359,7 +360,7 @@ const doQuery = () => {
   collapsed.value = next;
   queryHitPath.value = path;
   viewMode.value = 'tree';
-  popupTip(`已定位 ${path}`, 'success', 2000);
+  popupTip(`已定位 ${path}`, { type: 'success', duration: 2000 });
 };
 
 /** 折叠/展开节点 */
@@ -415,9 +416,9 @@ const onFileChange = (e: Event) => {
   reader.onload = () => {
     inputText.value = String(reader.result ?? '');
     doFormat();
-    popupTip(`已载入文件 ${file.name}`, 'success', 2000);
+    popupTip(`已载入文件 ${file.name}`, { type: 'success', duration: 2000 });
   };
-  reader.onerror = () => popupTip('文件读取失败', 'error', 2500);
+  reader.onerror = () => popupTip('文件读取失败', { type: 'error', duration: 2500 });
   reader.readAsText(file);
   (e.target as HTMLInputElement).value = '';
 };
@@ -427,13 +428,13 @@ const pasteFromClipboard = async () => {
   try {
     const text = await navigator.clipboard.readText();
     if (!text) {
-      popupTip('剪贴板为空', 'warning', 1500);
+      popupTip('剪贴板为空', { type: 'warning', duration: 1500 });
       return;
     }
     inputText.value = text;
     doFormat();
   } catch {
-    popupTip('无法访问剪贴板，请手动粘贴（Ctrl+V）', 'warning', 2500);
+    popupTip('无法访问剪贴板，请手动粘贴（Ctrl+V）', { type: 'warning', duration: 2500 });
   }
 };
 
@@ -454,7 +455,7 @@ let copyTimer: ReturnType<typeof setTimeout> | null = null;
 const copy = async (text: string) => {
   await copyText(text);
   copiedText.value = text;
-  popupTip('已复制到剪贴板', 'success', 1500);
+  popupTip('已复制到剪贴板', { type: 'success', duration: 1500 });
   if (copyTimer) clearTimeout(copyTimer);
   copyTimer = setTimeout(() => (copiedText.value = ''), 1500);
 };

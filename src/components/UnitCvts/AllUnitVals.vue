@@ -61,7 +61,7 @@ const copy = async (text: string) => {
   if (!text || text === '—') return;
   await copyText(text);
   copiedText.value = text;
-  popupTip(`已复制 ${truncate(text)}`, 'success', 1500);
+  popupTip(`已复制 ${truncate(text)}`, { type: 'success', duration: 1500 });
   if (copyTimer) clearTimeout(copyTimer);
   copyTimer = setTimeout(() => (copiedText.value = ''), 1500);
 };

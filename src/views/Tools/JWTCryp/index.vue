@@ -334,7 +334,7 @@ if (!payloadText.value) {
 function randomSecret() {
   // 生成 256 位随机密钥，以 base64url 形式展示
   encodeSecret.value = bytesToBase64Url(crypto.getRandomValues(new Uint8Array(32)));
-  popupTip('已生成随机密钥', 'success', 1500);
+  popupTip('已生成随机密钥', { type: 'success', duration: 1500 });
 }
 
 async function generate() {
@@ -376,7 +376,7 @@ const copy = async (text: string) => {
   if (!text) return;
   await copyText(text);
   copied.value = true;
-  popupTip('已复制到剪贴板', 'success', 1500);
+  popupTip('已复制到剪贴板', { type: 'success', duration: 1500 });
   if (copyTimer) clearTimeout(copyTimer);
   copyTimer = setTimeout(() => (copied.value = false), 1500);
 };

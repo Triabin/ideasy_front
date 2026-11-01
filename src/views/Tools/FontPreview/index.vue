@@ -141,7 +141,7 @@ const handleFiles = async (files: FileList | null) => {
   const list = Array.from(files);
   for (const file of list) {
     if (fonts.value.length >= maxCount) {
-      popupTip(`最多支持上传${maxCount}种字体，剩余文件已忽略`, 'warning', 2500);
+      popupTip(`最多支持上传${maxCount}种字体，剩余文件已忽略`, { type: 'warning', duration: 2500 });
       break;
     }
     await addFont(file);
@@ -156,7 +156,7 @@ const addFont = async (file: File) => {
   const url = URL.createObjectURL(file);
   const family = await getFontFamilyFromFile(file);
   if (fonts.value.findIndex(font => font.family === family) > -1) {
-    popupTip(`已存在family为${family}的字体`, 'warning', 2500);
+    popupTip(`已存在family为${family}的字体`, { type: 'warning', duration: 2500 });
     return;
   }
   try {
@@ -164,10 +164,10 @@ const addFont = async (file: File) => {
     await face.load();
     fontSet.add(face);
     fonts.value.push({ name: file.name, family, size: file.size, url, face });
-    popupTip(`字体“${file.name}”加载成功`, 'success', 2000);
+    popupTip(`字体“${file.name}”加载成功`, { type: 'success', duration: 2000 });
   } catch (e) {
     console.error(e);
-    popupTip(`字体“${file.name}”加载失败，请确认文件是否为有效字体`, 'error');
+    popupTip(`字体“${file.name}”加载失败，请确认文件是否为有效字体`, { type: 'error' });
   } finally {
     URL.revokeObjectURL(url);
   }
@@ -189,7 +189,7 @@ const removeFont = (family: string) => {
 /** 清空全部字体 */
 const clearAllFonts = () => {
   [...fonts.value].forEach(f => removeFont(f.family));
-  popupTip('已清空全部字体', 'none', 2000);
+  popupTip('已清空全部字体', { duration: 2000 });
 };
 
 /** input[type=file] change 回调（点击选择与全屏拖拽注入共用入口） */
@@ -205,8 +205,8 @@ useFullScreenDropFile(fileInputRef, {
   maxCount,
   overlayText: `松开鼠标，添加字体文件（最多 ${maxCount} 种）`,
   onReject: (rejected, reason) => {
-    if (reason === 'type') popupTip(`已忽略 ${rejected.length} 个非字体文件`, 'warning', 2500);
-    else if (reason === 'size') popupTip(`已忽略超过 30MB 的字体：${rejected.map(f => f.name).join('、')}`, 'warning', 2500);
+    if (reason === 'type') popupTip(`已忽略 ${rejected.length} 个非字体文件`, { type: 'warning', duration: 2500 });
+    else if (reason === 'size') popupTip(`已忽略超过 30MB 的字体：${rejected.map(f => f.name).join('、')}`, { type: 'warning', duration: 2500});
   },
 });
 

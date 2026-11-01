@@ -413,15 +413,15 @@ function generateOne(): string {
 /** 批量生成并自动存入最近记录 */
 function generateAll() {
   if (mode.value === 'password' && !charSets.value.length) {
-    popupTip('请至少勾选一种字符类型', 'warning');
+    popupTip('请至少勾选一种字符类型', { type: 'warning' });
     return;
   }
   if (specialError.value) {
-    popupTip(specialError.value, 'warning');
+    popupTip(specialError.value, { type: 'warning' });
     return;
   }
   if (!canGenerate.value) {
-    popupTip('排除后已无可生成字符', 'warning');
+    popupTip('排除后已无可生成字符', { type: 'warning' });
     return;
   }
   const r = lengthRange.value;
@@ -458,13 +458,13 @@ function saveToHistory(values: string[] = list.value) {
 /** 清除历史记录 */
 function clearHistory() {
   appDataStore.clearPasswordGenHistory();
-  popupTip('已清除全部密码生成记录', 'success', 1500);
+  popupTip('已清除全部密码生成记录', { type: 'success', duration: 1500 });
 }
 
 /** 复制全部结果 */
 async function copyAll() {
   await copy(list.value.join('\n'));
-  popupTip(`已复制${list.value.length}条`, 'success', 1500);
+  popupTip(`已复制${list.value.length}条`, { type: 'success', duration: 1500 });
 }
 
 /**
@@ -498,7 +498,7 @@ let copyTimer: ReturnType<typeof setTimeout> | null = null;
 const copy = async (text: string) => {
   await copyText(text);
   copiedText.value = text;
-  popupTip(`已复制 ${text.length > 16 ? text.slice(0, 8) + '…' + text.slice(-6) : text}`, 'success', 1500);
+  popupTip(`已复制 ${text.length > 16 ? text.slice(0, 8) + '…' + text.slice(-6) : text}`, { type: 'success', duration: 1500 });
   if (copyTimer) clearTimeout(copyTimer);
   copyTimer = setTimeout(() => (copiedText.value = ''), 1500);
 };

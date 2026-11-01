@@ -280,7 +280,7 @@ function onGeoPicked(payload: { lat: string; lng: string; label: string }) {
   geo.value.lng = payload.lng;
   if (payload.label) geo.value.label = payload.label;
   geoPickerOpen.value = false;
-  popupTip('已录入地图选点的位置信息', 'success', 1500);
+  popupTip('已录入地图选点的位置信息', { type: 'success', duration: 1500 });
 }
 
 /** 样式参数 */
@@ -423,9 +423,9 @@ async function downloadPng() {
       lightColor: hexWithAlpha(lightColor.value, lightAlpha.value),
     });
     downloadDataURL(dataURL, `qrcode_${Date.now()}.png`);
-    popupTip('已开始下载PNG图片', 'success', 1500);
+    popupTip('已开始下载PNG图片', { type: 'success', duration: 1500 });
   } catch (e) {
-    popupTip(`导出PNG失败：${e instanceof Error ? e.message : String(e)}`, 'error');
+    popupTip(`导出PNG失败：${e instanceof Error ? e.message : String(e)}`, { type: 'error' });
   }
 }
 
@@ -433,7 +433,7 @@ async function downloadPng() {
 function downloadSvgFile() {
   if (!svgText.value) return;
   downloadSVG(svgText.value, `qrcode_${Date.now()}.svg`);
-  popupTip('已开始下载SVG矢量图', 'success', 1500);
+  popupTip('已开始下载SVG矢量图', { type: 'success', duration: 1500 });
 }
 
 /** 复制二维码图片到剪贴板 */
@@ -448,9 +448,9 @@ async function copyToClipboard() {
     });
     const blob = await (await fetch(dataURL)).blob();
     await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
-    popupTip('二维码图片已复制到剪贴板', 'success', 1500);
+    popupTip('二维码图片已复制到剪贴板', { type: 'success', duration: 1500 });
   } catch {
-    popupTip('复制失败，当前浏览器可能不支持图片写入剪贴板，请使用下载功能', 'warning');
+    popupTip('复制失败，当前浏览器可能不支持图片写入剪贴板，请使用下载功能', { type: 'warning' });
   }
 }
 
@@ -459,7 +459,7 @@ const copy = async (text: string) => {
   if (!text) return;
   await copyText(text);
   copiedText.value = text;
-  popupTip('内容已复制', 'success', 1500);
+  popupTip('内容已复制', { type: 'success', duration: 1500 });
   if (copyTimer) clearTimeout(copyTimer);
   copyTimer = setTimeout(() => (copiedText.value = ''), 1500);
 };
