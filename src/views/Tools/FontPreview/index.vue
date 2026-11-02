@@ -191,6 +191,7 @@ type LoadedFont = {
   size: number; // 文件大小（字节），本地字体无法获取时为0
   url: string; // ObjectURL，用于卸载时释放；本地字体直接注册系统字体时为空
   local?: boolean; // 是否来自本地系统字体
+  face?: FontFace; // 字体对象
 };
 
 const defaultPreviewText = '天地玄黄，宇宙洪荒。日月盈昃，辰宿列张。（繁體：黃張）\nABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz\n0123456789 *_-+`!@#$%^&()=';
@@ -406,6 +407,14 @@ const handleFiles = async (files: FileList | null) => {
 };
 
 /**
+ * TS 内置 lib.dom.d.ts 中 FontFaceSet 类型未声明 add/delete 方法（浏览器实际支持），此处做类型补充
+ */
+const fontSet = document.fonts as FontFaceSet & {
+  add(fontface: FontFace): void;
+  delete(fontface: FontFace): void;
+};
+
+/**
  * 函数描述：加载单个字体文件并注册为可预览字体
  * @param file {File} 字体文件
  */
@@ -417,13 +426,15 @@ const addFont = async (file: File) => {
     return;
   }
   try {
-    fonts.value.push({ name: file.name, family, size: file.size, url });
+    const face = new FontFace(family, `url(${url})`);
+    await face.load();
+    fontSet.add(face);
+    fonts.value.push({ name: file.name, family, size: file.size, url, face });
     popupTip(`字体“${file.name}”加载成功`, { type: 'success', duration: 2000 });
   } catch (e) {
+    URL.revokeObjectURL(url);
     console.error(e);
     popupTip(`字体“${file.name}”加载失败，请确认文件是否为有效字体`, { type: 'error' });
-  } finally {
-    URL.revokeObjectURL(url);
   }
 };
 
@@ -477,7 +488,8 @@ const removeFont = (family: string) => {
   const index = fonts.value.findIndex(f => f.family === family);
   if (index === -1) return;
   const font = fonts.value[index];
-  if (font.url) URL.revokeObjectURL(font.url);
+  font.face && fontSet.delete(font.face);
+  font.url && URL.revokeObjectURL(font.url);
   fonts.value.splice(index, 1);
 };
 
@@ -500,8 +512,14 @@ useFullScreenDropFile(fileInputRef, {
   maxCount,
   overlayText: `松开鼠标，添加字体文件（最多 ${maxCount} 种）`,
   onReject: (rejected, reason) => {
-    if (reason === 'type') popupTip(`已忽略 ${rejected.length} 个非字体文件`, { type: 'warning', duration: 2500 });
-    else if (reason === 'size') popupTip(`已忽略超过 30MB 的字体：${rejected.map(f => f.name).join('、')}`, { type: 'warning', duration: 2500});
+    if (reason === 'type') popupTip(`已忽略 ${rejected.length} 个非字体文件：${rejected.map(f => f.name).join('、')}`, {
+      type: 'warning',
+      duration: 2500
+    });
+    else if (reason === 'size') popupTip(`已忽略超过 30MB 的字体：${rejected.map(f => f.name).join('、')}`, {
+      type: 'warning',
+      duration: 2500
+    });
   },
 });
 
@@ -509,6 +527,7 @@ onBeforeUnmount(() => {
   // 组件销毁时移除全局监听并释放字体与URL资源
   document.removeEventListener('mousedown', onDocMouseDown);
   fonts.value.forEach(f => {
+    f.face && fontSet.delete(f.face);
     f.url && URL.revokeObjectURL(f.url);
   });
 });
