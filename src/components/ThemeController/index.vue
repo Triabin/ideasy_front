@@ -5,10 +5,9 @@
         type="button"
         role="radio"
         data-theme-switcher="true"
-        data-active="false"
+        :aria-checked="theme.mode === 'light'"
         :class="'btn btn-sm btn-ghost btn-circle' + (theme.mode === 'light' ? ' selected' : '')"
         title="切换到日间模式"
-        aria-checked="false"
         @click="() => toggleTheme('light')"
     >
       <ThemeLight/>
@@ -17,10 +16,9 @@
         type="button"
         role="radio"
         data-theme-switcher="true"
-        data-active="false"
+        :aria-checked="theme.mode === 'system'"
         :class="'btn btn-sm btn-ghost btn-circle' + (theme.mode === 'system' ? ' selected' : '')"
         title="跟随浏览器"
-        aria-checked="false"
         @click="() => toggleTheme('system')"
     >
       <ThemeAuto/>
@@ -29,23 +27,82 @@
         type="button"
         role="radio"
         data-theme-switcher="true"
-        data-active="false"
+        :aria-checked="theme.mode === 'dark'"
         :class="'btn btn-sm btn-ghost btn-circle' + (theme.mode === 'dark' ? ' selected' : '')"
         title="切换到夜间模式"
-        aria-checked="false"
         @click="() => toggleTheme('dark')"
     >
       <ThemeDark/>
     </button>
+    <!-- 主题名称选择：与日/夜/自动按钮同组，点击展开下拉面板 -->
+    <button
+        ref="triggerRef"
+        type="button"
+        class="btn btn-sm btn-ghost btn-circle"
+        :class="{ selected: themePanelOpen }"
+        title="选择主题"
+        aria-label="选择主题"
+        :aria-expanded="themePanelOpen"
+        @click.stop="themePanelOpen = !themePanelOpen"
+    >
+      <Theme/>
+    </button>
+
+    <!-- 下拉面板：Teleport 到 body + fixed 定位，彻底避免被头部 overflow 裁剪遮挡 -->
+    <Teleport to="body">
+      <div
+          v-if="themePanelOpen"
+          ref="panelRef"
+          :style="floatingStyles"
+          class="fixed z-50 grid grid-cols-2 gap-x-2 p-3 pb-2 shadow-lg bg-base-100 rounded-box border border-base-300
+          w-fit max-w-[calc(100vw-16px)] max-h-[75%] overflow-y-auto no-scrollbar"
+          @click.stop
+      >
+        <!-- 日间主题列 -->
+        <div class="flex flex-col items-start">
+          <span class="text-xs font-bold opacity-60 mb-1 px-2">日间</span>
+          <button
+              v-for="name in LIGHT_THEMES"
+              :key="name"
+              type="button"
+              :data-theme="name"
+              class="btn btn-sm btn-ghost btn-block justify-start normal-case"
+              :class="theme.lightThemeName === name ? 'btn-active' : ''"
+              @click="changeTheme({ lightThemeName: name })"
+          >
+            <span class="size-3 rounded-full border border-base-content/30 bg-base-content/10 shrink-0"></span>
+            {{ name }}
+          </button>
+        </div>
+        <!-- 夜间主题列 -->
+        <div class="flex flex-col items-start">
+          <span class="text-xs font-bold opacity-60 mb-1 px-2">夜间</span>
+          <button
+              v-for="name in DARK_THEMES"
+              :key="name"
+              type="button"
+              :data-theme="name"
+              class="btn btn-sm btn-ghost btn-block justify-start normal-case"
+              :class="theme.darkThemeName === name ? 'btn-active' : ''"
+              @click="changeTheme({ darkThemeName: name })"
+          >
+            <span class="size-3 rounded-full border border-base-content/30 bg-base-content/10 shrink-0"></span>
+            {{ name }}
+          </button>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { toRef, onMounted, onUnmounted } from 'vue';
+import { toRef, ref, watch, onMounted, onUnmounted } from 'vue';
+import { useFloating, offset, flip, shift, autoUpdate } from '@floating-ui/vue';
 import useSettingsStore from '@/stores/settingsStore';
 import ThemeAuto from '@/components/icons/ThemeAuto.vue';
 import ThemeLight from '@/components/icons/ThemeLight.vue';
 import ThemeDark from '@/components/icons/ThemeDark.vue';
+import Theme from '@/components/icons/Theme.vue';
 
 const LIGHT_THEMES = ['light', 'cupcake', 'bumblebee', 'emerald', 'corporate', 'retro', 'valentine', 'garden', 'lofi',
   'pastel', 'fantasy', 'wirefarame', 'cmyk', 'autumn', 'acid', 'lemonade', 'winter', 'nord', 'caramellatte', 'silk'];
@@ -56,15 +113,44 @@ const event = window.matchMedia("(prefers-color-scheme: dark)");
 const { initTheme, toggleTheme, changeTheme, reset } = useSettingsStore();
 const theme = toRef(useSettingsStore(), 'theme');
 
+/* ---------------- 主题下拉面板：开合 + 浮动定位（@floating-ui/vue） ---------------- */
+const triggerRef = ref<HTMLElement>();
+const panelRef = ref<HTMLElement>();
+const themePanelOpen = ref(false);
+
+// 面板挂到 body 上，用 floating-ui 自动定位到整组按钮下方、右缘对齐；
+// 空间不足时自动翻转到上方，并随窗口尺寸/滚动自动更新，无需手写测量逻辑。
+const { floatingStyles } = useFloating(triggerRef, panelRef, {
+  placement: 'bottom',
+  middleware: [offset(8), flip(), shift({ padding: 8 })],
+  whileElementsMounted: autoUpdate,
+});
+const closeThemePanel = () => themePanelOpen.value = false;
+/** Esc 键关闭面板 */
+const onKeydown = (e: KeyboardEvent) => {
+  if (e.key === 'Escape') closeThemePanel();
+};
+
+watch(themePanelOpen, (open) => {
+  if (open) {
+    document.addEventListener('click', closeThemePanel);
+    document.addEventListener('keydown', onKeydown);
+  } else {
+    document.removeEventListener('click', closeThemePanel);
+    document.removeEventListener('keydown', onKeydown);
+  }
+});
+
 const switchTheme = (_: Event) => toggleTheme();
 onMounted(() => {
   initTheme();
-  event.addEventListener('change', (e: Event) => toggleTheme());
   event.addEventListener('change', switchTheme);
 });
 
 onUnmounted(() => {
   event.removeEventListener('change', switchTheme);
+  document.removeEventListener('click', closeThemePanel);
+  document.removeEventListener('keydown', onKeydown);
 });
 </script>
 
