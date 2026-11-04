@@ -47,17 +47,24 @@ import ThemeAuto from '@/components/icons/ThemeAuto.vue';
 import ThemeLight from '@/components/icons/ThemeLight.vue';
 import ThemeDark from '@/components/icons/ThemeDark.vue';
 
+const LIGHT_THEMES = ['light', 'cupcake', 'bumblebee', 'emerald', 'corporate', 'retro', 'valentine', 'garden', 'lofi',
+  'pastel', 'fantasy', 'wirefarame', 'cmyk', 'autumn', 'acid', 'lemonade', 'winter', 'nord', 'caramellatte', 'silk'];
+const DARK_THEMES = ['dark', 'synthwave', 'cyberpunk', 'halloween', 'forest', 'aqua', 'black', 'luxury', 'dracula', 'business', 'night',
+  'coffee', 'dim', 'sunset', 'abyss']
+
 const event = window.matchMedia("(prefers-color-scheme: dark)");
-const { initTheme, toggleTheme } = useSettingsStore();
+const { initTheme, toggleTheme, changeTheme, reset } = useSettingsStore();
 const theme = toRef(useSettingsStore(), 'theme');
 
+const switchTheme = (_: Event) => toggleTheme();
 onMounted(() => {
   initTheme();
   event.addEventListener('change', (e: Event) => toggleTheme());
+  event.addEventListener('change', switchTheme);
 });
 
 onUnmounted(() => {
-  event.removeEventListener('change', (e: Event) => toggleTheme());
+  event.removeEventListener('change', switchTheme);
 });
 </script>
 

@@ -2,8 +2,10 @@ import { defineStore } from 'pinia';
 import { reactive, ref } from 'vue';
 import { getOS } from '@/common/utils';
 
+type ThemeMode = 'light' | 'dark' | 'system';
+
 const useSettingsStore = defineStore('settingsStore', () => {
-  const theme: { mode: 'light' | 'dark' | 'system', darkThemeName: string, lightThemeName: string } = reactive({
+  const theme: { mode: ThemeMode, darkThemeName: string, lightThemeName: string } = reactive({
     mode: 'system',
     darkThemeName: 'dim',
     lightThemeName: 'nord',
@@ -39,8 +41,8 @@ const useSettingsStore = defineStore('settingsStore', () => {
     }
   }
 
-  /** 切换主题 */
-  function toggleTheme(mode: 'dark' | 'light' | 'system' = 'system') {
+  /** 切换主题模式 */
+  function toggleTheme(mode: ThemeMode = 'system') {
     theme.mode = mode;
     theme.darkThemeName = theme.darkThemeName || 'dim';
     theme.lightThemeName = theme.lightThemeName || 'nord';
@@ -61,7 +63,23 @@ const useSettingsStore = defineStore('settingsStore', () => {
     }
   }
 
-  return { theme, currRealMode, osType, initTheme, toggleTheme };
+  /** 修改主题 */
+  function changeTheme(payload: { mode?: ThemeMode, darkThemeName?: string, lightThemeName?: string }) {
+    const {
+      mode = theme.mode,
+      darkThemeName = theme.darkThemeName,
+      lightThemeName = theme.lightThemeName
+    } = payload;
+    theme.mode = mode;
+    theme.darkThemeName = darkThemeName;
+    theme.lightThemeName = lightThemeName;
+    initTheme();
+  }
+
+  /** 恢复默认主题 */
+  const reset = () => changeTheme({ mode: 'system', darkThemeName: 'dim', lightThemeName: 'nord' });
+
+  return { theme, currRealMode, osType, initTheme, toggleTheme, changeTheme, reset };
 }, {
   persist: {
     storage: localStorage,
