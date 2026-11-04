@@ -21,6 +21,7 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
     // 模块名到基于baseUrl的路径映射列表
+    "baseUrl": "./",
     "paths": {
       "@/*": ["src/*"],
       "#/*": ["types/*"]
