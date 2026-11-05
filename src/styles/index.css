@@ -34,6 +34,42 @@ body {
   }
 }
 
+@layer components {
+  .z-hide {
+    @apply z-[-1];
+  }
+  .z-base {
+    @apply z-0;
+  }
+  .z-content {
+    @apply z-10;
+  }
+  .z-dropdown {
+    @apply z-1000;
+  }
+  .z-sticky {
+    @apply z-1100;
+  }
+  .z-overlay {
+    @apply z-1200;
+  }
+  .z-modal {
+    @apply z-1300;
+  }
+  .z-popover {
+    @apply z-1400;
+  }
+  .z-toast {
+    @apply z-1500;
+  }
+  .z-tooltip {
+    @apply z-1600;
+  }
+  .z-max {
+    @apply z-9999;
+  }
+}
+
 @layer utilities {
   .no-scrollbar {
     -ms-overflow-style: none;  /* IE/Edge */

@@ -78,7 +78,7 @@
     <div v-if="hasInput && !tooLarge && viewMode === 'side'" class="card bg-base-200 shadow-sm overflow-hidden">
       <div class="overflow-auto font-mono text-[13px] leading-6">
         <table class="table w-full border-separate border-spacing-0">
-          <thead class="sticky top-0 z-10">
+          <thead class="sticky top-0 z-sticky">
           <tr class="bg-base-300 text-xs">
             <th class="w-12 px-2 text-right border-b border-base-content/10">原始行</th>
             <th class="border-b border-base-content/10 text-left pl-3">原始文本</th>

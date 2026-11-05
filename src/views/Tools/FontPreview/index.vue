@@ -2,7 +2,7 @@
 <template>
   <div class="p-4 flex flex-col gap-3">
     <h1 class="w-full text-center text-3xl mt-4">字体预览</h1>
-    <p class="text-sm opacity-70">将字体文件拖动到此页面或者点击上传按钮，也可以直接加载系统本地字体，然后输入预览内容即可，最多支持上传{{ maxCount }}种字体。</p>
+    <p class="text-sm opacity-70">将字体文件拖动到此页面或者点击上传按钮，也可以直接加载系统本机字体，然后输入预览内容即可，最多支持上传{{ maxCount }}种字体。</p>
 
     <!-- 上传区域：拖拽 + 点击选择 -->
     <div class="flex flex-col sm:flex-row gap-3">
@@ -23,22 +23,22 @@
         />
       </div>
 
-      <!-- 加载本地（系统）字体 -->
+      <!-- 加载本机（系统）字体 -->
       <div class="flex flex-col gap-2 shrink-0" @click.stop>
         <button
             class="btn btn-primary btn-outline"
             :disabled="!localFontsSupported || loadingLocalFonts"
             @click="loadLocalFontList"
         >
-          {{ loadingLocalFonts ? '读取中…' : '加载本地字体' }}
+          {{ loadingLocalFonts ? '读取中…' : '加载本机字体' }}
         </button>
-        <!-- 可搜索的本地字体下拉选框 -->
+        <!-- 可搜索的本机字体下拉选框 -->
         <div ref="fontPickerRef" class="relative">
           <input
               v-model="localFontKeyword"
               type="text"
               class="input input-sm input-bordered w-full"
-              :placeholder="localFonts.length ? '搜索并选择本地字体' : '请先加载本地字体'"
+              :placeholder="localFonts.length ? '搜索并选择本机字体' : '请先加载本机字体'"
               :disabled="!localFonts.length"
               @focus="showFontOptions = true"
               @keydown.down.prevent="moveActiveOption(1)"
@@ -48,7 +48,7 @@
           />
           <ul
               v-show="showFontOptions && localFonts.length"
-              class="absolute z-20 mt-1 w-full min-w-72 max-w-[min(32rem,90vw)] max-h-60 overflow-y-auto rounded-lg border border-base-300 bg-base-100 shadow-lg"
+              class="absolute z-overlay mt-1 w-full min-w-72 max-w-[min(32rem,90vw)] max-h-60 overflow-y-auto rounded-lg border border-base-300 bg-base-100 shadow-lg"
           >
             <li
                 v-for="(item, i) in filteredLocalFonts"
@@ -71,7 +71,7 @@
     <!-- 已上传字体列表 -->
     <div v-if="fonts.length" class="flex flex-wrap gap-2">
       <div v-for="font in fonts" :key="font.family" class="badge badge-lg gap-1 badge-outline cursor-pointer">
-        <span class="italic text-base-content text-sm mr-2">{{ font.name }}<template v-if="font.local">（本地）</template></span>
+        <span class="italic text-base-content text-sm mr-2">{{ font.name }}<template v-if="font.local">（本机）</template></span>
         <button class="cursor-pointer hover:text-error" title="移除该字体" @click.stop="removeFont(font.family)">✕</button>
       </div>
     </div>
@@ -102,7 +102,7 @@
           <input type="color" class="w-9 h-8 p-0 rounded-md cursor-pointer bg-transparent"
                  v-model="bgColor" title="选择背景颜色"/>
         </label>
-        <button class="btn btn-xs btn-ghost opacity-70" @click="resetBgColor" title="恢复默认背景颜色">默认</button>
+        <button class="btn btn-xs btn-ghost opacity-70" @click="() => bgColor = defaultBgColor" title="恢复默认背景颜色">默认</button>
       </div>
       <!-- 字体风格 -->
       <label class="select select-sm w-52">
@@ -186,11 +186,11 @@ import Font from '@/components/icons/Font.vue';
 
 /** 已加载的字体信息 */
 type LoadedFont = {
-  name: string; // 文件名（本地字体为“家族名 - 样式”）
+  name: string; // 文件名（本机字体为fullName/familyName）
   family: string; // FontFace 注册的家族名
-  size: number; // 文件大小（字节），本地字体无法获取时为0
-  url: string; // ObjectURL，用于卸载时释放；本地字体直接注册系统字体时为空
-  local?: boolean; // 是否来自本地系统字体
+  size: number; // 文件大小（字节），本机字体无法获取时为0
+  url: string; // ObjectURL，用于卸载时释放；本机字体直接注册系统字体时为空
+  local?: boolean; // 是否来自本机系统字体
   face?: FontFace; // 字体对象
 };
 
@@ -229,7 +229,7 @@ const suggestions = computed(() => {
   add(dark ? '#ffffff' : '#000000', dark ? '白色' : '黑色');
   return list;
 });
-/** 根据关键字过滤后的本地字体列表（保留原始索引以便添加），匹配家族名/全名/ PostScript 名，不区分大小写 */
+/** 根据关键字过滤后的本机字体列表（保留原始索引以便添加），匹配家族名/全名/ PostScript 名，不区分大小写 */
 const filteredLocalFonts = computed(() => {
   const kw = localFontKeyword.value.trim().toLowerCase();
   return localFonts.value
@@ -241,11 +241,6 @@ const filteredLocalFonts = computed(() => {
 });
 /** 是否显示颜色建议 */
 const ifShowColorSuggestion = computed(() => contrastRatio(fontColor.value, bgColor.value) < 4.5);
-
-/** 恢复背景默认颜色 */
-const resetBgColor = () => {
-  bgColor.value = defaultBgColor.value;
-};
 
 /** 解析 #rgb / #rrggbb / rgb() 为 0-255 通道 */
 const parseColor = (c: string): [number, number, number] | null => {
@@ -314,7 +309,7 @@ const contrastRatio = (a: string, b: string): number => {
   return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
 };
 
-/** 本地（系统）字体相关状态 */
+/** 本机（系统）字体相关状态 */
 const localFontsSupported = 'queryLocalFonts' in window; // Local Font Access API 支持检测
 const localFonts = ref<FontData[]>([]);
 const loadingLocalFonts = ref<boolean>(false);
@@ -344,7 +339,7 @@ const moveActiveOption = (delta: number) => {
 };
 
 /**
- * 函数描述：添加指定索引的本地字体并重置搜索框
+ * 函数描述：添加指定索引的本机字体并重置搜索框
  * @param index {number} localFonts 列表下标
  */
 const chooseOption = (index: number) => {
@@ -429,7 +424,7 @@ const addFont = async (file: File) => {
     const face = new FontFace(family, `url(${url})`);
     await face.load();
     fontSet.add(face);
-    fonts.value.push({ name: file.name, family, size: file.size, url, face });
+    fonts.value.unshift({ name: file.name, family, size: file.size, url, face });
     popupTip(`字体“${file.name}”加载成功`, { type: 'success', duration: 2000 });
   } catch (e) {
     URL.revokeObjectURL(url);
@@ -446,14 +441,14 @@ const loadLocalFontList = async () => {
   loadingLocalFonts.value = true;
   try {
     localFonts.value = await loadLocalFonts() || [];
-    popupTip(`读取到 ${localFonts.value.length} 个本地字体，请在下拉框中选择添加`, { type: 'success', duration: 2500 });
+    popupTip(`读取到 ${localFonts.value.length} 个本机字体，请在下拉框中选择添加`, { type: 'success', duration: 2500 });
   } finally {
     loadingLocalFonts.value = false;
   }
 };
 
 /**
- * 函数描述：将指定索引的本地系统字体添加到预览列表
+ * 函数描述：将指定索引的本机系统字体添加到预览列表
  * @param index {number} localFonts 列表下标
  */
 const addLocalFont = async (index: number) => {
@@ -472,11 +467,11 @@ const addLocalFont = async (index: number) => {
     return;
   }
   try {
-    fonts.value.push({ name, family, size, url: '', local: true });
-    popupTip(`本地字体“${name}”添加成功`, { type: 'success', duration: 2000 });
+    fonts.value.unshift({ name, family, size, url: '', local: true });
+    popupTip(`本机字体“${name}”添加成功`, { type: 'success', duration: 2000 });
   } catch (e) {
     console.error(e);
-    popupTip(`本地字体“${name}”加载失败`, { type: 'error' });
+    popupTip(`本机字体“${name}”加载失败`, { type: 'error' });
   }
 };
 
