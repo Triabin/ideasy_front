@@ -180,7 +180,7 @@
 <script lang="ts" setup>
 import { computed, onBeforeUnmount, ref, toRef, watch, useTemplateRef } from 'vue';
 import { getFontFamilyFromFile, loadLocalFonts, MyFileUtils, popupTip } from '@/common/utils';
-import useFullScreenDropFile from '@/common/useFullScreenDropFile.ts';
+import useFullScreenDropFile from '@/composables/useFullScreenDropFile.ts';
 import useSettingsStore from '@/stores/settingsStore';
 import Font from '@/components/icons/Font.vue';
 

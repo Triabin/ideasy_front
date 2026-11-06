@@ -186,7 +186,7 @@ import {
   type LoadedImage,
   type OutputFormat,
 } from './imageCompressor';
-import useFullScreenDropFile from '@/common/useFullScreenDropFile.ts';
+import useFullScreenDropFile from '@/composables/useFullScreenDropFile.ts';
 
 /** 列表项状态 */
 type ItemStatus = 'idle' | 'busy' | 'done' | 'error';

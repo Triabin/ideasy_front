@@ -117,7 +117,7 @@ import {
   type HashAlgorithm,
 } from './hashCalculator';
 import { copyText, popupTip, debounce } from '@/common/utils.ts';
-import useFullScreenDropFile from '@/common/useFullScreenDropFile.ts';
+import useFullScreenDropFile from '@/composables/useFullScreenDropFile.ts';
 
 /* ------------------------- 状态 ------------------------- */
 

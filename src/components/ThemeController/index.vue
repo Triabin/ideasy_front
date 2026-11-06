@@ -110,6 +110,7 @@
 import { toRef, ref, watch, onMounted, onUnmounted } from 'vue';
 import { useFloating, offset, flip, shift, autoUpdate } from '@floating-ui/vue';
 import useSettingsStore from '@/stores/settingsStore';
+import useAutoFavicon from '@/composables/useAutoFavicon.ts';
 import ThemeAuto from '@/components/icons/ThemeAuto.vue';
 import ThemeLight from '@/components/icons/ThemeLight.vue';
 import ThemeDark from '@/components/icons/ThemeDark.vue';
@@ -121,7 +122,7 @@ const DARK_THEMES = ['dark', 'synthwave', 'halloween', 'forest', 'aqua', 'black'
   'coffee', 'dim', 'sunset', 'abyss']
 
 const event = window.matchMedia("(prefers-color-scheme: dark)");
-const { initTheme, toggleTheme, changeTheme, reset } = useSettingsStore();
+const { initTheme, toggleTheme, changeTheme } = useSettingsStore();
 const theme = toRef(useSettingsStore(), 'theme');
 
 /* ---------------- 主题下拉面板：开合 + 浮动定位（@floating-ui/vue） ---------------- */
@@ -156,6 +157,7 @@ const switchTheme = (_: Event) => toggleTheme();
 onMounted(() => {
   initTheme();
   event.addEventListener('change', switchTheme);
+  useAutoFavicon();
 });
 
 onUnmounted(() => {

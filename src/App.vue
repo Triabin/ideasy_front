@@ -12,8 +12,7 @@
         <!-- Logo -->
         <div class="navbar-start text-2xl">
           <RouterLink to="/">
-            <div class="rounded-2xl size-9 bg-red-500 flex justify-center items-center font-bold text-primary-content round-font"
-            >灵</div>
+            <div class="rounded-2xl size-9 bg-primary flex justify-center items-center font-bold text-primary-content round-font">灵</div>
           </RouterLink>
           <RouterLink to="/">
             <span class="text-xl ml-2 font-bold overflow-hidden whitespace-nowrap text-ellipsis">
@@ -44,7 +43,7 @@
 <script lang="ts" setup>
 import ThemeController from '@/components/ThemeController';
 import { useTemplateRef } from 'vue';
-import useWheelOuter2Inner from '@/common/useWheelOuter2Inner.ts';
+import useWheelOuter2Inner from '@/composables/useWheelOuter2Inner.ts';
 
 // 主体外层容器与内容滚动区
 const mainWrapper = useTemplateRef<HTMLElement>('mainWrapper');

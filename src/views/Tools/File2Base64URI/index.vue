@@ -207,7 +207,7 @@ import {
   fileToBase64URI,
   getSizeAlertLevel,
 } from './file2Base64URI.ts';
-import useFullScreenDropFile from '@/common/useFullScreenDropFile.ts';
+import useFullScreenDropFile from '@/composables/useFullScreenDropFile.ts';
 
 /** 列表项数据 */
 interface ListItem {

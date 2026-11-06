@@ -1,0 +1,12 @@
+<!-- public/favicon.svg -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <style>
+    rect { fill: var(--color-primary, red); }
+    text { fill: var(--color-primary-content, #fff); }
+  </style>
+  <rect width="64" height="64" rx="24" />
+  <text x="50%" y="50%" dy="0.35em" text-anchor="middle"
+        font-size="38" font-weight="700"
+        font-family="'Yuanti SC', 'YouYuan', '汉仪润圆', '方正粗圆', ui-rounded, 'PingFang SC', 'Microsoft YaHei', 'HarmonyOS Sans SC', 'Noto Sans CJK SC', 'WenQuanYi Micro Hei', system-ui, sans-serif;"
+  >灵</text>
+</svg>
