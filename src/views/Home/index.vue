@@ -36,7 +36,6 @@
                 :key="ti"
                 class="badge badge-sm border-none text-white/90 font-medium"
                 :style="{ backgroundColor: tagColor(tag) }"
-                @click.stop="() => keyword = tag"
           >{{ tag }}</span>
         </div>
         <!-- 描述 -->
@@ -74,7 +73,12 @@ const cardTags = (card: RouteRecordRaw): string[] => {
 const TAG_COLORS = [
   '#EF4444', '#F97316', '#F59E0B', '#84CC16', '#22C55E', '#14B8A6',
   '#06B6D4', '#3B82F6', '#6366F1', '#8B5CF6', '#A855F7', '#D946EF',
-  '#EC4899', '#F43F5E',
+  '#EC4899', '#F43F5E', '#DC2626', '#EA580C', '#D97706', '#CA8A04',
+  '#65A30D', '#16A34A', '#059669', '#0D9488', '#0891B2', '#0284C7',
+  '#2563EB', '#4F46E5', '#7C3AED', '#9333EA', '#C026D3', '#DB2777',
+  '#E11D48', '#BE123C', '#B91C1C', '#9A3412', '#854D0E', '#4D7C0F',
+  '#166534', '#134E4A', '#155E75', '#1E40AF', '#3730A3', '#5B21B6',
+  '#86198F', '#9D174D',
 ];
 
 /**
