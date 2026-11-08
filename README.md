@@ -6,39 +6,9 @@
 
 ## 效果预览
 
-[首页](#功能模块)
+[首页](https://ideasy.triabin.cn/)
 
-[字体预览](#字体预览)
-
-[JSON格式化](#json格式化)
-
-[颜色转换](#颜色转换)
-
-[Lrc歌词时间轴调整](#lrc歌词时间轴调整)
-
-[进制转换](#进制转换)
-
-[编解码工具](#编解码工具)
-
-[时间戳转换](#时间戳转换)
-
-[文本Diff](#文本Diff)
-
-[UUID生成](#uuid生成)
-
-[哈希计算](#哈希计算)
-
-[单位换算](#单位换算)
-
-[密码生成](#密码生成)
-
-[图片压缩](#图片压缩)
-
-[二维码生成](#二维码生成)
-
-[JWT加解密](#jwt加解密)
-
-[文件转Base64URI](#文件转Base64URI)
+<iframe src="https://ideasy.triabin.cn" width="100%" height="500" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>
 
 ## 想在自己本地运行这个项目
 
@@ -54,71 +24,3 @@ pnpm dev
 
 > docker暂时还没时间折腾，不想自己运行可以先试试这个：[https://ideasy.triabin.cn](https://ideasy.triabin.cn/)，如果不卡就直接用它就行了。
 > 
-
-## 功能模块
-
-![首页](./doc-images/index.png)
-
-### 字体预览
-
-![字体预览](./doc-images/font-preview.png)
-
-### JSON格式化
-
-![JSON格式化](./doc-images/json-format.png)
-
-### 颜色转换
-
-![颜色转换](./doc-images/color-cvter.png)
-
-### Lrc歌词时间轴调整
-
-![Lrc歌词时间轴调整](./doc-images/lrc-adjuster.png)
-
-### 进制转换
-
-![进制转换](./doc-images/base-cvter.png)
-
-### 编解码工具
-
-![编解码工具](./doc-images/codec.png)
-
-### 时间戳转换
-
-![时间戳转换](./doc-images/timestamp-cvter.png)
-
-### 文本Diff
-
-![文本Diff](./doc-images/text-diff.png)
-
-### UUID生成
-
-![UUID生成](./doc-images/uuid-gen.png)
-
-### 哈希计算
-
-![哈希计算](./doc-images/hash-calc.png)
-
-### 单位换算
-
-![单位换算](./doc-images/unit-cvt.png)
-
-### 密码生成
-
-![密码生成](./doc-images/pwd-gen.png)
-
-### 图片压缩
-
-![图片压缩](./doc-images/compress-img.png)
-
-### 二维码生成
-
-![二维码生成](./doc-images/qr-gen.png)
-
-### JWT加解密
-
-![JWT加解密](./doc-images/jwt-cryp.png)
-
-### 文件转Base64URI
-
-![文件转Base64URI](./doc-images/file2-data-uri.png)
