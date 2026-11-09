@@ -1,10 +1,12 @@
 <template>
   <!--
-    高度使用 dvh（动态视口单位）：手机上浏览器底部工具栏收起/展开时，
-    dvh 会实时跟随可视区域变化，页面底部不会被浏览器导航栏遮挡。
-    min-h-screen 作为不支持 dvh 的浏览器的兜底；PC 端地址栏固定，dvh == 100vh，布局不受影响。
+    高度使用 .h-viewport（内部为 100vh → 100dvh 双声明渐进增强，见 styles/index.css）：
+    手机上浏览器底部工具栏收起/展开时，dvh 会实时跟随可视区域变化，页面底部不会被遮挡；
+    不支持 dvh 的老旧浏览器自动回退到 100vh。PC 端地址栏固定，dvh == 100vh，布局不受影响。
+    注意：这里不能叠加 min-h-screen —— 移动端 100vh ≥ dvh，且 min-height 优先于 height，
+    会把容器撑得比可视区域高，底部内容反而被浏览器工具栏遮挡。
   -->
-  <div class="flex flex-col min-h-screen h-dvh w-screen gap-0.5 pb-[env(safe-area-inset-bottom)]">
+  <div class="flex flex-col h-viewport w-screen gap-0.5 pb-[env(safe-area-inset-bottom)]">
     <!-- 头部 -->
     <div class="shrink-0 min-h-16 h-16 flex justify-center items-center bg-base-300/50 shadow-sm">
       <!-- 头部内容区 -->
