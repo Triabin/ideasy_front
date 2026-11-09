@@ -43,8 +43,8 @@
         type="button"
         class="btn btn-sm btn-ghost btn-circle"
         :class="[themePanelOpen ? 'selected btn-primary' : '']"
-        title="选择主题"
-        aria-label="选择主题"
+        title="设定主题"
+        aria-label="设定主题"
         :aria-expanded="themePanelOpen"
         @click.stop="themePanelOpen = !themePanelOpen"
     >

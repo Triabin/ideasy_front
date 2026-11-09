@@ -316,3 +316,15 @@ export const loadLocalFonts = async () => {
     console.error(err);
   }
 }
+
+/**
+ * 打开指定url的地址
+ * @param url 链接
+ * @param target 打开方式，默认'_blank'
+ */
+export function openUrl(url: string, target: string = '_blank') {
+  if (url.startsWith('/')) {
+    target = '_self';
+  }
+  window.open(url, target);
+}
