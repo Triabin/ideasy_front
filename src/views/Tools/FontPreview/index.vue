@@ -35,6 +35,7 @@
         <!-- 可搜索的本机字体下拉选框 -->
         <div ref="fontPickerRef" class="relative">
           <input
+              ref="fontPickerInputRef"
               v-model="localFontKeyword"
               type="text"
               class="input input-sm input-bordered w-full"
@@ -48,7 +49,8 @@
           />
           <ul
               v-show="showFontOptions && localFonts.length"
-              class="absolute z-overlay mt-1 w-full min-w-72 max-w-[min(32rem,90vw)] max-h-60 overflow-y-auto rounded-lg border border-base-300 bg-base-100 shadow-lg"
+              class="absolute z-overlay mt-1 w-full min-w-72 max-w-[min(32rem,90vw)] max-h-180 overflow-y-auto rounded-lg
+              border border-base-300 bg-base-100 shadow-lg"
           >
             <li
                 v-for="(item, i) in filteredLocalFonts"
@@ -315,6 +317,7 @@ const localFonts = ref<FontData[]>([]);
 const loadingLocalFonts = ref<boolean>(false);
 // 可搜索下拉选框状态
 const fontPickerRef = ref<HTMLDivElement>();
+const fontPickerInputRef = useTemplateRef<HTMLInputElement>('fontPickerInputRef');
 const localFontKeyword = ref<string>('');
 const showFontOptions = ref<boolean>(false);
 const activeOptionIndex = ref<number>(-1);
@@ -343,10 +346,11 @@ const moveActiveOption = (delta: number) => {
  * @param index {number} localFonts 列表下标
  */
 const chooseOption = (index: number) => {
-  // showFontOptions.value = false;
+  showFontOptions.value = false;
   void addLocalFont(index);
   // localFontKeyword.value = '';
   activeOptionIndex.value = -1;
+  fontPickerInputRef.value?.blur();
 };
 
 /** 回车选择当前高亮项；若无高亮但只有一个匹配项则直接选择 */

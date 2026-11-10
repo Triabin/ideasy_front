@@ -8,7 +8,7 @@
 
 [首页](https://ideasy.triabin.cn/)
 
-<iframe src="https://ideasy.triabin.cn" width="100%" height="500" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>
+![首页](doc-images/ideasy-index.png)
 
 ## 想在自己本地运行这个项目
 
