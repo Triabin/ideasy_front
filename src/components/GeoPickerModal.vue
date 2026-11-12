@@ -41,7 +41,7 @@
       <div class="px-5">
         <div
             ref="mapBox"
-            class="geo-map w-full h-[420px] rounded-lg border border-base-300 cursor-crosshair overflow-hidden"
+            class="geo-map w-full h-105 rounded-lg border border-base-300 cursor-crosshair overflow-hidden"
         ></div>
       </div>
 

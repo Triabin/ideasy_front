@@ -52,8 +52,11 @@ const router = createRouter({
   history: createWebHashHistory(),
   routes
 });
-// 8. 设置监听统计页面数据
-setupRouteAnalytics(router);
+// 8. 全局后置钩子
+router.afterEach((to, from, next) => {
+  // 向百度统计和微软Clarity报告页面访问信息
+  setupRouteAnalytics(to);
+});
 // 9. 导出路由
 export default router;
 export { routes, flattenRoute };
