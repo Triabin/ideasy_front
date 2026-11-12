@@ -6,7 +6,7 @@
 
 ## 效果预览
 
-[首页](https://ideasy.triabin.cn/)
+[首页](https://ideasy.triabin.cn/#/home)
 
 ![首页](doc-images/ideasy-index.png)
 

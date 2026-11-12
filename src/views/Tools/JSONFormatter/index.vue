@@ -104,7 +104,7 @@
               </div>
               <button v-show="viewMode === 'tree'" class="btn btn-xs btn-ghost" @click="toggleCollapseAll">{{ allCollapsed ? '全部展开' : '全部收起' }}</button>
               <div class="bg-base-100 rounded-md">
-                <button class="btn btn-sm btn-ghost" :class="(!outputText || viewMode === 'tree') ? 'btn-disabled btn-square' : ''" title="复制结果" @click="copy(outputText)" :disabled="!outputText || viewMode === 'tree'">
+                <button class="btn btn-sm btn-ghost" :class="[!outputText ? 'btn-disabled' : '', 'btn-square']" title="复制结果" @click="copy(outputText)" :disabled="!outputText">
                   <Copied v-if="copiedText === outputText && copiedText" :size="16" :twClasses="['fill-success']"/>
                   <Copy v-else :size="16"/>
                 </button>
