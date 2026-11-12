@@ -20,8 +20,6 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
-    // 用于忽略7.0版本以后得弃用警告
-    "ignoreDeprecations": "6.0",
     // 模块名到基于baseUrl的路径映射列表
     "baseUrl": "./",
     "paths": {
