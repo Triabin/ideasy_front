@@ -13,15 +13,7 @@
       <div class="navbar w-160 md:w-3xl lg:w-5xl xl:w-7xl 2xl:w-360 flex items-center">
         <!-- 导航栏左侧 -->
         <div class="navbar-start text-2xl">
-          <!-- Logo -->
-          <RouterLink to="/">
-            <div class="rounded-xl size-9 bg-primary flex justify-center items-center font-bold text-primary-content round-font">灵</div>
-          </RouterLink>
-          <RouterLink to="/">
-            <span class="text-xl ml-2 font-bold overflow-hidden whitespace-nowrap text-ellipsis">
-              能网页&nbsp;&nbsp;不软件
-            </span>
-          </RouterLink>
+          <NavbarLeft/>
         </div>
         <!-- 导航栏中间 -->
         <div class="navbar-center">
@@ -45,6 +37,7 @@
 
 <script lang="ts" setup>
 import NavbarRight from '@/components/NavbarRight';
+import NavbarLeft from '@/components/NavbarLeft';
 import { useTemplateRef } from 'vue';
 import useWheelOuter2Inner from '@/composables/useWheelOuter2Inner.ts';
 
