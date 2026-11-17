@@ -40,6 +40,18 @@
       </div>
     </div>
 
+    <details class="collapse collapse-arrow bg-base-100 border border-base-300">
+      <summary class="collapse-title font-semibold">关于时间的一些地理知识</summary>
+      <div class="collapse-content text-sm text-base-content/75 leading-6 indent-8">
+        <p>以前，以地球0度经线位的时间为标准时间（本初子午线），英国伦敦的格林威（尼）治天文台就在这条线上，因此以前的世界时间也叫格林威治时间（Greenwich Mean Time，即<b>GMT</b>）。</p>
+        <p>对于地球上的每一个地方来说，太阳直射时为正午12点，地球上的时间需要一个统一的计算标准，而计算的核心就是地球的自转，地球自转一周是24小时，于是将地球从经度方向分为24个不同的时区，本初子午线所在时区为零时区，往西为西时区共12个，与本初子午线每差一个时区时间就早一个小时；往东为东时区也是12个，东西第十二区重叠在一起（注意，重叠在一起，不代表时间相同，因为时间实际上是人为规定的），时区与本初子午线每差一个时区时间就往后晚一个小时。</p>
+        <p>中国所使用的时间北京时间就是东八区时间，而东八区的标准时间实际上在上海，因此Linux系统或者一些地方表示中国时间的时候只能选 <code>Asia/Shanghai</code>。</p>
+        <p>由于东西十二区重叠，为了避免该时区内的人日期混乱，于是规定了一条国际日期变更线（日界线），变更线东侧日期减一天，西侧日期加一天。为了避免同一个国家/地区两个时间的尴尬情况，该变更线从180度经线附近延伸出来后多处采用曲折走向避开陆地，并且也经过多次变更。</p>
+        <p>然而，实际上地球的自转并不是均匀的，这就导致出现记录的实际时间与自转时间存在误差的情况（据统计，最大误差长达16分钟）。2012年1月，取消用了将近130年的格林威治标准时间，标准时间改为使用原子钟提供。</p>
+        <p>原子钟是利用铯原子的震动频率计算出来的时间作为世界标准时间（Coordinated Universal Time，<b>UTC</b>），铯原子每震动9192631770次等于1秒。</p>
+      </div>
+    </details>
+
     <!-- 时区设置（两个方向共用） -->
     <div class="card bg-base-200 shadow-sm">
       <div class="card-body py-3">
@@ -51,7 +63,7 @@
             <button class="btn btn-sm" :class="tzMode === 'offset' ? 'btn-primary' : ''" @click="tzMode = 'offset'">指定偏移</button>
           </div>
           <label v-if="tzMode === 'offset'" class="join">
-            <button class="btn btn-sm join-item pointer-events-none">UTC 偏移</button>
+            <span class="label mr-2">偏移量</span>
             <input
                 type="number"
                 class="input input-sm join-item w-24 font-mono"
@@ -223,7 +235,7 @@ const copy = async (text: string) => {
   if (!text) return;
   await copyText(text);
   copiedText.value = text;
-  popupTip(`已复制 ${text.length > 16 ? text.slice(0, 8) + '…' + text.slice(-6) : text}`, { type: 'success', duration: 1500 });
+  popupTip(`已复制 ${text.length > 16 ? (text.slice(0, 8) + '…' + text.slice(-6)) : text}`, { type: 'success', duration: 1500 });
   if (copyTimer) clearTimeout(copyTimer);
   copyTimer = setTimeout(() => (copiedText.value = ''), 1500);
 };

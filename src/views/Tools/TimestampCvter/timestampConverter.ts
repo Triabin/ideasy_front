@@ -31,11 +31,6 @@ export interface DateParts {
 const pad = (n: number, len = 2): string => String(Math.abs(n)).padStart(len, '0');
 
 /**
- * 获取当前时间的毫秒级时间戳
- */
-export const nowMs = (): number => Date.now();
-
-/**
  * 判断输入字符串是否为纯数字时间戳（可带负号）
  */
 export function isNumericTimestamp(s: string): boolean {
@@ -174,30 +169,15 @@ export function getDateParts(ms: number, mode: TimeZoneMode, offsetHours: number
   };
 }
 
-/**
- * 获取时区后缀标识，如 " UTC"、" GMT+8"
- */
-export function getTimeZoneLabel(mode: TimeZoneMode, offsetHours: number): string {
-  if (mode === 'utc') return ' UTC';
-  if (mode === 'offset') {
-    const sign = offsetHours >= 0 ? '+' : '-';
-    const h = Math.abs(offsetHours);
-    const hh = Math.floor(h);
-    const mmm = Math.round((h - hh) * 60);
-    return ` GMT${sign}${hh}${mmm ? ':' + pad(mmm) : ''}`;
-  }
-  return '';
-}
-
 /** 常用格式化预设 */
 export const FORMAT_PRESETS: { key: string; label: string; template: string }[] = [
-  { key: 'std', label: 'YYYY-MM-DD HH:mm:ss', template: '{yyyy}-{MM}-{dd} {HH}:{mm}:{ss}' },
-  { key: 'ms', label: 'YYYY-MM-DD HH:mm:ss.SSS', template: '{yyyy}-{MM}-{dd} {HH}:{mm}:{ss}.{SSS}' },
+  { key: 'std', label: 'yyyy-MM-dd HH:mm:ss', template: '{yyyy}-{MM}-{dd} {HH}:{mm}:{ss}' },
+  { key: 'ms', label: 'yyyy-MM-dd HH:mm:ss.SSS', template: '{yyyy}-{MM}-{dd} {HH}:{mm}:{ss}.{SSS}' },
   { key: 'iso', label: 'ISO 8601', template: '{yyyy}-{MM}-{dd}T{HH}:{mm}:{ss}' },
-  { key: 'date', label: '仅日期 YYYY-MM-DD', template: '{yyyy}-{MM}-{dd}' },
+  { key: 'date', label: '仅日期 yyyy-MM-dd', template: '{yyyy}-{MM}-{dd}' },
   { key: 'time', label: '仅时间 HH:mm:ss', template: '{HH}:{mm}:{ss}' },
-  { key: 'slash', label: 'YYYY/MM/DD HH:mm', template: '{yyyy}/{MM}/{dd} {HH}:{mm}' },
-  { key: 'cn', label: '中文 YYYY年MM月DD日', template: '{yyyy}年{MM}月{dd}日 {HH}:{mm}:{ss}' },
+  { key: 'slash', label: 'yyyy/MM/dd HH:mm', template: '{yyyy}/{MM}/{dd} {HH}:{mm}' },
+  { key: 'cn', label: '中文 yyyy年MM月dd日 HH:mm:ss', template: '{yyyy}年{MM}月{dd}日 {HH}:{mm}:{ss}' },
 ];
 
 /**
@@ -214,7 +194,7 @@ export function formatByTemplate(
   offsetHours: number
 ): string {
   const parts = getDateParts(ms, mode, offsetHours);
-  return template.replace(/\{(yyyy|MM|dd|HH|mm|ss|SSS)}/g, (_m, k: keyof DateParts) => parts[k]);
+  return template.replace(/{(yyyy|MM|dd|HH|mm|ss|SSS)}/g, (_m, k: keyof DateParts) => parts[k]);
 }
 
 /**

@@ -6,7 +6,7 @@
   >
     <Copied v-if="copiedText === props.value" :size="16" :twClasses="['fill-success']"/>
     <Copy v-else :size="16"/>
-    复制
+    {{props.label ?? ''}}
   </button>
 </template>
 
@@ -18,7 +18,7 @@ import { ref, onBeforeUnmount } from 'vue';
 
 const props = withDefaults(defineProps<{
   /** 按钮名称 */
-  label: string;
+  label?: string;
   /** 待复制内容 */
   value: string;
   /** 鼠标悬浮在按钮上的提示内容 */
@@ -28,7 +28,6 @@ const props = withDefaults(defineProps<{
   /** 是否开启弹窗提示 */
   popupTip: 'on' | 'off';
 }>(), {
-  label: '复制',
   title: '点击复制结果',
   duration: 1500,
   popupTip: 'off',

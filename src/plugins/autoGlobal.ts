@@ -61,45 +61,47 @@ export default {
     // 5. 注册全局方法
     /**
      * 函数描述：时间格式化工具
-     * @param format { string } 格式（y-年，M-月，d-日，H-时[24]，h-时[12]，m-分，s-秒，S-毫秒(3位数)，q-季度，ap，午前am/午后pm）
+     * @param format { string } 格式：y-年，M-月，d-日，H-时[24]，h-时[12]，m-分，s-秒，S-毫秒，q/Q-季度，ap/AP-am/pm（配合h使用），E/e-星期，Z-时区。
+     * 特殊格式说明：
+     * ① 表示5月时，M=>5、MM=>05，时分秒毫秒和日同理，匹配字符数量为真实值最小长度，不足时用0补足。
+     * ② 年份y匹配字符长度为2时，取最后两位，其余时候同①。
+     * ③ 星期：E => 一~六与日、EE => 周*、EEE => 星期*；e => 英文简写、ee => 英文简写（末尾带“.”）、eee => 英文星期。
+     * ④ 季度q为大写Q时，返回汉字“一~四”；ap为大写时，返回的上/下午为大写字母。
      * @returns { string } 格式化后的字符串
      */
     Date.prototype.format = function (format: string = 'yyyy-MM-dd HH:mm:ss'): string {
-      let o: { [key: string]: number | string } = {
+      const o: Record<string, number> = {
         'M+': this.getMonth() + 1, // 月份
         'd+': this.getDate(), // 日
         'H+': this.getHours(), // 时（24小时制）
         'h+': this.getHours() % 12 === 0 ? 12 : this.getHours() % 12, // 时（12小时制）
         'm+': this.getMinutes(), // 分
         's+': this.getSeconds(), // 秒
-        'q+': Math.floor((this.getMonth() + 3) / 3), // 季度
-        'S': this.getMilliseconds(), // 毫秒
-        'ap': this.getHours() > 12 ? 'am' : 'pm'
       };
-      let week = ['日', '一', '二', '三', '四', '五', '六'];
-      if (/(y+)/.test(format)) {
-        format = format.replace(RegExp.$1, (this.getFullYear() + '').substr(4 - RegExp.$1.length));
-      }
-      if (/(E+)/.test(format)) {
-        format = format.replace(RegExp.$1, ((RegExp.$1.length > 1) ? (RegExp.$1.length > 2 ? '星期' : '周') : '') + week[this.getDay()]);
-      }
-      for (let k in o) {
-        let el = o[k];
-        if (new RegExp('(' + k + ')').test(format)) {
-          // 原代码中 el 类型为 string | number，而 replace 方法的第二个参数期望是一个函数或字符串，这里将 el 转换为字符串
-          // 同时使用 match 方法替代已弃用的 RegExp.$1，使用 slice 方法替代已弃用的 substr
-          const matchResult = format.match(new RegExp('(' + k + ')'));
-          if (matchResult) {
-            const matchedStr = matchResult[1];
-            const formattedEl = typeof el === 'number' ? el.toString() : el;
-            format = format.replace(
-              matchedStr,
-              matchedStr.length === 1 ? formattedEl : ('00' + formattedEl).slice(-matchedStr.length)
-            );
-          }
-        }
-      }
-      return format;
+      const weeks = ['日', '一', '二', '三', '四', '五', '六'];
+      const weeksEn = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      const weeksEnAbb = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      const year = this.getFullYear();
+      const week = this.getDay();
+      const quarter = Math.ceil((this.getMonth() + 1) / 3);
+      const zone = -Math.floor(this.getTimezoneOffset() / 60);
+      format = format.replace(/(y+)/g, (_, y) => {
+        const ye = y as string;
+        if (ye.length === 1) return year.toString().padStart(4, '0');
+        else if (ye.length === 2) return year.toString().slice(-y.length);
+        else return year.toString().padStart(ye.length, '0');
+      }).replace(/(E+)/g, (_, e) => e.length >= 3 ? `星期${weeks[week]}` : e.length === 2 ? `周${weeks[week]}` : weeks[week])
+        .replace(/(e+)/g, (_, e) => e.length >= 3 ? weeksEn[week] : e.length === 2 ? `${weeksEnAbb[week]}.` : weeksEnAbb[week])
+        .replace(/(S+)/g, (_, ms) => this.getMilliseconds().toString().padStart(ms.length, '0'))
+        .replace('ap', this.getHours() > 12 ? 'am' : 'pm')
+        .replace('AP', this.getHours() > 12 ? 'PM' : 'AM')
+        .replace('q', quarter.toString())
+        .replace('Q', ['', '一', '二', '三', '四'][quarter])
+        .replace('Z', `${zone >= 0 ? '+' : '-'}${String(Math.abs(zone)).padStart(2, '0')}${String(Math.abs(this.getTimezoneOffset()) % 60).padStart(2, '0')}`);
+      return Object.keys(o)
+        .reduce((formattedTemp, currKey) => formattedTemp.replace(
+          new RegExp(`(${currKey})`),
+          (_, match) => o[currKey].toString().padStart(match.length, '0')), format);
     }
   }
 }
