@@ -5,18 +5,18 @@
     <p class="text-sm opacity-70 text-center">批量生成UUID（v4/v1/v6/v7），支持大写、小写与不带连字符“-”等格式，点击任意结果即可复制。</p>
 
     <!-- 简介 -->
-    <div class="card bg-base-200 shadow-sm">
-      <div class="card-body gap-3">
-        <h2 class="card-title text-base">简介</h2>
-        <p class="text-sm opacity-80">UUID，全称为通用唯一识别码（Universally Unique Identifier），是一种标准化的标识符。它在计算机系统中广泛应用，用于唯一标识对象、实体或信息。UUID由128位数字组成，通常以32个十六进制数字的形式表示，中间使用连字符进行分隔。</p>
-        <ul>
-          <li class="indent-4 text-sm opacity-60 p-1">v1：时间戳 + 节点MAC地址 + 计数器，时间上有序，但高位设计问题导致数据库插入非完全连续，有泄露机器的 MAC 地址和生成时间的风险。早期分布式系统、需追踪生成来源的场景。</li>
-          <li class="indent-4 text-sm opacity-60 p-1">v4（推荐）：纯随机数（122位随机比特），完全随机无序，没有无任何时间或硬件信息泄露的风险。通用默认选择、对排序无要求的随机ID。</li>
-          <li class="indent-4 text-sm opacity-60 p-1">v6：将v1的时间戳高低位进行重排（时间戳前置），改善了v1的时序性，适合数据库顺序插入，仍包含 MAC 地址和生成时间。需要时间排序但基于v1逻辑改造的系统。</li>
-          <li class="indent-4 text-sm opacity-60 p-1">v7：Unix毫秒时间戳 + 随机数，天然按时间递增，对数据库B+树索引极友好，不暴露机器MAC地址，仅有时间戳和随机数。现代数据库主键索引、分布式系统推荐首选。</li>
+    <details class="collapse collapse-arrow bg-base-100 border border-base-300">
+      <summary title="点击展开/折叠" class="collapse-title font-semibold">简介</summary>
+      <div class="collapse-content text-sm text-base-content/75">
+        <p>UUID，全称为通用唯一识别码（Universally Unique Identifier），是一种标准化的标识符。它在计算机系统中广泛应用，用于唯一标识对象、实体或信息。UUID由128位数字组成，通常以32个十六进制数字的形式表示，中间使用连字符进行分隔。</p>
+        <ul class="indent-4 opacity-80 mt-2">
+          <li class="leading-6">v1：时间戳 + 节点MAC地址 + 计数器，时间上有序，但高位设计问题导致数据库插入非完全连续，有泄露机器的 MAC 地址和生成时间的风险。早期分布式系统、需追踪生成来源的场景。</li>
+          <li class="leading-6">v4（推荐）：纯随机数（122位随机比特），完全随机无序，没有无任何时间或硬件信息泄露的风险。通用默认选择、对排序无要求的随机ID。</li>
+          <li class="leading-6">v6：将v1的时间戳高低位进行重排（时间戳前置），改善了v1的时序性，适合数据库顺序插入，仍包含 MAC 地址和生成时间。需要时间排序但基于v1逻辑改造的系统。</li>
+          <li class="leading-6">v7：Unix毫秒时间戳 + 随机数，天然按时间递增，对数据库B+树索引极友好，不暴露机器MAC地址，仅有时间戳和随机数。现代数据库主键索引、分布式系统推荐首选。</li>
         </ul>
       </div>
-    </div>
+    </details>
 
     <!-- 生成设置 -->
     <div class="card bg-base-200 shadow-sm">

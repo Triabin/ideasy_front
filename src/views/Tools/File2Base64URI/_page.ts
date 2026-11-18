@@ -2,7 +2,7 @@ import Base64Edit from '@/components/icons/Base64Edit.vue';
 
 export default {
     title: '文件转Base64URI',
-    menuOrder: 16,
+    menuOrder: 10,
     icon: Base64Edit,
     hidden: false,
     tags: ['文件', 'Base64', 'DataURI'],

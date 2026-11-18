@@ -2,7 +2,7 @@ import QRGen from '@/components/icons/QRGen.vue';
 
 export default {
   title: '二维码生成',
-  menuOrder: 14,
+  menuOrder: 11,
   icon: QRGen,
   hidden: false,
   tags: ['二维码', 'QRCode', '扫码'],

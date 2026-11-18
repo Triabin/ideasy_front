@@ -2,7 +2,7 @@ import JWT from '@/components/icons/JWT.vue';
 
 export default {
   title: 'JWT加解密',
-  menuOrder: 15,
+  menuOrder: 8,
   hidden: false,
   icon: JWT,
   tags: ['JWT', 'Token', '签名', '加密', '解密', 'HS256'],

@@ -12,15 +12,15 @@
         <div class="flex flex-wrap items-center gap-x-6 gap-y-3 text-sm">
           <h2 class="card-title text-base mr-auto">生成设置</h2>
           <!-- 模式切换 -->
-          <div class="btn-group inline-block align-middle shrink-0">
+          <div class="btn-group inline-block align-middle shrink-0 join">
             <button
-                class="btn btn-sm"
-                :class="mode === 'password' ? 'btn-primary' : ''"
+                class="btn btn-outline btn-primary btn-sm join-item"
+                :class="mode === 'password' ? 'btn-active' : ''"
                 @click="mode = 'password'"
             >密码</button>
             <button
-                class="btn btn-sm"
-                :class="mode === 'pin' ? 'btn-primary' : ''"
+                class="btn btn-outline btn-primary btn-sm join-item"
+                :class="mode === 'pin' ? 'btn-active' : ''"
                 @click="mode = 'pin'"
                 title="PIN码仅包含数字，长度3~12位"
             >PIN码</button>

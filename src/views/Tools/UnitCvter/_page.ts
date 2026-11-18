@@ -2,7 +2,7 @@ import UnitCvter from '@/components/icons/UnitCvter.vue';
 
 export default {
   title: '单位换算',
-  menuOrder: 10,
+  menuOrder: 5,
   hidden: false,
   icon: UnitCvter,
   tags: ['单位换算', '人民币', '长度', '重量', '温度'],

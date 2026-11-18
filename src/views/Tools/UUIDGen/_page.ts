@@ -2,7 +2,7 @@ import UUID from '@/components/icons/UUID.vue';
 
 export default {
   title: 'UUID生成',
-  menuOrder: 11,
+  menuOrder: 7,
   icon: UUID,
   hidden: false,
   tags: ['UUID', '唯一标识符', '字符串'],

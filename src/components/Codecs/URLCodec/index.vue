@@ -9,7 +9,7 @@
       <div class="flex flex-wrap items-center gap-x-5 gap-y-2 mt-1">
         <label class="join items-center">
           <span class="join-item btn btn-sm btn-ghost pointer-events-none normal-case opacity-80">编码范围</span>
-          <select class="select select-sm join-item w-60" v-model="codecScope">
+          <select class="select select-sm join-item w-100" v-model="codecScope">
             <option value="full">整个字符串【encodeURI，保留URL结构字符】</option>
             <option value="component">URL组件【encodeURIComponent，仅保留字母数字与-_.!~*'()】</option>
           </select>
