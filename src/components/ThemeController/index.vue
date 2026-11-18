@@ -57,49 +57,100 @@
           v-if="themePanelOpen"
           ref="panelRef"
           :style="floatingStyles"
-          class="fixed z-max grid grid-cols-2 gap-x-2 p-3 pb-2 shadow-lg bg-base-100 rounded-box border border-base-300
-          w-fit max-w-[calc(100vw-16px)] max-h-[75%] overflow-y-auto no-scrollbar"
+          class="flex flex-col fixed z-max p-3 pb-2 shadow-lg bg-base-100 rounded-box border border-base-300 w-fit
+          max-w-[min(18rem,calc(100vw-16px))] max-h-[75%] overflow-y-auto no-scrollbar"
           @click.stop
       >
-        <!-- 日间主题列 -->
-        <div class="flex flex-col items-start">
-          <span class="text-xs font-bold opacity-60 mb-1 px-2 w-full text-center">日间</span>
-          <button
-              v-for="name in LIGHT_THEMES"
-              :key="name"
-              type="button"
-              :data-theme="name"
-              :title="`日间主题切换为${name}`"
-              class="btn btn-sm btn-ghost btn-block justify-start normal-case hover:text-black"
-              :class="[
+        <!-- 弹窗标题 -->
+        <div class="text-sm font-semibold mb-2 text-center">主题设定</div>
+
+        <!-- 主题模式选择 -->
+        <div class="flex flex-col gap-2 mb-4">
+          <span class="text-xs card-title opacity-60">主题模式</span>
+          <div class="flex items-center gap-4" role="radiogroup" aria-label="主题模式">
+            <label class="flex items-center gap-1.5 cursor-pointer text-sm">
+              <input
+                  type="radio"
+                  name="theme-mode"
+                  class="radio radio-xs radio-primary"
+                  :checked="theme.mode === 'light'"
+                  @change="toggleTheme('light')"
+              />
+              日间
+            </label>
+            <label class="flex items-center gap-1.5 cursor-pointer text-sm">
+              <input
+                  type="radio"
+                  name="theme-mode"
+                  class="radio radio-xs radio-primary"
+                  :checked="theme.mode === 'system'"
+                  @change="toggleTheme('system')"
+              />
+              自动
+            </label>
+            <label class="flex items-center gap-1.5 cursor-pointer text-sm">
+              <input
+                  type="radio"
+                  name="theme-mode"
+                  class="radio radio-xs radio-primary"
+                  :checked="theme.mode === 'dark'"
+                  @change="toggleTheme('dark')"
+              />
+              夜间
+            </label>
+            <span v-if="theme.mode === 'system'" class="text-xs opacity-60">
+              当前{{ currRealMode === 'dark' ? '夜间' : '日间' }}
+            </span>
+          </div>
+        </div>
+
+        <!-- 主题名称选择：与日/夜/自动按钮同组，点击展开下拉面板 -->
+        <div class="grid grid-cols-2 gap-x-2 border-t border-base-200 pt-2">
+          <!-- 日间主题列 -->
+          <div class="flex flex-col items-start">
+            <span class="text-xs font-bold opacity-60 mb-1 px-2 w-full indent-4">日间</span>
+            <button
+                v-for="name in LIGHT_THEMES"
+                :key="name"
+                type="button"
+                :data-theme="name"
+                :title="`日间主题切换为${name}`"
+                class="btn btn-sm btn-ghost btn-block justify-start normal-case hover:text-black"
+                :class="[
                   theme.lightThemeName === name ? 'btn-active text-black' : '',
                   theme.mode === 'dark' ? 'text-white' : '',
                   ]"
-              @click="changeTheme({ lightThemeName: name })"
-          >
-            <span class="size-3 rounded-full bg-primary shrink-0"></span>
-            {{ name }}
-          </button>
-        </div>
-        <!-- 夜间主题列 -->
-        <div class="flex flex-col items-start">
-          <span class="text-xs font-bold opacity-60 mb-1 px-2 w-full text-center">夜间</span>
-          <button
-              v-for="name in DARK_THEMES"
-              :key="name"
-              type="button"
-              :data-theme="name"
-              :title="`夜间主题切换为${name}`"
-              class="btn btn-sm btn-ghost btn-block justify-start normal-case hover:text-white"
-              :class="[
+                @click="changeTheme({ lightThemeName: name })"
+            >
+              <span class="size-3 rounded-full bg-primary shrink-0"></span>
+              {{ name }}
+            </button>
+          </div>
+          <!-- 夜间主题列 -->
+          <div class="flex flex-col items-start">
+            <span class="text-xs font-bold opacity-60 mb-1 px-2 w-full indent-4">夜间</span>
+            <button
+                v-for="name in DARK_THEMES"
+                :key="name"
+                type="button"
+                :data-theme="name"
+                :title="`夜间主题切换为${name}`"
+                class="btn btn-sm btn-ghost btn-block justify-start normal-case hover:text-white"
+                :class="[
                   theme.darkThemeName === name ? 'btn-active text-white' : '',
                   theme.mode === 'dark' ? '' : 'text-black',
                   ]"
-              @click="changeTheme({ darkThemeName: name })"
-          >
-            <span class="size-3 rounded-full bg-primary shrink-0"></span>
-            {{ name }}
-          </button>
+                @click="changeTheme({ darkThemeName: name })"
+            >
+              <span class="size-3 rounded-full bg-primary shrink-0"></span>
+              {{ name }}
+            </button>
+          </div>
+        </div>
+
+        <!-- 存储说明 -->
+        <div class="text-xs opacity-50 pt-2 mt-1 border-t border-base-200 leading-relaxed break-words">
+          以上设置会自动保存到浏览器本地存储（localStorage），切换浏览器或者清除本地存储数据时自动恢复默认。
         </div>
       </div>
     </Teleport>
@@ -122,8 +173,10 @@ const DARK_THEMES = ['dark', 'synthwave', 'halloween', 'forest', 'aqua', 'black'
   'coffee', 'dim', 'sunset', 'abyss']
 
 const event = window.matchMedia("(prefers-color-scheme: dark)");
-const { initTheme, toggleTheme, changeTheme } = useSettingsStore();
-const theme = toRef(useSettingsStore(), 'theme');
+const settingsStore = useSettingsStore();
+const { initTheme, toggleTheme, changeTheme } = settingsStore;
+const theme = toRef(settingsStore, 'theme');
+const currRealMode = toRef(settingsStore, 'currRealMode');
 
 /* ---------------- 主题下拉面板：开合 + 浮动定位（@floating-ui/vue） ---------------- */
 const triggerRef = ref<HTMLElement>();
