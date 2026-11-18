@@ -67,41 +67,42 @@ export default {
      * ② 年份y匹配字符长度为2时，取最后两位，其余时候同①。
      * ③ 星期：E => 一~六与日、EE => 周*、EEE => 星期*；e => 英文简写、ee => 英文简写（末尾带“.”）、eee => 英文星期。
      * ④ 季度q为大写Q时，返回汉字“一~四”；ap为大写时，返回的上/下午为大写字母。
+     * ⑤ 需要原样输出的内容用方括号包裹，如 yyyy-MM-dd HH:mm:ss [GMT]Z => 2026-11-18 12:00:00 GMT+0800。
      * @returns { string } 格式化后的字符串
      */
     Date.prototype.format = function (format: string = 'yyyy-MM-dd HH:mm:ss'): string {
-      const o: Record<string, number> = {
-        'M+': this.getMonth() + 1, // 月份
-        'd+': this.getDate(), // 日
-        'H+': this.getHours(), // 时（24小时制）
-        'h+': this.getHours() % 12 === 0 ? 12 : this.getHours() % 12, // 时（12小时制）
-        'm+': this.getMinutes(), // 分
-        's+': this.getSeconds(), // 秒
-      };
       const weeks = ['日', '一', '二', '三', '四', '五', '六'];
       const weeksEn = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
       const weeksEnAbb = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
       const year = this.getFullYear();
       const week = this.getDay();
       const quarter = Math.ceil((this.getMonth() + 1) / 3);
-      const zone = -Math.floor(this.getTimezoneOffset() / 60);
-      format = format.replace(/(y+)/g, (_, y) => {
-        const ye = y as string;
-        if (ye.length === 1) return year.toString().padStart(4, '0');
-        else if (ye.length === 2) return year.toString().slice(-y.length);
-        else return year.toString().padStart(ye.length, '0');
-      }).replace(/(E+)/g, (_, e) => e.length >= 3 ? `星期${weeks[week]}` : e.length === 2 ? `周${weeks[week]}` : weeks[week])
-        .replace(/(e+)/g, (_, e) => e.length >= 3 ? weeksEn[week] : e.length === 2 ? `${weeksEnAbb[week]}.` : weeksEnAbb[week])
-        .replace(/(S+)/g, (_, ms) => this.getMilliseconds().toString().padStart(ms.length, '0'))
-        .replace('ap', this.getHours() > 12 ? 'am' : 'pm')
-        .replace('AP', this.getHours() > 12 ? 'PM' : 'AM')
-        .replace('q', quarter.toString())
-        .replace('Q', ['', '一', '二', '三', '四'][quarter])
-        .replace('Z', `${zone >= 0 ? '+' : '-'}${String(Math.abs(zone)).padStart(2, '0')}${String(Math.abs(this.getTimezoneOffset()) % 60).padStart(2, '0')}`);
-      return Object.keys(o)
-        .reduce((formattedTemp, currKey) => formattedTemp.replace(
-          new RegExp(`(${currKey})`),
-          (_, match) => o[currKey].toString().padStart(match.length, '0')), format);
+      const zone = -this.getTimezoneOffset(); // 时区总偏移分钟数（东为正，支持半小时时区）
+      const pad = (value: number, len: number) => String(value).padStart(len, '0');
+      // 单次扫描替换，避免替换结果（如英文星期中的 s、am/pm 中的 m）被后续规则二次匹配
+      return format.replace(/\[[^\]]*\]|y+|M+|d+|H+|h+|m+|s+|S+|q|Q|E+|e+|ap|AP|Z/g, (token) => {
+        switch (token[0]) {
+          // 方括号包裹的内容原样输出，用于 GMT 这类含格式符的字面量
+          case '[': return token.slice(1, -1);
+          // 年：y 与 yyyy 为四位，yy 取后两位，其余按匹配长度补零
+          case 'y': return token.length === 1 ? pad(year, 4) : token.length === 2 ? String(year).slice(-2) : pad(year, token.length);
+          case 'M': return pad(this.getMonth() + 1, token.length);
+          case 'd': return pad(this.getDate(), token.length);
+          case 'H': return pad(this.getHours(), token.length);
+          case 'h': return pad(this.getHours() % 12 === 0 ? 12 : this.getHours() % 12, token.length);
+          case 'm': return pad(this.getMinutes(), token.length);
+          case 's': return pad(this.getSeconds(), token.length);
+          case 'S': return pad(this.getMilliseconds(), token.length);
+          case 'q': return String(quarter);
+          case 'Q': return ['', '一', '二', '三', '四'][quarter];
+          case 'a': return this.getHours() < 12 ? 'am' : 'pm';
+          case 'A': return this.getHours() < 12 ? 'AM' : 'PM';
+          case 'E': return token.length >= 3 ? `星期${weeks[week]}` : token.length === 2 ? `周${weeks[week]}` : weeks[week];
+          case 'e': return token.length >= 3 ? weeksEn[week] : token.length === 2 ? `${weeksEnAbb[week]}.` : weeksEnAbb[week];
+          case 'Z': return `${zone >= 0 ? '+' : '-'}${pad(Math.floor(Math.abs(zone) / 60), 2)}${pad(Math.abs(zone) % 60, 2)}`;
+          default: return token;
+        }
+      });
     }
   }
 }

@@ -37,6 +37,7 @@ interface Date {
    * ② 年份y匹配字符长度为2时，取最后两位，其余时候同①。
    * ③ 星期：E => 一~六与日、EE => 周*、EEE => 星期*；e => 英文简写、ee => 英文简写（末尾带“.”）、eee => 英文星期。
    * ④ 季度q为大写Q时，返回汉字“一~四”；ap为大写时，返回的上/下午为大写字母。
+   * ⑤ 需要原样输出的内容用方括号包裹，如 yyyy-MM-dd HH:mm:ss [GMT]Z => 2026-11-18 12:00:00 GMT+0800。
    * @returns { string } 格式化后的字符串
    */
   format(format: string = 'yyyy-MM-dd HH:mm:ss'): string;

@@ -84,7 +84,7 @@
         <h2 class="card-title text-base">时间戳 → 日期时间</h2>
         <div class="flex flex-wrap items-center gap-3">
           <label class="join shrink-0">
-            <button class="btn btn-sm join-item pointer-events-none">单位</button>
+            <span class="label mr-2">单位</span>
             <select v-model="tsUnit" class="select select-sm join-item w-36">
               <option value="auto">自动识别</option>
               <option value="s">秒（s）</option>
@@ -101,7 +101,6 @@
                 v-model="tsInput"
                 placeholder="如：1760000000 / 1760000000000"
                 spellcheck="false"
-                @keyup.enter="convertTsToNow"
             />
           </label>
           <button class="btn btn-sm shrink-0" @click="convertTsToNow">取当前值</button>
@@ -133,11 +132,32 @@
           <div class="flex flex-wrap items-center gap-3">
             <label class="input grow items-center gap-2 min-w-60">
               <span class="opacity-60 shrink-0">自定义格式</span>
-              <input type="text" class="grow font-mono" v-model="customTemplate" spellcheck="false"/>
+              <input
+                  type="text"
+                  class="grow font-mono"
+                  v-model="customTemplate"
+                  placeholder="yyyy-MM-dd HH:mm:ss.SSS"
+                  spellcheck="false"
+                  @blur="rememberCustomTemplate"
+                  @keyup.enter="rememberCustomTemplate"
+              />
             </label>
             <span class="font-mono text-lg shrink-0">{{ customFormatted }}{{ tzLabel }}</span>
           </div>
-          <p class="text-xs opacity-50">占位符：{yyyy} 年、{MM} 月、{dd} 日、{HH} 时、{mm} 分、{ss} 秒、{SSS} 毫秒</p>
+          <p class="text-xs opacity-50">
+            格式符：y 年、M 月、d 日、H 时（24 制）、h 时（12 制）、m 分、s 秒、S 毫秒、q 季度数字、Q 季度汉字、E/EE/EEE 星期、e/ee/eee 英文星期、ap/AP 上下午、Z 时区；重复字符数量决定补零位数（y 为 2 位时取年份后两位）；需要原样输出的内容用方括号包裹，如 yyyy-MM-dd HH:mm:ss [GMT]Z => {{new Date(parsedMs || Date.now()).format('yyyy-MM-dd HH:mm:ss [GMT]Z')}}。
+          </p>
+          <div v-if="customFormatHistory.length" class="flex flex-wrap items-center gap-2">
+            <span class="text-xs opacity-50">历史格式</span>
+            <span
+                v-for="item in customFormatHistory"
+                :key="item"
+                class="badge badge-outline gap-1 font-mono"
+            >
+              <button class="max-w-64 truncate hover:text-primary" :title="`点击使用 ${item}`" @click="customTemplate = item">{{ item }}</button>
+              <button class="opacity-50 hover:text-error" title="删除该记录" @click="removeCustomHistory(item)">×</button>
+            </span>
+          </div>
 
           <!-- 附加信息 -->
           <div class="flex flex-wrap gap-2 text-sm">
@@ -163,12 +183,38 @@
                 type="text"
                 class="grow font-mono"
                 v-model="dtInput"
-                placeholder="如：2026-10-19 12:00:00 / 2026-10-19T04:00:00Z"
+                placeholder="如：2026-10-19 12:00:00"
                 spellcheck="false"
+                @blur="rememberDtFormat"
+                @keyup.enter="rememberDtFormat"
             />
           </label>
-          <input type="datetime-local" class="input input-sm shrink-0" v-model="dtPicker" @change="onPickerChange"/>
-          <button class="btn btn-sm shrink-0" @click="dtInput = nowDateTimeString()">此刻</button>
+          <label class="input grow items-center gap-2 min-w-60" :class="{ 'input-error': !!dtError }">
+            <span class="opacity-60 shrink-0">格式</span>
+            <input
+                type="text"
+                class="grow font-mono"
+                v-model="dtFormat"
+                placeholder="如：yyyy-MM-dd HH:mm:ss"
+                spellcheck="false"
+                @blur="rememberDtFormat"
+                @keyup.enter="rememberDtFormat"
+            />
+          </label>
+        </div>
+        <p class="text-xs opacity-50">
+          解析支持 y、M、d、H、h、m、s、S、ap/AP、Z 与 [字面量]；格式中缺少的日期取今天、时间取 0；含 Z 时以字符串中的时区为准，否则按上方所选时区解析。
+        </p>
+        <div v-if="dtFormatHistory.length" class="flex flex-wrap items-center gap-2">
+          <span class="text-xs opacity-50">历史格式</span>
+          <span
+              v-for="item in dtFormatHistory"
+              :key="item"
+              class="badge badge-outline gap-1 font-mono"
+          >
+            <button class="max-w-64 truncate hover:text-primary" :title="`点击使用 ${item}`" @click="dtFormat = item">{{ item }}</button>
+            <button class="opacity-50 hover:text-error" title="删除该记录" @click="removeDtHistory(item)">×</button>
+          </span>
         </div>
         <div v-if="dtError" class="text-error text-sm">{{ dtError }}</div>
         <div v-else-if="dtMs !== null" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 text-sm">
@@ -195,16 +241,15 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onBeforeUnmount, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, ref, watch, type Ref } from 'vue';
 import Copy from '@/components/icons/Copy.vue';
 import Copied from '@/components/icons/Copied.vue';
 import { copyText, popupTip } from '@/common/utils.ts';
 import {
   FORMAT_PRESETS,
   describeDiff,
-  formatByTemplate,
-  getWeekdayName,
-  parseDateTimeToMs,
+  formatDate,
+  parseDateTimeByFormat,
   parseTimestampText,
   type ParsedTimestamp,
   type TimeUnit,
@@ -274,7 +319,7 @@ const useNow = () => {
 /* ------------------------- 时间戳 -> 日期时间 ------------------------- */
 const tsInput = ref<string>(`${Date.now()}`);
 const tsUnit = ref<TimeUnit>('auto');
-const customTemplate = ref<string>('{yyyy}-{MM}-{dd} {HH}:{mm}:{ss}.{SSS}');
+const customTemplate = ref<string>('yyyy-MM-dd HH:mm:ss.SSS');
 
 const parsed = computed<ParsedTimestamp | null>(() => {
   const raw = tsInput.value.trim();
@@ -299,18 +344,18 @@ const formatResults = computed(() => {
   return FORMAT_PRESETS.map(p => ({
     key: p.key,
     label: p.label + (tzLabel.value ? `（${tzLabel.value}）` : ''),
-    value: formatByTemplate(ms, p.template, tzMode.value, tzOffsetHours.value),
+    value: formatDate(ms, p.pattern, tzMode.value, tzOffsetHours.value),
   }));
 });
 
 const customFormatted = computed(() => {
   const ms = parsedMs.value;
   if (ms === null) return '';
-  return formatByTemplate(ms, customTemplate.value, tzMode.value, tzOffsetHours.value);
+  return formatDate(ms, customTemplate.value, tzMode.value, tzOffsetHours.value);
 });
 
 const weekdayName = computed(() =>
-    parsedMs.value !== null ? getWeekdayName(parsedMs.value, tzMode.value, tzOffsetHours.value) : ''
+    parsedMs.value !== null ? formatDate(parsedMs.value, 'EE', tzMode.value, tzOffsetHours.value) : ''
 );
 
 const diff = computed(() => {
@@ -326,28 +371,74 @@ const convertTsToNow = () => {
 };
 
 /* ------------------------- 日期时间 -> 时间戳 ------------------------- */
-const nowDateTimeString = () => {
-  const f = (n: number, l = 2) => String(n).padStart(l, '0');
-  const d = new Date();
-  return `${d.getFullYear()}-${f(d.getMonth() + 1)}-${f(d.getDate())} ${f(d.getHours())}:${f(d.getMinutes())}:${f(d.getSeconds())}.${f(d.getMilliseconds(), 3)}`;
-};
+const dtFormat = ref<string>('yyyy-MM-dd HH:mm:ss');
+const dtInput = ref<string>(new Date().format(dtFormat.value));
 
-const dtInput = ref<string>(nowDateTimeString());
-const dtPicker = ref<string>('');
-
-const onPickerChange = () => {
-  if (dtPicker.value) dtInput.value = dtPicker.value;
-};
-
-const dtMs = computed<number | null>(() => parseDateTimeToMs(dtInput.value, tzMode.value, tzOffsetHours.value));
+const dtMs = computed<number | null>(() =>
+    parseDateTimeByFormat(dtInput.value, dtFormat.value, tzMode.value, tzOffsetHours.value)
+);
 
 const dtError = computed(() => {
   const raw = dtInput.value.trim();
   if (!raw) return '';
+  if (dtMs.value !== null) return '';
+  if (!dtFormat.value.trim()) return '请填写与日期时间对应的格式串';
   if (/^-?\d+$/.test(raw)) return '这是纯数字，请在上方“时间戳 → 日期时间”中转换';
-  if (dtMs.value === null) return '无法解析该日期时间，请检查格式（如：2026-10-19 12:00:00）';
-  return '';
+  return '日期时间与格式不匹配，请检查两者是否对应';
 });
+
+/* ------------------------- 格式历史记录（本地存储，最多 5 条） ------------------------- */
+const CUSTOM_FORMAT_HISTORY_KEY = 'timestampCvter:custom-formats';
+const DT_FORMAT_HISTORY_KEY = 'timestampCvter:datetime-formats';
+const FORMAT_HISTORY_MAX = 5;
+
+const readFormatHistory = (key: string): string[] => {
+  try {
+    const stored = JSON.parse(localStorage.getItem(key) ?? '[]');
+    return Array.isArray(stored)
+      ? stored.filter((item): item is string => typeof item === 'string').slice(0, FORMAT_HISTORY_MAX)
+      : [];
+  } catch {
+    return [];
+  }
+};
+
+const writeFormatHistory = (key: string, list: string[]) => {
+  try {
+    localStorage.setItem(key, JSON.stringify(list));
+  } catch {
+    // 本地存储不可用时仅保留内存中的记录
+  }
+};
+
+const customFormatHistory = ref<string[]>(readFormatHistory(CUSTOM_FORMAT_HISTORY_KEY));
+const dtFormatHistory = ref<string[]>(readFormatHistory(DT_FORMAT_HISTORY_KEY));
+
+/** 记录一条格式：去重后置顶，最多保留 FORMAT_HISTORY_MAX 条 */
+const rememberFormat = (key: string, history: Ref<string[]>, value: string) => {
+  const format = value.trim();
+  if (!format) return;
+  history.value = [format, ...history.value.filter(item => item !== format)].slice(0, FORMAT_HISTORY_MAX);
+  writeFormatHistory(key, history.value);
+};
+
+const forgetFormat = (key: string, history: Ref<string[]>, value: string) => {
+  history.value = history.value.filter(item => item !== value);
+  writeFormatHistory(key, history.value);
+};
+
+/** 自定义格式：输入完成即记录 */
+const rememberCustomTemplate = () => {
+  rememberFormat(CUSTOM_FORMAT_HISTORY_KEY, customFormatHistory, customTemplate.value);
+};
+
+/** 日期时间格式：仅在当前转换成功时记录 */
+const rememberDtFormat = () => {
+  if (dtMs.value !== null) rememberFormat(DT_FORMAT_HISTORY_KEY, dtFormatHistory, dtFormat.value);
+};
+
+const removeCustomHistory = (item: string) => forgetFormat(CUSTOM_FORMAT_HISTORY_KEY, customFormatHistory, item);
+const removeDtHistory = (item: string) => forgetFormat(DT_FORMAT_HISTORY_KEY, dtFormatHistory, item);
 
 const dtOutItems = computed(() => {
   const ms = dtMs.value;
