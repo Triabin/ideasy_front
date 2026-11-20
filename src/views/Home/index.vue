@@ -1,8 +1,8 @@
 <!-- 首页路由组件 -->
 <template>
-  <div class="flex flex-col items-center justify-center gap-1">
+  <div class="flex flex-col items-center justify-center gap-1 p-4">
     <!-- 粒子时钟 -->
-    <div class="w-full h-[25lvh] bg-base-200 rounded-md m-4 flex justify-center items-center">
+    <div class="w-full h-[25lvh] bg-base-200 rounded-md mb-3 flex justify-center items-center">
       <DynamicClock :color="currRealMode === 'dark' ? '#FFFFFFA1' : '#283747AF'" :density="4"/>
     </div>
     <!-- 卡片网格 -->
