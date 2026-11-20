@@ -5,21 +5,14 @@
     <div class="w-full h-[25lvh] bg-base-200 rounded-md m-4 flex justify-center items-center">
       <DynamicClock :color="currRealMode === 'dark' ? '#FFFFFFA1' : '#283747AF'" :density="4"/>
     </div>
-    <!-- 搜索框 -->
-    <div class="w-full h-[5lvh] flex justify-center items-center">
-      <GlobalSearchBox v-model="keyword"/>
-    </div>
     <!-- 卡片网格 -->
-    <div class="w-full min-h-[70lvh] grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] grid-rows-[repeat(auto-fill,minmax(200px,1fr))] gap-5 p-5">
-      <div v-if="keyword.trim() && filteredCardRoutes.length === 0"
-           class="col-span-full flex items-center justify-center text-base-content/60">
-        没有找到与“{{ keyword.trim() }}”匹配的工具
-      </div>
+    <div class="w-full min-h-[70lvh] grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] grid-rows-[repeat(auto-fill,minmax(200px,1fr))] gap-5">
+      <div v-if="!cardRoutes || cardRoutes.length === 0" class="col-span-full flex items-center justify-center text-base-content/60">啥也没有</div>
       <!-- 卡片 -->
-      <div v-for="(card, index) in filteredCardRoutes"
+      <div v-for="(card, index) in cardRoutes"
            :key="index"
            title="点击跳转"
-           @click="cardClick(card.path)"
+           @click="router.push(card.path)"
            class="flex flex-col justify-start gap-2.5 border border-accent/10 rounded-md p-6 overflow-hidden bg-base-200/55
              shadow-sm cursor-pointer hover:border-primary hover:shadow-[0_0_10px_var(--color-primary)] hover:-translate-y-1.25
              transition-all duration-200 ease-in-out">
@@ -45,9 +38,8 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { computed, ref, toRef } from 'vue';
+import { computed, toRef } from 'vue';
 import DynamicClock from '@/components/DynamicClock';
-import GlobalSearchBox from '@/components/GlobalSearchBox';
 import useSettingsStore from '@/stores/settingsStore';
 import { routes, flattenRoute } from '@/router';
 import { useRouter, type RouteRecordRaw } from 'vue-router';
@@ -58,8 +50,6 @@ const cardRoutes = computed(() => flattenRoute(routes)
     .filter(route => route.path.startsWith('/tools/'))
 );
 const router = useRouter();
-// 搜索关键字
-const keyword = ref<string>('');
 
 /**
  * 获取卡片路由的标签列表
@@ -92,23 +82,4 @@ const tagColor = (tag: string): string => {
   }
   return TAG_COLORS[Math.abs(hash) % TAG_COLORS.length];
 };
-
-/**
- * 根据关键字过滤工具卡片
- * 匹配各工具页面 _page.ts 导出对象的 title、desc 与 tags 字段（不区分大小写，支持空格分隔多关键词）
- */
-const filteredCardRoutes = computed(() => {
-  const kws = keyword.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
-  if (kws.length === 0) return cardRoutes.value;
-  return cardRoutes.value.filter(card => {
-    const title = (card.meta?.title as string ?? '').toLowerCase();
-    const desc = (card.meta?.desc as string ?? '').toLowerCase();
-    const tags = cardTags(card).map(t => t.toLowerCase());
-    return kws.every(kw => title.includes(kw) || desc.includes(kw) || tags.some(tag => tag.includes(kw)));
-  });
-});
-
-const cardClick = (path: string) => {
-  router.push(path);
-}
 </script>

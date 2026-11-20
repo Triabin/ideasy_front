@@ -149,7 +149,7 @@
         </div>
 
         <!-- 存储说明 -->
-        <div class="text-xs opacity-50 pt-2 mt-1 border-t border-base-200 leading-relaxed break-words">
+        <div class="text-xs opacity-50 pt-2 mt-1 border-t border-base-200 leading-relaxed wrap-break-word">
           以上设置会自动保存到浏览器本地存储（localStorage），切换浏览器或者清除本地存储数据时自动恢复默认。
         </div>
       </div>
