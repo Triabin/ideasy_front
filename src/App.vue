@@ -54,14 +54,13 @@
     <div class="drawer-side z-overlay">
       <label for="nav-drawer" aria-label="关闭菜单" class="drawer-overlay"></label>
       <aside class="flex flex-col w-72 max-w-[85vw] min-h-full bg-base-200 p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
-        <!-- 抽屉标题栏 -->
-        <div class="flex items-center justify-between">
-          <span class="text-lg font-bold">菜单</span>
-          <label for="nav-drawer" aria-label="关闭菜单" class="btn btn-sm btn-ghost btn-circle cursor-pointer">
-            <Close :size="18"/>
-          </label>
+        <!-- 主题设定：复用桌面端同一组件，其下拉面板 Teleport 到 body，不会被抽屉裁剪 -->
+        <div class="divider text-xs opacity-60">主题设定</div>
+        <div class="flex justify-center">
+          <ThemeController/>
         </div>
         <!-- 外链菜单 -->
+        <div class="divider text-xs opacity-60">外链菜单</div>
         <ul class="menu rounded-box mt-2">
           <li>
             <a title="我的博客" @click="openDrawerLink('https://spirit.triabin.cn')">
@@ -76,11 +75,6 @@
             </a>
           </li>
         </ul>
-        <!-- 主题设定：复用桌面端同一组件，其下拉面板 Teleport 到 body，不会被抽屉裁剪 -->
-        <div class="divider text-xs opacity-60">主题设定</div>
-        <div class="flex justify-center">
-          <ThemeController/>
-        </div>
       </aside>
     </div>
   </div>
@@ -93,7 +87,6 @@ import NavbarRight from '@/components/NavbarRight';
 import NavbarLeft from '@/components/NavbarLeft';
 import ThemeController from '@/components/ThemeController';
 import GitHub from '@/components/icons/GitHub.vue';
-import Close from '@/components/icons/Close.vue';
 import useWheelOuter2Inner from '@/composables/useWheelOuter2Inner.ts';
 import { openUrl } from '@/common/utils.ts';
 

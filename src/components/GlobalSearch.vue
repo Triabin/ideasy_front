@@ -22,8 +22,8 @@
     <Search class="shrink-0"/>
     <span class="grow text-left truncate">你找啥？</span>
     <span v-if="osType === 'Windows' || osType === 'Linux' || osType === 'MacOS'" class="hidden md:flex items-center gap-0.5 shrink-0">
-      <kbd class="kbd kbd-xs">{{ modifierKey }}</kbd>
-      <kbd class="kbd kbd-xs">K</kbd>
+      <kbd class="kbd kbd-sm">{{ modifierKey }}</kbd>
+      <kbd class="kbd kbd-sm">K</kbd>
     </span>
   </button>
 
