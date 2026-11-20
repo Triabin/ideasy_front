@@ -1,16 +1,27 @@
 <!-- 全局搜索：导航栏只做触发器，搜索逻辑全部在弹窗中 -->
 <template>
-  <!-- 导航栏触发框（伪输入框） -->
+  <!-- 移动端触发器：纯图标按钮（md 及以上隐藏，让位给伪输入框） -->
   <button
       type="button"
-      class="flex items-center gap-2 h-9 w-40 px-3 rounded-md border border-base-300 bg-base-100 text-sm
+      class="btn btn-sm btn-ghost btn-circle md:hidden"
+      title="搜索"
+      aria-label="打开搜索"
+      @click="openSearch"
+  >
+    <Search class="shrink-0"/>
+  </button>
+
+  <!-- 导航栏触发框（伪输入框，md 及以上显示） -->
+  <button
+      type="button"
+      class="hidden md:flex items-center gap-2 h-9 w-auto px-3 rounded-md border border-base-300 bg-base-100 text-sm
       text-base-content/60 cursor-pointer hover:border-primary/60 hover:text-base-content transition-colors"
       :title="`搜索（${modifierKey} + K）`"
       @click="openSearch"
   >
     <Search class="shrink-0"/>
     <span class="grow text-left truncate">你找啥？</span>
-    <span class="hidden md:flex items-center gap-0.5 shrink-0">
+    <span v-if="osType === 'Windows' || osType === 'Linux' || osType === 'MacOS'" class="hidden md:flex items-center gap-0.5 shrink-0">
       <kbd class="kbd kbd-xs">{{ modifierKey }}</kbd>
       <kbd class="kbd kbd-xs">K</kbd>
     </span>
