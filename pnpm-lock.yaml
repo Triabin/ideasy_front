@@ -14,6 +14,9 @@ importers:
       '@tailwindcss/vite':
         specifier: ^4.1.13
         version: 4.3.3(vite@8.3.3(@types/node@24.19.1)(jiti@2.7.0))
+      chinese-days:
+        specifier: ^2.0.0
+        version: 2.0.0
       leaflet:
         specifier: ^1.9.4
         version: 1.9.4
@@ -424,6 +427,9 @@ packages:
   camelcase@5.3.1:
     resolution: {integrity: sha512-L28STB170nwWS63UjtlEOE3dldQApaJXZkOI1uMFfzf3rRuPegHaHesyee+YxQ+W6SvRDQV6UrdOdRiR153wJg==}
     engines: {node: '>=6'}
+
+  chinese-days@2.0.0:
+    resolution: {integrity: sha512-ZeCh4gOEaPKYVPv+qIer4Ehi4gqqyVMW6Js8ZJ3/tLDLlV+vVR6SqqL/xpwZYXWFjbJk4IUtAvYhPgjjxwSoog==}
 
   cliui@6.0.0:
     resolution: {integrity: sha512-t6wbgtoCXvAzst7QgXxJYqPt0usEfbgQdftEPbLL/cvv6HPE5VgvqCuAIDR0NgU52ds6rFwqrgakNLrHEjCbrQ==}
@@ -1176,6 +1182,8 @@ snapshots:
   birpc@2.9.0: {}
 
   camelcase@5.3.1: {}
+
+  chinese-days@2.0.0: {}
 
   cliui@6.0.0:
     dependencies:

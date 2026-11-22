@@ -1,3 +1,4 @@
+<!-- 搜索图标 -->
 <template>
   <svg class="h-[1.5em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
     <g

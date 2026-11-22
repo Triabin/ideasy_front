@@ -1,29 +1,104 @@
 <!-- 首页路由组件 -->
 <template>
-  <div class="flex flex-col items-center justify-center gap-1 p-4">
+  <div class="flex flex-col items-center justify-center gap-4 p-4">
+    <!-- 问候语 + 日期 + 统计 -->
+    <div class="w-full flex flex-wrap items-end justify-between gap-2 px-1">
+      <div class="flex flex-col gap-1">
+        <HomeGreeting/>
+      </div>
+      <div class="flex gap-2 text-sm">
+        <span class="badge badge-lg badge-outline gap-1.5 font-mono">
+          <b class="text-primary">{{ allTools.length }}</b> 个工具
+        </span>
+        <span v-if="appData.favoriteTools.length" class="badge badge-lg badge-outline gap-1.5 font-mono">
+          <b class="text-warning">{{ appData.favoriteTools.length }}</b> 个收藏
+        </span>
+      </div>
+    </div>
+
     <!-- 粒子时钟 -->
-    <div class="w-full h-[25lvh] bg-base-200 rounded-md mb-3 flex justify-center items-center shadow-md">
+    <div class="w-full h-[25lvh] bg-base-200 rounded-md flex justify-center items-center shadow-md">
       <DynamicClock :color="currRealMode === 'dark' ? '#FFFFFFA1' : '#283747AF'" :density="4"/>
     </div>
+
+    <!-- 搜索 + 标签筛选 -->
+    <div class="w-full flex flex-col gap-2">
+      <label class="input w-full sm:w-96 sm:self-center rounded-full">
+        <Search/>
+        <input v-model="keyword" type="search" class="grow" placeholder="搜索工具：名称 / 标签 / 描述" spellcheck="false"/>
+        <button v-if="keyword" class="btn btn-ghost btn-xs btn-circle" title="清空搜索" @click="keyword = ''">
+          <Close class="size-4"/>
+        </button>
+      </label>
+      <div class="flex flex-wrap justify-center gap-1.5">
+        <button class="btn btn-xs rounded-full" :class="activeTag === '' ? 'btn-primary' : 'btn-ghost bg-base-200'"
+                @click="activeTag = ''">全部</button>
+        <button v-for="tag in hotTags" :key="tag"
+                class="btn btn-xs rounded-full" :class="activeTag === tag ? 'btn-primary' : 'btn-ghost bg-base-200'"
+                @click="activeTag = activeTag === tag ? '' : tag">{{ tag }}</button>
+      </div>
+    </div>
+
+    <!-- 收藏的工具 -->
+    <section v-if="favoriteRoutes.length && !isFiltering" class="w-full">
+      <h2 class="text-sm font-semibold opacity-60 mb-2 px-1">我的收藏</h2>
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5">
+        <div v-for="tool in favoriteRoutes" :key="tool.path"
+             class="flex items-center gap-2.5 rounded-lg border border-warning/30 bg-base-200 px-3 py-2.5 cursor-pointer
+                    hover:border-warning hover:shadow-sm transition-all group"
+             @click="openTool(tool.path)">
+          <component v-if="tool.meta?.icon" :is="tool.meta.icon" class="shrink-0"/>
+          <span class="font-medium truncate grow">{{ tool.meta?.title }}</span>
+          <button class="btn btn-ghost btn-xs btn-circle text-warning opacity-60 group-hover:opacity-100"
+                  title="取消收藏" @click.stop="appData.toggleFavoriteTool(tool.path)">
+            <Star filled/>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 最近使用 -->
+    <section v-if="recentRoutes.length && !isFiltering" class="w-full">
+      <h2 class="text-sm font-semibold opacity-60 mb-2 px-1">最近使用</h2>
+      <div class="flex flex-wrap gap-2">
+        <button v-for="tool in recentRoutes" :key="tool.path"
+                class="btn btn-sm bg-base-200 border-base-300 font-normal gap-2 hover:border-primary"
+                @click="openTool(tool.path)">
+          <component v-if="tool.meta?.icon" :is="tool.meta.icon"/>
+          {{ tool.meta?.title }}
+        </button>
+      </div>
+    </section>
+
     <!-- 卡片网格 -->
-    <div class="w-full min-h-[70lvh] grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] grid-rows-[repeat(auto-fill,minmax(200px,1fr))] gap-5">
-      <div v-if="!cardRoutes || cardRoutes.length === 0" class="col-span-full flex items-center justify-center text-base-content/60">啥也没有</div>
+    <div class="w-full min-h-[40lvh] grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] grid-rows-[repeat(auto-fill,minmax(200px,1fr))] gap-5">
+      <div v-if="!filteredRoutes.length" class="col-span-full flex flex-col items-center justify-center gap-2 text-base-content/60">
+        <Search class="size-8 opacity-40"/>
+        <p>{{ isFiltering ? '没有找到匹配的工具，换个关键词试试' : '啥也没有' }}</p>
+        <button v-if="isFiltering" class="btn btn-sm btn-ghost" @click="keyword = ''; activeTag = ''">清除筛选条件</button>
+      </div>
       <!-- 卡片 -->
-      <div v-for="(card, index) in cardRoutes"
-           :key="index"
+      <div v-for="card in filteredRoutes"
+           :key="card.path"
            title="点击跳转"
-           @click="router.push(card.path)"
-           class="flex flex-col justify-start gap-2.5 border border-accent/10 rounded-md p-6 overflow-hidden bg-base-200/55
+           @click="openTool(card.path)"
+           class="relative flex flex-col justify-start gap-2.5 border border-accent/10 rounded-md p-6 overflow-hidden bg-base-200/55
              shadow-sm cursor-pointer hover:border-primary hover:shadow-[0_0_10px_var(--color-primary)] hover:-translate-y-1.25
-             transition-all duration-200 ease-in-out">
+             transition-all duration-200 ease-in-out group">
+        <!-- 收藏按钮 -->
+        <button class="btn btn-ghost btn-sm btn-circle absolute top-2 right-2 z-10
+                       opacity-0 group-hover:opacity-100 transition-opacity"
+                :class="appData.favoriteTools.includes(card.path) ? 'text-warning opacity-100!' : 'text-base-content/50'"
+                :title="appData.favoriteTools.includes(card.path) ? '取消收藏' : '收藏'"
+                @click.stop="appData.toggleFavoriteTool(card.path)">
+          <Star :filled="appData.favoriteTools.includes(card.path)"/>
+        </button>
         <!-- 卡片标题 -->
         <div class="flex items-center gap-2.5">
-          <!-- 卡片图标 -->
           <component v-if="card.meta?.icon" :is="card.meta.icon"/>
-          <!-- 卡片标题 -->
           <h2 class="text-xl font-semibold">{{ card.meta?.title }}</h2>
         </div>
-        <!-- 卡片标签 -->
+        <!-- 卡片标签（仅展示，筛选统一走顶部标签按钮，避免点卡片时误触） -->
         <div v-if="cardTags(card).length" class="flex flex-wrap gap-1.5">
           <span v-for="(tag, ti) in cardTags(card)"
                 :key="ti"
@@ -38,26 +113,71 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { computed, toRef } from 'vue';
-import DynamicClock from '@/components/DynamicClock';
-import useSettingsStore from '@/stores/settingsStore';
+import { computed, ref, toRef } from 'vue';
 import { routes, flattenRoute } from '@/router';
 import { useRouter, type RouteRecordRaw } from 'vue-router';
+import useSettingsStore from '@/stores/settingsStore';
+import useAppDataStore from '@/stores/appData';
+import DynamicClock from '@/components/DynamicClock';
+import Search from '@/components/icons/Search.vue';
+import Close from '@/components/icons/Close.vue';
+import Star from '@/components/icons/Star.vue';
+import HomeGreeting from '@/components/HomeGreeting.vue';
 
 const currRealMode = toRef(useSettingsStore(), 'currRealMode');
-const cardRoutes = computed(() => flattenRoute(routes)
+const appData = useAppDataStore();
+const router = useRouter();
+
+/* ------------------------- 工具数据 ------------------------- */
+const allTools = computed(() => flattenRoute(routes)
     .filter(route => !route.meta?.hidden)
     .filter(route => route.path.startsWith('/tools/'))
 );
-const router = useRouter();
+const routeByPath = (path: string) => allTools.value.find(r => r.path === path);
+
+/** 收藏的工具（过滤掉已下线的路由） */
+const favoriteRoutes = computed(() => appData.favoriteTools.map(routeByPath).filter((r): r is RouteRecordRaw => !!r));
+/** 最近使用（过滤掉已下线的路由） */
+const recentRoutes = computed(() => appData.recentTools.map(r => routeByPath(r.path)).filter((r): r is RouteRecordRaw => !!r));
+
+/** 打开工具并记录最近使用 */
+const openTool = (path: string) => {
+  appData.pushRecentTool(path);
+  router.push(path);
+};
+
+/* ------------------------- 搜索与筛选 ------------------------- */
+const keyword = ref('');
+const activeTag = ref('');
+const isFiltering = computed(() => !!keyword.value.trim() || !!activeTag.value);
+
+/** 热门标签：按出现次数取前 8 个 */
+const hotTags = computed(() => {
+  const count = new Map<string, number>();
+  for (const tool of allTools.value) {
+    for (const tag of cardTags(tool)) count.set(tag, (count.get(tag) ?? 0) + 1);
+  }
+  return [...count.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8).map(([tag]) => tag);
+});
+
+const filteredRoutes = computed(() => {
+  const kw = keyword.value.trim().toLowerCase();
+  const words = kw.split(/\s+/).filter(Boolean);
+  return allTools.value.filter(tool => {
+    if (activeTag.value && !cardTags(tool).includes(activeTag.value)) return false;
+    if (!words.length) return true;
+    const title = String(tool.meta?.title ?? '').toLowerCase();
+    const desc = String(tool.meta?.desc ?? '').toLowerCase();
+    const tags = cardTags(tool).join(' ').toLowerCase();
+    return words.every(w => title.includes(w) || desc.includes(w) || tags.includes(w));
+  });
+});
 
 /**
  * 获取卡片路由的标签列表
  * @param card {RouteRecordRaw} 卡片路由
  */
-const cardTags = (card: RouteRecordRaw): string[] => {
-  return (card.meta?.tags as string[] | undefined) ?? [];
-};
+const cardTags = (card: RouteRecordRaw): string[] => (card.meta?.tags as string[] | undefined) ?? [];
 
 /** 标签颜色调色板（保证同名标签颜色稳定） */
 const TAG_COLORS = [

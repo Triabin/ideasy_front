@@ -29,6 +29,24 @@ const useAppDataStore = defineStore('appData', () => {
   /** 颜色转换历史 */
   const cvtColorHistories = ref<string[]>([]);
 
+  /** 收藏的工具路径（按收藏先后顺序） */
+  const favoriteTools = ref<string[]>([]);
+  /** 最近使用的工具（最新在前，最多8条） */
+  const recentTools = ref<{ path: string; time: number }[]>([]);
+
+  /** 切换工具收藏状态 */
+  const toggleFavoriteTool = (path: string) => {
+    const idx = favoriteTools.value.indexOf(path);
+    if (idx >= 0) favoriteTools.value.splice(idx, 1);
+    else favoriteTools.value.push(path);
+  };
+
+  /** 记录一次工具使用 */
+  const pushRecentTool = (path: string) => recentTools.value = [
+    { path, time: Date.now() },
+    ...recentTools.value.filter(r => r.path !== path).slice(0, 7)
+  ];
+
   /** 密码生成最近记录（最多100条，最新在前） */
   const passwordGenRecords = ref<PasswordGenRecord[]>([]);
 
@@ -67,7 +85,8 @@ const useAppDataStore = defineStore('appData', () => {
 
   return {
     cvtColorHistories, pushCvtColorHistory, clearCvtColorHistory,
-    passwordGenRecords, pushPasswordGenRecord, removePasswordGenRecord, clearPasswordGenHistory
+    passwordGenRecords, pushPasswordGenRecord, removePasswordGenRecord, clearPasswordGenHistory,
+    favoriteTools, toggleFavoriteTool, recentTools, pushRecentTool
   };
 }, { persist: true });
 
