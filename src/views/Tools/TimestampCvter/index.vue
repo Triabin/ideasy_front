@@ -142,7 +142,7 @@
                   @keyup.enter="rememberCustomTemplate"
               />
             </label>
-            <span class="font-mono text-lg shrink-0">{{ customFormatted }}{{ tzLabel }}</span>
+            <span class="font-mono text-lg shrink-0">{{ customFormatted }}{{ tzLabel && `  ${tzLabel}` }}</span>
           </div>
           <p class="text-xs opacity-50">
             格式符：y 年、M 月、d 日、H 时（24 制）、h 时（12 制）、m 分、s 秒、S 毫秒、q 季度数字、Q 季度汉字、E/EE/EEE 星期、e/ee/eee 英文星期、ap/AP 上下午、Z 时区；重复字符数量决定补零位数（y 为 2 位时取年份后两位）；需要原样输出的内容用方括号包裹，如 yyyy-MM-dd HH:mm:ss [GMT]Z => {{new Date(parsedMs || Date.now()).format('yyyy-MM-dd HH:mm:ss [GMT]Z')}}。
