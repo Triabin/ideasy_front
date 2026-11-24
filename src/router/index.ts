@@ -1,3 +1,9 @@
+/**
+ * 按照目录../views下子路径的目录层级生成路由，例如../views/Home目录下，有一个index.vue和一个_page.ts文件，
+ * index.vue为Home页面内容，_page.ts默认到处一个JSON对象，该对象内容为路由的meta字段值，生成的路由为/home，
+ * 路由名称为Home。如果Home还有其他子路径，则生成规则相同，只不过路由前面都有/home/
+ * 特殊说明：路由 / 重定向到 /home
+ */
 import { createRouter, createWebHistory, type RouteMeta, type RouteRecordRaw } from 'vue-router';
 import { setupRouteAnalytics } from '@/plugins/analytics.ts';
 import useAppDataStore from '@/stores/appData';
@@ -22,9 +28,15 @@ const pages: Record<string, RouteMeta> = import.meta.glob('../views/**/_page.ts'
 const components = import.meta.glob('../views/**/index.vue');
 // 3. 通过文件信息和导出的路由信息，将生成的路由信息存入Map中
 Object.entries(pages).forEach(([path, meta]) => {
+  // 生成组件引用路径
   const compPath = path.replace('_page.ts', 'index.vue');
+  // 获取路由名称
+  const routeName = path.replace('../views/', '').replace('/_page.ts', '')
+    .split('/')
+    .filter(Boolean)
+    .pop();
   // 获取路径并转为短横线命名
-  path = path.replace('../views/', '').replace('/_page.ts', '')
+  const urlPath = path.replace('../views/', '').replace('/_page.ts', '')
     // 小写字母/数字与大写字母之间用-连接
     .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
     // 所有大写字母之间用-连接
@@ -33,9 +45,10 @@ Object.entries(pages).forEach(([path, meta]) => {
     .replace(/_/g, '-')
     // 转为小写
     .toLowerCase();
-  const model = getModel(path);
+  const model = getModel(urlPath);
   if (!model) return;
   model.component = components[compPath];
+  model.name = routeName;
   model.meta = meta;
 });
 
