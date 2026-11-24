@@ -46,7 +46,7 @@ import Copy from '@/components/icons/Copy.vue';
 import Copied from '@/components/icons/Copied.vue';
 import { ref } from 'vue';
 import { type UnitDef } from './units.ts';
-import { copyText, popupTip } from '@/common/utils.ts';
+import { copyText, popupToast } from '@/common/utils.ts';
 
 const props = defineProps<{
   parsedValue: number | null;
@@ -61,7 +61,7 @@ const copy = async (text: string) => {
   if (!text || text === '—') return;
   await copyText(text);
   copiedText.value = text;
-  popupTip(`已复制 ${truncate(text)}`, { type: 'success', duration: 1500 });
+  popupToast(`已复制 ${truncate(text)}`, { type: 'success', duration: 1500 });
   if (copyTimer) clearTimeout(copyTimer);
   copyTimer = setTimeout(() => (copiedText.value = ''), 1500);
 };

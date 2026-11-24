@@ -265,7 +265,7 @@ export async function copyText(text: string): Promise<void> {
  * @param options.vertical 垂直位置，默认center
  * @param options.style 弹窗分隔，outline：实线边框，dash：虚线边框，soft：浅色填充
  */
-export const popupTip = (
+export const popupToast = (
   content: string,
   options?: {
     duration?: number;
@@ -287,18 +287,18 @@ export const popupTip = (
   const verts = { top: 'toast-top', middle: 'toast-middle', bottom: 'toast-bottom' };
   const types = { info: 'alert-info', success: 'alert-success', warning: 'alert-warning', error: 'alert-error' };
   const styles = { outline: 'alert-outline', dash: 'alert-dash', soft: 'alert-soft' };
-  const popupTip = document.getElementById('popup-tip');
-  if (!popupTip) return;
-  popupTip.className = `toast ${horis[horizontal]} ${verts[vertical]}`;
+  const popupToast = document.getElementById('popup-tip');
+  if (!popupToast) return;
+  popupToast.className = `toast ${horis[horizontal]} ${verts[vertical]}`;
   const alert = document.createElement('div');
   type && types[type] && classList.push(types[type]);
   style && styles[style] && classList.push(styles[style]);
   alert.className = `alert ${classList.length > 0 ? classList.join(' ') : ''}`.trim();
   alert.innerHTML = content;
-  popupTip.appendChild(alert);
+  popupToast.appendChild(alert);
   setTimeout(() => {
-    popupTip.removeChild(alert);
-    if (!popupTip.innerHTML) popupTip.removeAttribute('class');
+    popupToast.removeChild(alert);
+    if (!popupToast.innerHTML) popupToast.removeAttribute('class');
   }, duration);
 }
 
@@ -309,9 +309,9 @@ export const loadLocalFonts = async () => {
     return await window.queryLocalFonts();
   } catch (err: any) {
     if (err.name === 'NotAllowedError') {
-      popupTip('您拒绝了字体访问权限。请在浏览器设置中允许本站访问字体。', { type: 'error' });
+      popupToast('您拒绝了字体访问权限。请在浏览器设置中允许本站访问字体。', { type: 'error' });
     } else {
-      popupTip(`读取失败: ${err.message || '未知错误'}`, { type: 'error' });
+      popupToast(`读取失败: ${err.message || '未知错误'}`, { type: 'error' });
     }
     console.error(err);
   }

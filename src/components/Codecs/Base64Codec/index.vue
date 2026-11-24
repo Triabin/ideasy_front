@@ -52,7 +52,7 @@ import {
   base64ToBytes,
   bytesToUtf8
 } from './base64.ts';
-import { popupTip } from '@/common/utils.ts';
+import { popupToast } from '@/common/utils.ts';
 
 const mode = ref<CodecMode>('encode');
 const inputText = ref<string>('');
@@ -67,7 +67,7 @@ const codec = (dontTip: boolean = true) => {
   errorMsg.value = '';
   if (!inputText.value) {
     outputText.value = '';
-    !dontTip && popupTip('请输入内容', { type: 'warning', duration: 1500 });
+    !dontTip && popupToast('请输入内容', { type: 'warning', duration: 1500 });
     return;
   }
   try {

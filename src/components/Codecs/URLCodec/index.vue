@@ -32,7 +32,7 @@ import TitleModeBtn from '@/components/Codecs/TitleModeBtn.vue';
 import OutInputArea from '../OutInputArea.vue';
 import { ref, watch } from 'vue';
 import { type CodecMode } from '../codec.ts';
-import { popupTip } from '@/common/utils.ts';
+import { popupToast } from '@/common/utils.ts';
 
 const mode = ref<CodecMode>('decode');
 const codecScope = ref<string>('full');
@@ -45,7 +45,7 @@ const codec = (dontTip: boolean = true) => {
   errorMsg.value = '';
   if (!inputText.value) {
     outputText.value = '';
-    !dontTip && popupTip('请输入内容', { type: 'warning', duration: 1500 });
+    !dontTip && popupToast('请输入内容', { type: 'warning', duration: 1500 });
     return;
   }
   try {

@@ -116,7 +116,7 @@ import {
   formatFileSize,
   type HashAlgorithm,
 } from './hashCalculator';
-import { copyText, popupTip, debounce } from '@/common/utils.ts';
+import { copyText, popupToast, debounce } from '@/common/utils.ts';
 import useFullScreenDropFile from '@/composables/useFullScreenDropFile.ts';
 
 /* ------------------------- 状态 ------------------------- */
@@ -296,11 +296,11 @@ const copy = async (text: string) => {
   if (!text) return;
   await copyText(text);
   copiedText.value = text;
-  popupTip(`已复制 ${truncate(text)}`, { duration: 1500, type: 'success' });
+  popupToast(`已复制 ${truncate(text)}`, { duration: 1500, type: 'success' });
   if (copyTimer) clearTimeout(copyTimer);
   copyTimer = setTimeout(() => (copiedText.value = ''), 1500);
 };
 
 // 计算出错时提示
-watch(error, (err) => err && popupTip(err, { duration: 2500, type: 'error' }));
+watch(error, (err) => err && popupToast(err, { duration: 2500, type: 'error' }));
 </script>

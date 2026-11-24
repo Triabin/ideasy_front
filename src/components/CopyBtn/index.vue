@@ -13,7 +13,7 @@
 <script setup lang="ts">
 import Copy from '@/components/icons/Copy.vue';
 import Copied from '@/components/icons/Copied.vue';
-import { copyText, popupTip } from '@/common/utils';
+import { copyText, popupToast } from '@/common/utils';
 import { ref, onBeforeUnmount } from 'vue';
 
 const props = withDefaults(defineProps<{
@@ -26,11 +26,11 @@ const props = withDefaults(defineProps<{
   /** 提示过渡时长（单位：ms） */
   duration: number;
   /** 是否开启弹窗提示 */
-  popupTip: 'on' | 'off';
+  popupToast: 'on' | 'off';
 }>(), {
   title: '点击复制结果',
   duration: 1500,
-  popupTip: 'off',
+  popupToast: 'off',
 });
 const copiedText = ref<string | null>(null);
 
@@ -41,11 +41,11 @@ const copy = async (text: string) => {
   try {
     await copyText(text);
     copiedText.value = text;
-    props.popupTip && popupTip(`已复制 ${truncate(text)}`, { type: 'success', duration: props.duration });
+    props.popupToast && popupToast(`已复制 ${truncate(text)}`, { type: 'success', duration: props.duration });
     if (copyTimer) clearTimeout(copyTimer);
     copyTimer = setTimeout(() => (copiedText.value = ''), props.duration);
   } catch (e: any) {
-    props.popupTip && popupTip(e.message ?? '复制失败', { type: 'error', duration: 2500 });
+    props.popupToast && popupToast(e.message ?? '复制失败', { type: 'error', duration: 2500 });
   }
 }
 onBeforeUnmount(() => copyTimer && clearTimeout(copyTimer));

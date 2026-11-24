@@ -167,7 +167,7 @@ import {
   type Rgba,
   rgbToHsl,
 } from './colorConverter';
-import { copyText, popupTip } from '@/common/utils.ts';
+import { copyText, popupToast } from '@/common/utils.ts';
 import useAppDataStore from '@/stores/appData';
 
 const inputText = ref<string>('#FF5733');
@@ -269,10 +269,10 @@ const applyInput = () => {
     parseError.value = '';
     inputText.value = formatHex(color.value);
     pushCvtColorHistory(formatHex(color.value));
-    popupTip('解析成功', { duration: 1500, type: 'success' });
+    popupToast('解析成功', { duration: 1500, type: 'success' });
   } catch (e: any) {
     parseError.value = e?.message ?? '解析失败';
-    popupTip(e instanceof ColorParseError ? e.message : '无法识别的颜色格式', { duration: 2500, type: 'error' });
+    popupToast(e instanceof ColorParseError ? e.message : '无法识别的颜色格式', { duration: 2500, type: 'error' });
   }
 };
 
@@ -300,7 +300,7 @@ let copyTimer: ReturnType<typeof setTimeout> | null = null;
 const copy = async (text: string) => {
   await copyText(text);
   copiedText.value = text;
-  popupTip(`已复制 ${text}`, { duration: 1500, type: 'success' });
+  popupToast(`已复制 ${text}`, { duration: 1500, type: 'success' });
   if (copyTimer) clearTimeout(copyTimer);
   copyTimer = setTimeout(() => (copiedText.value = ''), 1500);
 };

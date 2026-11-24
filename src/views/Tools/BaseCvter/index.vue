@@ -140,7 +140,7 @@ import {
   isValidBase,
   BASE_NAMES,
 } from './baseConverter';
-import {copyText, popupTip} from '@/common/utils.ts';
+import {copyText, popupToast} from '@/common/utils.ts';
 
 const inputText = ref<string>('255');
 const srcBase = ref<number>(10);
@@ -157,7 +157,7 @@ const onCustomBaseChange = (e: Event) => {
   if (isValidBase(v)) {
     srcBase.value = v;
   } else {
-    popupTip('进制仅支持 2 ~ 36 的整数', { duration: 2000, type: 'error' });
+    popupToast('进制仅支持 2 ~ 36 的整数', { duration: 2000, type: 'error' });
   }
 };
 
@@ -235,7 +235,7 @@ const copy = async (text: string) => {
   if (!text) return;
   await copyText(text);
   copiedText.value = text;
-  popupTip(`已复制 ${truncate(text)}`, { duration: 1500, type: 'success' });
+  popupToast(`已复制 ${truncate(text)}`, { duration: 1500, type: 'success' });
   if (copyTimer) clearTimeout(copyTimer);
   copyTimer = setTimeout(() => (copiedText.value = ''), 1500);
 };
@@ -243,7 +243,7 @@ const copy = async (text: string) => {
 // 输入非法时给出提示
 watch(parseError, (err) => {
   if (err && inputText.value.trim()) {
-    popupTip(err, { duration: 2500, type: 'error' });
+    popupToast(err, { duration: 2500, type: 'error' });
   }
 });
 </script>

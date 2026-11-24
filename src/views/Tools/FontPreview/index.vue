@@ -181,7 +181,7 @@
 </template>
 <script lang="ts" setup>
 import { computed, onBeforeUnmount, ref, toRef, watch, useTemplateRef } from 'vue';
-import { getFontFamilyFromFile, loadLocalFonts, MyFileUtils, popupTip } from '@/common/utils';
+import { getFontFamilyFromFile, loadLocalFonts, MyFileUtils, popupToast } from '@/common/utils';
 import useFullScreenDropFile from '@/composables/useFullScreenDropFile.ts';
 import useSettingsStore from '@/stores/settingsStore';
 import Font from '@/components/icons/Font.vue';
@@ -398,7 +398,7 @@ const handleFiles = async (files: FileList | null) => {
   const list = Array.from(files);
   for (const file of list) {
     if (fonts.value.length >= maxCount) {
-      popupTip(`最多支持上传${maxCount}种字体，剩余文件已忽略`, { type: 'warning', duration: 2500 });
+      popupToast(`最多支持上传${maxCount}种字体，剩余文件已忽略`, { type: 'warning', duration: 2500 });
       break;
     }
     await addFont(file);
@@ -421,7 +421,7 @@ const addFont = async (file: File) => {
   const url = URL.createObjectURL(file);
   const family = await getFontFamilyFromFile(file);
   if (fonts.value.findIndex(font => font.family === family) > -1) {
-    popupTip(`已存在family为${family}的字体`, { type: 'warning', duration: 2500 });
+    popupToast(`已存在family为${family}的字体`, { type: 'warning', duration: 2500 });
     return;
   }
   try {
@@ -429,11 +429,11 @@ const addFont = async (file: File) => {
     await face.load();
     fontSet.add(face);
     fonts.value.unshift({ name: file.name, family, size: file.size, url, face });
-    popupTip(`字体“${file.name}”加载成功`, { type: 'success', duration: 2000 });
+    popupToast(`字体“${file.name}”加载成功`, { type: 'success', duration: 2000 });
   } catch (e) {
     URL.revokeObjectURL(url);
     console.error(e);
-    popupTip(`字体“${file.name}”加载失败，请确认文件是否为有效字体`, { type: 'error' });
+    popupToast(`字体“${file.name}”加载失败，请确认文件是否为有效字体`, { type: 'error' });
   }
 };
 
@@ -445,7 +445,7 @@ const loadLocalFontList = async () => {
   loadingLocalFonts.value = true;
   try {
     localFonts.value = await loadLocalFonts() || [];
-    popupTip(`读取到 ${localFonts.value.length} 个本机字体，请在下拉框中选择添加`, { type: 'success', duration: 2500 });
+    popupToast(`读取到 ${localFonts.value.length} 个本机字体，请在下拉框中选择添加`, { type: 'success', duration: 2500 });
   } finally {
     loadingLocalFonts.value = false;
   }
@@ -458,7 +458,7 @@ const loadLocalFontList = async () => {
 const addLocalFont = async (index: number) => {
   if (index < 0 || index >= localFonts.value.length) return;
   if (fonts.value.length >= maxCount) {
-    popupTip(`最多支持上传${maxCount}种字体`, { type: 'warning', duration: 2500 });
+    popupToast(`最多支持上传${maxCount}种字体`, { type: 'warning', duration: 2500 });
     return;
   }
   const lf = localFonts.value[index];
@@ -467,15 +467,15 @@ const addLocalFont = async (index: number) => {
   const family = lf.family;
   const size = (await lf.blob()).size;
   if (fonts.value.findIndex(font => font.family === family) > -1) {
-    popupTip(`已存在family为“${family}”的字体`, { type: 'warning', duration: 2500 });
+    popupToast(`已存在family为“${family}”的字体`, { type: 'warning', duration: 2500 });
     return;
   }
   try {
     fonts.value.unshift({ name, family, size, url: '', local: true });
-    popupTip(`本机字体“${name}”添加成功`, { type: 'success', duration: 2000 });
+    popupToast(`本机字体“${name}”添加成功`, { type: 'success', duration: 2000 });
   } catch (e) {
     console.error(e);
-    popupTip(`本机字体“${name}”加载失败`, { type: 'error' });
+    popupToast(`本机字体“${name}”加载失败`, { type: 'error' });
   }
 };
 
@@ -495,7 +495,7 @@ const removeFont = (family: string) => {
 /** 清空全部字体 */
 const clearAllFonts = () => {
   [...fonts.value].forEach(f => removeFont(f.family));
-  popupTip('已清空全部字体', { duration: 2000, type: 'info' });
+  popupToast('已清空全部字体', { duration: 2000, type: 'info' });
 };
 
 /** input[type=file] change 回调（点击选择与全屏拖拽注入共用入口） */
@@ -511,11 +511,11 @@ useFullScreenDropFile(fileInputRef, {
   maxCount,
   overlayText: `松开鼠标，添加字体文件（最多 ${maxCount} 种）`,
   onReject: (rejected, reason) => {
-    if (reason === 'type') popupTip(`已忽略 ${rejected.length} 个非字体文件：${rejected.map(f => f.name).join('、')}`, {
+    if (reason === 'type') popupToast(`已忽略 ${rejected.length} 个非字体文件：${rejected.map(f => f.name).join('、')}`, {
       type: 'warning',
       duration: 2500
     });
-    else if (reason === 'size') popupTip(`已忽略超过 30MB 的字体：${rejected.map(f => f.name).join('、')}`, {
+    else if (reason === 'size') popupToast(`已忽略超过 30MB 的字体：${rejected.map(f => f.name).join('、')}`, {
       type: 'warning',
       duration: 2500
     });
