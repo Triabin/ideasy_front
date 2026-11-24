@@ -44,14 +44,13 @@ export default {
  */
 export const setupRouteAnalytics = (to: RouteLocationNormalizedGeneric) => {
   if (!enabled) return;
-  const pathResolve = (path: string | undefined | null) => (!path || path === '/') ? '' : `/#${path}`;
   // 1 百度统计：手动推送页面路径
   if (typeof window !== 'undefined' && window._hmt) {
-    window._hmt?.push(['_trackPageview', pathResolve(to.fullPath)]);
+    window._hmt?.push(['_trackPageview', to.fullPath || '']);
   }
   // 2 微软 Clarity：Clarity 通常会自动监听 history.pushState，但为了保险起见，或者如果需要传递自定义数据，可以手动触发
   if (typeof window !== 'undefined' && window.clarity) {
     // 可选：给 Clarity 传递当前路由的名称或元数据，方便在后台筛选
-    window.clarity('set', 'page_route', pathResolve(to.name?.toString() || to.path));
+    window.clarity('set', 'page_route', to.name?.toString() || to.path || '');
   }
 }

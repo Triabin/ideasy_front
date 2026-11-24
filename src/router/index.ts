@@ -1,5 +1,6 @@
-import { createRouter, createWebHashHistory, type RouteMeta, type RouteRecordRaw } from 'vue-router';
+import { createRouter, createWebHistory, type RouteMeta, type RouteRecordRaw } from 'vue-router';
 import { setupRouteAnalytics } from '@/plugins/analytics.ts';
+import useAppDataStore from '@/stores/appData';
 
 /** 存放路由信息的模型 */
 type _GenRouteModel = {
@@ -49,13 +50,21 @@ routes.push({
 sortRoute(routes);
 // 7. 构建路由
 const router = createRouter({
-  history: createWebHashHistory(),
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes
 });
 // 8. 全局后置钩子
+let pushRecentTool: (path: string) => void;
 router.afterEach((to, from, next) => {
   // 向百度统计和微软Clarity报告页面访问信息
   setupRouteAnalytics(to);
+  // 记录最近使用的工具
+  if (to?.matched?.length && to?.fullPath.startsWith('/tools/')) {
+    if (!pushRecentTool) {
+      pushRecentTool = useAppDataStore().pushRecentTool;
+    }
+    pushRecentTool && pushRecentTool(to.fullPath);
+  }
 });
 // 9. 导出路由
 export default router;

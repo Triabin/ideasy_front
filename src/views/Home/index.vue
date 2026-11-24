@@ -46,7 +46,7 @@
         <div v-for="tool in favoriteRoutes" :key="tool.path"
              class="flex items-center gap-2.5 rounded-lg border border-warning/30 bg-base-200 px-3 py-2.5 cursor-pointer
                     hover:border-warning hover:shadow-sm transition-all group"
-             @click="openTool(tool.path)">
+             @click="router.push(tool.path)">
           <component v-if="tool.meta?.icon" :is="tool.meta.icon" class="shrink-0"/>
           <span class="font-medium truncate grow">{{ tool.meta?.title }}</span>
           <button class="btn btn-ghost btn-xs btn-circle text-warning opacity-60 group-hover:opacity-100"
@@ -63,7 +63,7 @@
       <div class="flex flex-wrap gap-2">
         <button v-for="tool in recentRoutes" :key="tool.path"
                 class="btn btn-sm bg-base-200 border-base-300 font-normal gap-2 hover:border-primary"
-                @click="openTool(tool.path)">
+                @click="router.push(tool.path)">
           <component v-if="tool.meta?.icon" :is="tool.meta.icon"/>
           {{ tool.meta?.title }}
         </button>
@@ -81,7 +81,7 @@
       <div v-for="card in filteredRoutes"
            :key="card.path"
            title="点击跳转"
-           @click="openTool(card.path)"
+           @click="router.push(card.path)"
            class="relative flex flex-col justify-start gap-2.5 border border-accent/10 rounded-md p-6 overflow-hidden bg-base-200/55
              shadow-sm cursor-pointer hover:border-primary hover:shadow-[0_0_10px_var(--color-primary)] hover:-translate-y-1.25
              transition-all duration-200 ease-in-out group">
@@ -139,12 +139,6 @@ const routeByPath = (path: string) => allTools.value.find(r => r.path === path);
 const favoriteRoutes = computed(() => appData.favoriteTools.map(routeByPath).filter((r): r is RouteRecordRaw => !!r));
 /** 最近使用（过滤掉已下线的路由） */
 const recentRoutes = computed(() => appData.recentTools.map(r => routeByPath(r.path)).filter((r): r is RouteRecordRaw => !!r));
-
-/** 打开工具并记录最近使用 */
-const openTool = (path: string) => {
-  appData.pushRecentTool(path);
-  router.push(path);
-};
 
 /* ------------------------- 搜索与筛选 ------------------------- */
 const keyword = ref('');
