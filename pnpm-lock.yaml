@@ -44,6 +44,9 @@ importers:
       vue-router:
         specifier: ^4.5.1
         version: 4.6.4(vue@3.5.43(typescript@5.9.3))
+      zhiji-bazi:
+        specifier: ^0.2.1
+        version: 0.2.1
     devDependencies:
       '@types/leaflet':
         specifier: ^1.9.22
@@ -666,6 +669,9 @@ packages:
     resolution: {integrity: sha512-t7hw9pI+WvuwNJXwk5zVHpyhIqzg2qTlklJOf0mVxGSbe3Fp2VieZcduNYjaLDoy6p9uGpQEGWG87WpMKlNq8g==}
     engines: {node: '>=8'}
 
+  lunar-javascript@1.7.8:
+    resolution: {integrity: sha512-T79Lq2t5zjPu7nnkuUn3xFqIMIB5LCVSn6uJXQLvgWEqUGdE4KQXqQOVBaoYsVHY/8MIwFd7ol9dJ5bP2ItXUQ==}
+
   magic-string@0.30.21:
     resolution: {integrity: sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ==}
 
@@ -882,6 +888,10 @@ packages:
   yargs@15.4.1:
     resolution: {integrity: sha512-aePbxDmcYW++PaqBsJ+HYUFwCdv4LVvdnhBy78E57PIor8/OVvhMrADFFEDh8DHDFRv/O9i3lPhsENjO7QX0+A==}
     engines: {node: '>=8'}
+
+  zhiji-bazi@0.2.1:
+    resolution: {integrity: sha512-mCL7z/8r8IYcOJP64a43JhrfwZW/3A6AzMGAIozJWqS6qoTXopUFU/rTYuxV2gIpcCSF95upiGMuID0rgMjXiQ==}
+    hasBin: true
 
 snapshots:
 
@@ -1346,6 +1356,8 @@ snapshots:
     dependencies:
       p-locate: 4.1.0
 
+  lunar-javascript@1.7.8: {}
+
   magic-string@0.30.21:
     dependencies:
       '@jridgewell/sourcemap-codec': 1.6.0
@@ -1523,3 +1535,7 @@ snapshots:
       which-module: 2.0.1
       y18n: 4.0.3
       yargs-parser: 18.1.3
+
+  zhiji-bazi@0.2.1:
+    dependencies:
+      lunar-javascript: 1.7.8
