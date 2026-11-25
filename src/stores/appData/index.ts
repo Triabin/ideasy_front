@@ -25,6 +25,16 @@ export type PasswordGenRecord = {
   };
 };
 
+/** 计算器历史记录条目 */
+export type CalculatorRecord = {
+  /** 计算时间戳（毫秒） */
+  time: number;
+  /** 表达式（展示格式，含 ×÷ 等符号） */
+  expr: string;
+  /** 计算结果 */
+  result: string;
+};
+
 const useAppDataStore = defineStore('appData', () => {
   /** 颜色转换历史 */
   const cvtColorHistories = ref<string[]>([]);
@@ -70,6 +80,33 @@ const useAppDataStore = defineStore('appData', () => {
    */
   const clearPasswordGenHistory = () => passwordGenRecords.value = [];
 
+  /** 计算器历史记录（最多100条，最新在前） */
+  const calculatorRecords = ref<CalculatorRecord[]>([]);
+
+  /**
+   * 存储一条计算器历史记录（与最近一条完全相同时忽略，避免连续按 = 产生重复）
+   * @param record {Omit<CalculatorRecord, 'time'>} 记录内容（不含时间戳）
+   */
+  const pushCalculatorRecord = (record: Omit<CalculatorRecord, 'time'>) => {
+    const last = calculatorRecords.value[0];
+    if (last && last.expr === record.expr && last.result === record.result) return;
+    calculatorRecords.value = [
+      { ...record, time: Date.now() },
+      ...calculatorRecords.value.slice(0, 99)
+    ];
+  };
+
+  /**
+   * 删除指定下标的计算器历史记录
+   * @param index {number} 记录下标
+   */
+  const removeCalculatorRecord = (index: number) => calculatorRecords.value.splice(index, 1);
+
+  /**
+   * 清空计算器历史记录
+   */
+  const clearCalculatorHistory = () => calculatorRecords.value = [];
+
   /**
    * 存储转换颜色值
    * @param hex 要记录转换历史的RGB十六进制值
@@ -86,6 +123,7 @@ const useAppDataStore = defineStore('appData', () => {
   return {
     cvtColorHistories, pushCvtColorHistory, clearCvtColorHistory,
     passwordGenRecords, pushPasswordGenRecord, removePasswordGenRecord, clearPasswordGenHistory,
+    calculatorRecords, pushCalculatorRecord, removeCalculatorRecord, clearCalculatorHistory,
     favoriteTools, toggleFavoriteTool, recentTools, pushRecentTool
   };
 }, { persist: true });
