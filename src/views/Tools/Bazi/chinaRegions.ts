@@ -119,3 +119,47 @@ function parse(): ProvinceNode[] {
 
 /** 省-市-县三级行政区划树（含海外组） */
 export const PROVINCES: ProvinceNode[] = parse();
+
+/** 检索结果：三级选择器的下标 */
+export interface PlaceIndex {
+  provIdx: number;
+  cityIdx: number;
+  areaIdx: number;
+}
+
+/**
+ * 按经纬度检索最近的县级行政区（等距矩形近似，误差在默认值场景可忽略），
+ * 用于浏览器定位后默认定出生地；不设区县的市与海外城市以市级坐标参与比较。
+ * @param lon {number} 经度
+ * @param lat {number} 纬度
+ */
+export function nearestPlace(lon: number, lat: number): PlaceIndex | null {
+  let best: PlaceIndex | null = null;
+  let bestD = Infinity;
+  const cosLat = Math.cos((lat * Math.PI) / 180);
+  const dist2 = (x: number, y: number) => {
+    const dx = (x - lon) * cosLat;
+    const dy = y - lat;
+    return dx * dx + dy * dy;
+  };
+  PROVINCES.forEach((p, provIdx) => {
+    p.cities.forEach((c, cityIdx) => {
+      if (c.areas.length) {
+        c.areas.forEach((a, areaIdx) => {
+          const d = dist2(a.lon, a.lat);
+          if (d < bestD) {
+            bestD = d;
+            best = { provIdx, cityIdx, areaIdx };
+          }
+        });
+      } else {
+        const d = dist2(c.lon, c.lat);
+        if (d < bestD) {
+          bestD = d;
+          best = { provIdx, cityIdx, areaIdx: 0 };
+        }
+      }
+    });
+  });
+  return best;
+}

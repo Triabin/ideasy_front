@@ -14,13 +14,13 @@
           </label>
           <label class="join">
             <span class="label mr-2">出生地</span>
-            <select class="select select-sm join-item w-24" v-model.number="provIdx" title="省 / 直辖市 / 特别行政区">
+            <select class="select select-sm join-item w-24" v-model.number="provIdx" title="省 / 直辖市 / 特别行政区" @change="onPlaceChange('prov')">
               <option v-for="(p, i) in PROVINCES" :key="p.n" :value="i">{{ p.n }}</option>
             </select>
-            <select class="select select-sm join-item w-28" v-model.number="cityIdx" title="地级市 / 地区 / 自治州">
+            <select class="select select-sm join-item w-28" v-model.number="cityIdx" title="地级市 / 地区 / 自治州" @change="onPlaceChange('city')">
               <option v-for="(c, i) in province.cities" :key="c.n" :value="i">{{ c.n }}</option>
             </select>
-            <select v-if="city.areas.length" class="select select-sm join-item w-28" v-model.number="areaIdx" title="县 / 区 / 县级市">
+            <select v-if="city.areas.length" class="select select-sm join-item w-28" v-model.number="areaIdx" title="县 / 区 / 县级市" @change="onPlaceChange('area')">
               <option v-for="(a, i) in city.areas" :key="a.n" :value="i">{{ a.n }}</option>
             </select>
           </label>
@@ -45,6 +45,7 @@
         <p class="text-xs opacity-60">
           输入时间按出生地当地墙上时间解读；年柱以立春为界、月柱以节气为界。{{ ZISHI_RULE_NOTE[zishiRule] }}
           <template v-if="useTrueSolar">真太阳时按出生地政府驻地经度（当前 {{ birthPlace.lon }}°）校正，县级精度约 0.01°。</template>
+          首次进入会请求浏览器定位以默认出生地，手动更改后不再覆盖。
         </p>
       </div>
     </div>
@@ -264,9 +265,8 @@
     </div>
   </div>
 </template>
-
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import Copy from '@/components/icons/Copy.vue';
 import Copied from '@/components/icons/Copied.vue';
 import { copyText, popupToast } from '@/common/utils.ts';
@@ -311,7 +311,7 @@ import {
   type DaYunInfo,
   type DaYunItem,
 } from './baziExtra';
-import { PROVINCES } from './chinaRegions';
+import { PROVINCES, nearestPlace } from './chinaRegions';
 
 /** 页面视图模型：排盘成功或失败 */
 interface ChartView {
@@ -358,12 +358,37 @@ const yearsAgoStr = (zone: string, years: number) => {
 const provIdx = ref(0);
 const cityIdx = ref(0);
 const areaIdx = ref(0);
-watch(provIdx, () => {
-  cityIdx.value = 0;
-  areaIdx.value = 0;
-});
-watch(cityIdx, () => {
-  areaIdx.value = 0;
+/** 出生地是否被手动改过（改过则不再用定位结果覆盖） */
+const placeUntouched = ref(true);
+/** 手动更改：重置下级选择并标记已手动选择 */
+const onPlaceChange = (level: 'prov' | 'city' | 'area') => {
+  placeUntouched.value = false;
+  if (level === 'prov') {
+    cityIdx.value = 0;
+    areaIdx.value = 0;
+  } else if (level === 'city') {
+    areaIdx.value = 0;
+  }
+};
+
+/* 首次进入请求浏览器定位，按最近县级行政区默认出生地 */
+onMounted(() => {
+  if (!('geolocation' in navigator)) return;
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      if (!placeUntouched.value) return;
+      const hit = nearestPlace(pos.coords.longitude, pos.coords.latitude);
+      if (!hit) return;
+      provIdx.value = hit.provIdx;
+      cityIdx.value = hit.cityIdx;
+      areaIdx.value = hit.areaIdx;
+      // popupToast(`已按浏览器定位默认出生地：${birthPlace.value.name}，可手动更改`, { type: 'info', duration: 2500 });
+    },
+    () => {
+      // 定位被拒绝或不可用时保持默认出生地，不打扰用户
+    },
+    { timeout: 8000, maximumAge: 600000 },
+  );
 });
 
 const province = computed(() => PROVINCES[provIdx.value]);
