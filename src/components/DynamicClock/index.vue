@@ -1,6 +1,6 @@
 <!-- 动态粒子时钟组件 -->
 <template>
-  <canvas ref="canvasRef" class="bg-transparent block w-full h-full"></canvas>
+  <canvas ref="canvasRef" class="block w-full h-full"></canvas>
 </template>
 <script lang="ts" setup>
 import { computed, useTemplateRef, onMounted, onBeforeUnmount, watch } from 'vue';

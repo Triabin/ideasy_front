@@ -17,7 +17,25 @@
     </div>
 
     <!-- 粒子时钟 -->
-    <div class="w-full h-[25lvh] bg-base-200 rounded-md flex justify-center items-center shadow-md">
+    <div class="relative w-full h-[25lvh] rounded-xl overflow-hidden flex justify-center items-center">
+      <!-- 背景点阵（中心清晰、向四周淡出） -->
+      <div class="absolute inset-0 pointer-events-none dot-grid"></div>
+      <!-- 主题色光晕（缓慢呼吸） -->
+      <div class="absolute inset-0 pointer-events-none clock-glow"></div>
+      <!-- 四角装饰框 -->
+      <span class="corner top-2 left-2 border-t-2 border-l-2 rounded-tl-md"></span>
+      <span class="corner top-2 right-2 border-t-2 border-r-2 rounded-tr-md"></span>
+      <span class="corner bottom-2 left-2 border-b-2 border-l-2 rounded-bl-md"></span>
+      <span class="corner bottom-2 right-2 border-b-2 border-r-2 rounded-br-md"></span>
+      <!-- 实时指示灯 -->
+      <div class="absolute bottom-2.5 left-1/2 -translate-x-1/2 flex items-center gap-1.5 text-[11px] font-mono
+                  tracking-wider text-base-content/45 pointer-events-none">
+        <span class="relative flex size-1.5">
+          <span class="absolute inline-flex size-full rounded-full bg-success opacity-70 animate-ping"></span>
+          <span class="relative inline-flex size-1.5 rounded-full bg-success"></span>
+        </span>
+        实时 · 本地时间
+      </div>
       <DynamicClock :color="currRealMode === 'dark' ? '#FFFFFFA1' : '#283747AF'" :density="4"/>
     </div>
 
@@ -83,7 +101,7 @@
            title="点击跳转"
            @click="router.push(card.path)"
            class="relative flex flex-col justify-start gap-2.5 border border-accent/10 rounded-md p-6 overflow-hidden bg-base-200/55
-             shadow-sm cursor-pointer hover:border-primary hover:shadow-[0_0_10px_var(--color-primary)] hover:-translate-y-1.25
+             max-h-56 shadow-sm cursor-pointer hover:border-primary hover:shadow-[0_0_10px_var(--color-primary)] hover:-translate-y-1.25
              transition-all duration-200 ease-in-out group">
         <!-- 收藏按钮 -->
         <button class="btn btn-ghost btn-sm btn-circle absolute top-2 right-2 z-10
@@ -106,8 +124,8 @@
                 :style="{ backgroundColor: tagColor(tag) }"
           >{{ tag }}</span>
         </div>
-        <!-- 描述 -->
-        <p class="font-normal">{{ card.meta?.desc }}</p>
+        <!-- 描述（超出最大高度时按行截断，保证卡片高度一致） -->
+        <p class="font-normal line-clamp-3" :title="(card.meta?.desc || '') as string">{{ card.meta?.desc }}</p>
       </div>
     </div>
   </div>
@@ -197,3 +215,51 @@ const tagColor = (tag: string): string => {
   return TAG_COLORS[Math.abs(hash) % TAG_COLORS.length];
 };
 </script>
+
+<style lang="css" scoped>
+/* 点阵背景：中心清晰，向四周淡出，避免与数字抢视觉 */
+.dot-grid {
+  color: var(--color-base-content);
+  opacity: 0.09;
+  background-image: radial-gradient(currentColor 1px, transparent 1px);
+  background-size: 18px 18px;
+  background-position: center;
+  mask-image: radial-gradient(ellipse at center, #000 20%, transparent 72%);
+  -webkit-mask-image: radial-gradient(ellipse at center, #000 20%, transparent 72%);
+}
+
+/* 主题色光晕：随主题色变化，缓慢呼吸 */
+.clock-glow {
+  background: radial-gradient(ellipse at center,
+    color-mix(in oklab, var(--color-primary) 18%, transparent) 0%,
+    color-mix(in oklab, var(--color-primary) 6%, transparent) 45%,
+    transparent 72%);
+  animation: clock-breathe 9s ease-in-out infinite alternate;
+}
+
+@keyframes clock-breathe {
+  from {
+    opacity: 0.55;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
+/* 四角装饰框 */
+.corner {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-color: color-mix(in oklab, var(--color-primary) 45%, transparent);
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clock-glow {
+    animation: none;
+  }
+}
+</style>
