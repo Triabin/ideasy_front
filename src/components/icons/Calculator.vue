@@ -20,7 +20,7 @@
     <rect x="696" y="712" width="112" height="96" rx="20"/>
   </svg>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 const props = withDefaults(defineProps<{
   /** 自定义尺寸，单位：px */
   size?: number,

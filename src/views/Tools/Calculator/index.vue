@@ -104,7 +104,7 @@
           <div v-if="!records.length" class="py-6 text-center opacity-50 text-sm">
             暂无历史记录。按 = 计算后，表达式与结果会自动保存到本地（localStorage）。
           </div>
-          <div v-else class="flex flex-col gap-1.5 overflow-y-auto max-h-[32rem] pr-1">
+          <div v-else class="flex flex-col gap-1.5 overflow-y-auto max-h-128 pr-1">
             <div
                 v-for="(rec, idx) in records"
                 :key="rec.time + '-' + idx"
@@ -138,7 +138,7 @@
     </div>
 
     <!-- 使用说明 -->
-    <details class="collapse collapse-arrow bg-base-100 border border-base-300 w-full max-w-md xl:max-w-[57rem] mx-auto">
+    <details class="collapse collapse-arrow bg-base-100 border border-base-300 w-full max-w-md xl:max-w-228 mx-auto">
       <summary class="collapse-title font-semibold">使用说明与键盘快捷键</summary>
       <div class="collapse-content text-sm text-base-content/75 leading-6">
         <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
