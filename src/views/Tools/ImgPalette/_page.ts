@@ -1,7 +1,7 @@
 import ImgPalette from '@/components/icons/ImgPalette.vue';
 
 export default {
-  title: '图片取色盘',
+  title: '图片取色',
   menuOrder: 26,
   hidden: false,
   icon: ImgPalette,
