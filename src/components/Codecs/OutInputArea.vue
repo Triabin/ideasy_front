@@ -4,11 +4,11 @@
     <div class="card-body p-3 gap-2">
       <div class="flex items-center justify-between mb-3">
         <h2 class="card-title text-base">
-          {{ props.mode === 'encode' ? '待编码文本' : '待解码文本' }}
+          待{{ actionLabel }}文本
         </h2>
         <div class="flex flex-wrap items-center gap-2">
           <button class="btn btn-sm btn-primary" @click="codec">
-            {{ props.mode === 'encode' ? '编码' : '解码' }}
+            {{ actionLabel }}
           </button>
           <button class="btn btn-sm" :disabled="!props.outputText" @click="swapInOut">结果 ⇄ 输入互换</button>
           <button class="btn btn-sm btn-ghost" title="从剪贴板粘贴" @click="pasteFromClipboard">粘贴</button>
@@ -23,7 +23,7 @@
           v-model="inputText"
           class="textarea textarea-bordered w-full grow min-h-72 font-mono text-sm leading-relaxed resize-none thin-scrollbar"
           :class="{ 'textarea-error': !!props.errorMsg }"
-          :placeholder="props.mode === 'encode' ? '在此输入需要编码的原文，支持中文等多字节字符' : '在此输入需要解码的密文'"
+          :placeholder="inputPlaceholder"
           spellcheck="false"
       ></textarea>
       <div v-if="props.errorMsg" class="rounded-lg border border-red-400/50 bg-red-500/10 px-3 py-2">
@@ -38,7 +38,7 @@
       <div class="flex items-center justify-between mb-3">
         <h2 class="card-title text-base">
           输出
-          <span v-if="props.outputText && !props.errorMsg" class="badge badge-success badge-sm">✓ {{ props.mode === 'encode' ? '编码成功' : '解码成功' }}</span>
+          <span v-if="props.outputText && !props.errorMsg" class="badge badge-success badge-sm">✓ {{ actionLabel }}成功</span>
         </h2>
         <div class="flex items-center gap-2">
           <span v-if="props.outputText" class="text-xs opacity-60 font-mono">{{ props.outputText.length }} 字符</span>
@@ -71,7 +71,22 @@ const props = defineProps<{
   mode: CodecMode;
   outputText: string;
   errorMsg: string;
+  /** encode 模式动词（默认「编码」，可改为「转义」等） */
+  encodeLabel?: string;
+  /** decode 模式动词（默认「解码」，可改为「反转义」等） */
+  decodeLabel?: string;
 }>();
+/** 当前模式对应的动作动词 */
+const actionLabel = computed(() => props.mode === 'encode'
+    ? (props.encodeLabel ?? '编码')
+    : (props.decodeLabel ?? '解码'));
+/** 输入区占位文案（未自定义动词时保持原有措辞） */
+const inputPlaceholder = computed(() => {
+  if (props.mode === 'encode') {
+    return `在此输入需要${actionLabel.value}的原文，支持中文等多字节字符`;
+  }
+  return props.decodeLabel ? `在此输入需要${actionLabel.value}的文本` : '在此输入需要解码的密文';
+});
 const emits = defineEmits<{
   (e: 'updateData', payload: {
     inputText: string;

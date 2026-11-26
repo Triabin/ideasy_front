@@ -9,21 +9,28 @@
           class="btn btn-outline btn-primary btn-sm join-item"
           :class="{ 'btn-active': props.mode === 'encode' }"
           @click="() => emit('switchMode', 'encode')"
-      >编码</button>
+      >{{ props.encodeLabel }}</button>
       <button
           class="btn btn-outline btn-primary btn-sm join-item"
           :class="{ 'btn-active': props.mode === 'decode' }"
           @click="() => emit('switchMode', 'decode')"
-      >解码</button>
+      >{{ props.decodeLabel }}</button>
     </div>
   </div>
 </template>
 <script lang="ts" setup>
 import { type CodecMode } from './codec.ts';
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   title: string;
   mode: CodecMode;
-}>();
+  /** encode 模式按钮文案（默认「编码」，可改为「转义」等） */
+  encodeLabel?: string;
+  /** decode 模式按钮文案（默认「解码」，可改为「反转义」等） */
+  decodeLabel?: string;
+}>(), {
+  encodeLabel: '编码',
+  decodeLabel: '解码',
+});
 const emit = defineEmits<{ (e: 'switchMode', newMode: CodecMode): void }>();
 </script>
