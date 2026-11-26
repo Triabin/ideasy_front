@@ -1,11 +1,9 @@
 <!-- 导航栏左侧 -->
 <template>
   <!-- Logo -->
-  <RouterLink to="/">
+  <RouterLink to="/" class="flex items-center">
     <div class="rounded-xl size-9 bg-primary flex justify-center items-center font-bold text-primary-content round-font">灵</div>
-  </RouterLink>
-  <RouterLink to="/">
-    <span class="text-xl ml-2 font-bold overflow-hidden whitespace-nowrap text-ellipsis">
+    <span class=" text-xl ml-2 font-bold overflow-hidden whitespace-nowrap text-ellipsis">
       能网页&nbsp;&nbsp;不软件
     </span>
   </RouterLink>

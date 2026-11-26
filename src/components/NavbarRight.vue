@@ -1,5 +1,10 @@
 <!-- 导航栏右侧：桌面端展示全部入口；移动端只保留搜索、主题快速切换与抽屉入口，其余收进抽屉 -->
 <template>
+  <Transition name="clock-fade">
+    <div v-if="route.name && route.name !== 'Home'" class="max-md:hidden w-40">
+      <CardClock/>
+    </div>
+  </Transition>
   <!-- 全局搜索：组件内部自适应，桌面端为伪输入框、移动端为图标按钮 -->
   <GlobalSearch/>
   <!-- 博客（md 及以上显示，移动端收进抽屉） -->
@@ -23,11 +28,11 @@
     <ThemeLight v-if="currRealMode === 'dark'" :size="18"/>
     <ThemeDark v-else :size="18"/>
   </button>
-  <span class="hidden md:inline text-gray-500 cursor-default">||</span>
+  <span class="max-md:hidden text-gray-500 cursor-default">||</span>
   <!-- GitHub（md 及以上显示，移动端收进抽屉） -->
   <div
       title="访问GitHub仓库"
-      class="hidden md:block cursor-pointer"
+      class="max-md:hidden cursor-pointer"
       @click="openUrl('https://github.com/Triabin/ideasy_front')">
     <GitHub :size="24"/>
   </div>
@@ -39,18 +44,33 @@
 </template>
 
 <script lang="ts" setup>
-import { toRef } from 'vue';
+import CardClock from '@/components/CardClock';
 import GlobalSearch from '@/components/GlobalSearch.vue';
 import ThemeController from '@/components/ThemeController';
 import GitHub from '@/components/icons/GitHub.vue';
 import MenuIcon from '@/components/icons/Menu.vue';
 import ThemeLight from '@/components/icons/ThemeLight.vue';
 import ThemeDark from '@/components/icons/ThemeDark.vue';
-import useSettingsStore from '@/stores/settingsStore';
+import { toRef } from 'vue';
+import { useRoute } from 'vue-router';
 import { openUrl } from '@/common/utils.ts';
+import useSettingsStore from '@/stores/settingsStore';
 
 const settingsStore = useSettingsStore();
 /** 当前实际的明暗模式（跟随系统时即系统当前模式） */
 const currRealMode = toRef(settingsStore, 'currRealMode');
 const { toggleTheme } = settingsStore;
+const route = useRoute();
 </script>
+<style lang="css" scoped>
+/* 时钟出现/消失过渡 */
+.clock-fade-enter-active,
+.clock-fade-leave-active {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.clock-fade-enter-from,
+.clock-fade-leave-to {
+  opacity: 0;
+  transform: translate(-4px, 8px) scale(0.96);
+}
+</style>
