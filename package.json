@@ -12,6 +12,7 @@
     "@floating-ui/vue": "^2.0.1",
     "@tailwindcss/vite": "^4.1.13",
     "chinese-days": "^2.0.0",
+    "cronstrue": "^3.50.0",
     "leaflet": "^1.9.4",
     "opentype.js": "^2.0.0",
     "pinia": "^4.1.0",
