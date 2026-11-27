@@ -20,6 +20,9 @@ importers:
       cronstrue:
         specifier: ^3.50.0
         version: 3.50.0
+      dcraw:
+        specifier: ^1.0.3
+        version: 1.0.3
       leaflet:
         specifier: ^1.9.4
         version: 1.9.4
@@ -456,6 +459,9 @@ packages:
 
   daisyui@5.7.50:
     resolution: {integrity: sha512-+/LRqnTCoc7s/bJEKKwtJSwzeXCVdAmRdNmZeZzgHCaQ9PJyl7j+2V2U32GQDMyD+VDkP9e/+JGoC72Y1hLk7w==}
+
+  dcraw@1.0.3:
+    resolution: {integrity: sha512-Eer+8s95I1itFQUCOqMxNNLPLR0MPjBHxuPY7AgbdcMY/aohbJhf8/mvA+NqKUj+MWm0fEKm17CmESqbzzcvZg==}
 
   decamelize@1.2.0:
     resolution: {integrity: sha512-z2S+W9X73hAUUki+N+9Za2lBlun89zigOyGrsax+KUQ6wKW4ZoWpEYBkGhQjwAjjDCkWxhY0VKEhk8wzY7F5cA==}
@@ -1219,6 +1225,8 @@ snapshots:
   csstype@3.2.3: {}
 
   daisyui@5.7.50: {}
+
+  dcraw@1.0.3: {}
 
   decamelize@1.2.0: {}
 
