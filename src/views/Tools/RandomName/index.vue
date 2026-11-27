@@ -2,7 +2,7 @@
 <template>
   <div class="w-full flex flex-col gap-4 p-4 overflow-y-auto no-scrollbar">
     <h1 class="w-full text-center text-3xl mt-2">随机姓名</h1>
-    <p class="text-sm opacity-70 text-center">批量随机生成中文姓名，支持指定性别、名字字数与单姓/复姓，批内自动去重，点击任意结果即可复制。</p>
+    <p class="text-sm opacity-70 text-center">批量随机生成中文姓名，支持指定性别、名字字数、单姓/复姓/自定义姓氏与字辈用字，批内自动去重，点击任意结果即可复制。</p>
 
     <!-- 生成设置 -->
     <div class="card bg-base-200 shadow-sm">
@@ -29,6 +29,8 @@
             <div class="join inline-flex align-middle">
               <button v-for="l in GIVEN_LENS" :key="String(l.value)" class="btn btn-sm join-item"
                       :class="{ 'btn-primary': givenLen === l.value }"
+                      :disabled="l.value === 1 && enableGeneration"
+                      :title="l.value === 1 && enableGeneration ? '开启字辈后名字固定两字（字辈不单独成名），该选项不可用' : ''"
                       @click="givenLen = l.value"
               >{{ l.label }}</button>
             </div>
@@ -43,7 +45,40 @@
               >{{ s.label }}</button>
             </div>
           </div>
+
+          <!-- 自定义姓氏输入框 -->
+          <input v-if="surnameMode === 'custom'"
+                 v-model="customSurname"
+                 type="text"
+                 maxlength="4"
+                 class="input input-sm input-bordered w-40 shrink-0"
+                 placeholder="自定义姓氏，如：王"
+                 spellcheck="false"
+          />
+
+          <!-- 字辈开关与用字输入 -->
+          <div class="flex items-center gap-2 shrink-0">
+            <label class="label cursor-pointer gap-2 p-0"
+                   title="字辈即家族按辈分共用的取名用字。开启后所有姓名必用字辈，且字辈用字不会再出现在名字其余部分">
+              <input type="checkbox" class="toggle toggle-sm toggle-primary" v-model="enableGeneration"/>
+              <span>字辈</span>
+            </label>
+            <input v-if="enableGeneration"
+                   v-model="generationChars"
+                   type="text"
+                   maxlength="20"
+                   class="input input-sm input-bordered w-52"
+                   placeholder="字辈用字（可多个），如：德文志国"
+                   spellcheck="false"
+            />
+          </div>
         </div>
+
+        <!-- 字辈规则说明 -->
+        <p v-if="enableGeneration" class="text-xs opacity-50">
+          开启后所有姓名必用字辈：从输入用字中随机取一个置于名首，字辈后再配一名用字（名字固定两字，字辈绝不单独成名）；
+          输入框中的全部字（含未被抽中的其他辈分用字）绝不会再出现在名字其余部分。
+        </p>
 
         <div class="flex flex-wrap items-center gap-3">
           <button class="btn btn-primary btn-sm shrink-0" @click="generate">生成 {{ clampedCount }} 个姓名</button>
@@ -76,6 +111,9 @@
                 {{ item.gender === 'male' ? '男' : '女' }}
               </span>
               <span v-if="item.compound" class="badge badge-xs badge-ghost">复姓</span>
+              <span v-if="item.generation" class="badge badge-xs badge-soft badge-primary border-transparent"
+                    :title="`使用了字辈「${item.generation}」`"
+              >字辈·{{ item.generation }}</span>
             </div>
             <div class="shrink-0 opacity-60">
               <Copied v-if="copiedText === item.name" :size="16" :twClasses="['fill-success']"/>
@@ -91,7 +129,7 @@
 <script lang="ts" setup>
 import Copy from '@/components/icons/Copy.vue';
 import Copied from '@/components/icons/Copied.vue';
-import { computed, onBeforeUnmount, ref } from 'vue';
+import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { copyText, popupToast, clickDownload } from '@/common/utils';
 import { randomName, type GenName, type Gender, type SurnameMode } from './nameData';
 
@@ -112,26 +150,49 @@ const SURNAME_MODES = [
   { value: 'mix', label: '随机', desc: '约 12% 概率出现复姓' },
   { value: 'single', label: '单姓', desc: '只使用单字姓' },
   { value: 'compound', label: '复姓', desc: '只使用欧阳、司马等复姓' },
+  { value: 'custom', label: '自定义', desc: '使用输入框中填写的姓氏（单字或多字均可）' },
 ] as const;
 
 const count = ref<number>(10);
 const gender = ref<Gender>('any');
 const givenLen = ref<1 | 2 | 'random'>('random');
 const surnameMode = ref<SurnameMode>('mix');
+const customSurname = ref<string>('');
+const enableGeneration = ref<boolean>(false);
+const generationChars = ref<string>('');
 const list = ref<GenName[]>([]);
 const copiedText = ref<string>('');
 
 const clampedCount = computed(() => Math.min(Math.max(Math.trunc(count.value) || 1, 1), MAX_COUNT));
 
+// 开启字辈后名字固定两字，「1 字」不再适用：自动切回随机
+watch(enableGeneration, on => {
+  if (on && givenLen.value === 1) givenLen.value = 'random';
+});
+
 /** 生成一批不重复姓名 */
 function generate() {
+  if (surnameMode.value === 'custom' && !customSurname.value.trim()) {
+    popupToast('请先填写自定义姓氏', { type: 'warning', duration: 2000 });
+    return;
+  }
+  if (enableGeneration.value && !generationChars.value.trim()) {
+    popupToast('已开启字辈，请填写字辈用字（一个或多个）', { type: 'warning', duration: 2000 });
+    return;
+  }
   const n = clampedCount.value;
   const seen = new Set<string>();
   const out: GenName[] = [];
   // 去重可能导致少量失败，限制尝试次数避免死循环
   let guard = 0;
   while (out.length < n && guard++ < n * 50) {
-    const item = randomName(gender.value, givenLen.value, surnameMode.value);
+    const item = randomName({
+      gender: gender.value,
+      givenLen: givenLen.value,
+      surnameMode: surnameMode.value,
+      customSurname: customSurname.value,
+      generationChars: enableGeneration.value ? generationChars.value : '',
+    });
     if (seen.has(item.name)) continue;
     seen.add(item.name);
     out.push(item);
