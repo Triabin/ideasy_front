@@ -4,14 +4,15 @@
  * - dynasty：朝代/政权名；emperors[].name：帝号与姓名；
  * - bc：为 true 时该皇帝所有年号年份均为公元前年份（数值为正数，表示「公元前 X 年」，无公元 0 年）；
  * - eras[].from / to：年号起讫年份（含两端）；
- * - fm / fd、tm / td：可选的起讫月日（缺省为 1 月 1 日与 12 月 31 日），仅少数有精确日期的边界使用（如宣统退位）；
+ * - fm / fd、tm / td：可选的起讫月日（缺省为 1 月 1 日与 12 月 31 日），用于有明确记载的改元/退位边界；
  * - yn：可选，结束公历年对应的年号年数（用于年号在农历岁首前终结等「公历年份差 ≠ 年号年数」的场景，
  *   如 1912 年 2 月退位时仍是宣统三年；0 表示不显示年数，如张勋复辟恢复宣统年号）；
  * - note：备注。
  * 精度说明：
- * 1. 绝大多数改元发生在农历正月初一，本数据将年号边界近似到「年」，个别精确到日的边界已在数据中注明；
- * 2. 1582 年 10 月之前欧洲通用儒略历，本工具统一按格里历（公历）处理，边界日期可能有数日出入；
- * 3. 数据整理自常见史表，割据政权与短命年号的起止年份诸家记载互有出入，仅供参考。
+ * 1. 绝大多数改元发生在农历正月初一，本数据仅对「有明确史料可考」的改元记录月/日，其余仍按「年」近似；
+ * 2. 同朝代内下一年号的起始日精确到月/日时，会自动把上一年号的结束日截断到前一天；
+ * 3. 1582 年 10 月之前欧洲通用儒略历，本工具统一按格里历（公历）处理，边界日期可能有数日出入；
+ * 4. 数据整理自常见史表，割据政权与短命年号的起止年份诸家记载互有出入，仅供参考。
  */
 import hanData from './data/han.json';
 import sanguoJinData from './data/sanguo-jin.json';
@@ -76,6 +77,10 @@ interface EraEntry {
   to: number;
   start: DatePoint;
   end: DatePoint;
+  /** 起始日期精度：0 仅年、1 精确到月、2 精确到日 */
+  startPrecision: 0 | 1 | 2;
+  /** 结束日期精度：0 仅年、1 精确到月、2 精确到日 */
+  endPrecision: 0 | 1 | 2;
 }
 
 /** 查询结果中的单条匹配 */
@@ -110,8 +115,12 @@ export type QueryStatus = 'ok' | 'before' | 'ended' | 'gap';
 
 export interface QueryResult {
   status: QueryStatus;
-  /** 匹配到的年号，第一条为主年号，其余为同时并立政权的年号 */
+  /** 每个政权一条主年号，第一条为查询日期对应的主年号，其余为同时并立的政权 */
   matches: NianHaoMatch[];
+  /** 同年改元、具体月日不详时，同政权下年初可能仍在使用的旧年号 */
+  alternatives: NianHaoMatch[];
+  /** 干支纪年，仅天干地支两字，如「庚午」 */
+  ganzhi: string;
 }
 
 /** 正统主要王朝，用于多政权并存时主年号的排序 */
@@ -144,6 +153,31 @@ function cmpDate(a: DatePoint, b: DatePoint): number {
   return 0;
 }
 
+/** 指定公历年的某月天数（按格里历闰年规则） */
+function daysInMonth(year: number, month: number): number {
+  const leap = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+  return [31, leap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month - 1];
+}
+
+/** 前一天的日期点 */
+function dayBefore(point: DatePoint): DatePoint {
+  if (point.d > 1) return { y: point.y, m: point.m, d: point.d - 1 };
+  if (point.m > 1) return { y: point.y, m: point.m - 1, d: daysInMonth(point.y, point.m - 1) };
+  return { y: point.y - 1, m: 12, d: 31 };
+}
+
+/** 天干 */
+const TIAN_GAN = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
+/** 地支 */
+const DI_ZHI = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
+
+/** 由天文纪年推算干支纪年（公元 4 年为甲子年） */
+function ganzhiOf(astroYear: number): string {
+  const gan = ((astroYear - 4) % 10 + 10) % 10;
+  const zhi = ((astroYear - 4) % 12 + 12) % 12;
+  return `${TIAN_GAN[gan]}${DI_ZHI[zhi]}`;
+}
+
 const CN_DIGITS = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
 
 /** 数字转中文（支持 1-99，用于「XX年」展示） */
@@ -160,10 +194,37 @@ function eraYearText(name: string, yearInEra: number): string {
   return yearInEra === 1 ? `${name}元年` : `${name}${chineseNumeral(yearInEra)}年`;
 }
 
-/** 起止年份展示文本 */
+/** 起止日期展示文本，有精确月/日时一并显示 */
 function formatSpan(entry: EraEntry): string {
-  const fmt = (bc: boolean, y: number) => (bc ? `前 ${y}` : `${y}`);
-  return `${fmt(entry.bc, entry.from)} — ${fmt(entry.bc, entry.to)} 年`;
+  const fmt = (year: number, point: DatePoint, precision: 0 | 1 | 2): string => {
+    const y = entry.bc ? `前 ${year}` : `${year}`;
+    if (precision === 0) return `${y} 年`;
+    if (precision === 1) return `${y} 年 ${point.m} 月`;
+    return `${y} 年 ${point.m} 月 ${point.d} 日`;
+  };
+  return `${fmt(entry.from, entry.start, entry.startPrecision)} — ${fmt(entry.to, entry.end, entry.endPrecision)}`;
+}
+
+/**
+ * 同朝代内下一年号起始日精确到月/日时，把上一年号的结束日截断到前一天。
+ * 例如崇德元年（1636 年 5 月 15 日）建立后，天聪年号应在此前一日结束。
+ */
+function resolveBoundaries(entries: EraEntry[]): void {
+  const precise = entries.filter(e => e.startPrecision > 0);
+  for (const next of precise) {
+    for (const prev of entries) {
+      if (prev === next || prev.dynasty !== next.dynasty) continue;
+      // 仅处理起始更早、且在同一公历年内与新年号重叠的旧年号
+      if (cmpDate(prev.start, next.start) >= 0) continue;
+      if (prev.end.y !== next.start.y) continue;
+      if (cmpDate(prev.end, next.start) < 0) continue;
+      const lastDay = dayBefore(next.start);
+      if (cmpDate(lastDay, prev.end) < 0) {
+        prev.end = lastDay;
+        prev.endPrecision = 2;
+      }
+    }
+  }
 }
 
 /** 展平所有 JSON 数据为年号记录列表（保持文件与朝代顺序） */
@@ -188,12 +249,15 @@ function buildEntries(): EraEntry[] {
             from: era.from,
             to: era.to,
             start: { y: toAstro(bc, era.from), m: era.fm ?? 1, d: era.fd ?? 1 },
-            end: { y: toAstro(bc, era.to), m: era.tm ?? 12, d: era.td ?? 31 }
+            end: { y: toAstro(bc, era.to), m: era.tm ?? 12, d: era.td ?? 31 },
+            startPrecision: era.fd !== undefined ? 2 : era.fm !== undefined ? 1 : 0,
+            endPrecision: era.td !== undefined ? 2 : era.tm !== undefined ? 1 : 0
           });
         }
       }
     }
   }
+  resolveBoundaries(entries);
   return entries;
 }
 
@@ -241,6 +305,23 @@ export const COVERAGE = {
   total: ERA_ENTRIES.length
 };
 
+/** 把年号记录转换为查询结果 */
+function toMatch(entry: EraEntry, bc: boolean, year: number, astroYear: number): NianHaoMatch {
+  // 年号年数：默认按公历年份差推算；结束年若指定 yn 则以 yn 为准（0 表示不显示年数）
+  const useOverride = entry.yn !== undefined && astroYear === entry.end.y;
+  const yearInEra = useOverride ? (entry.yn as number) : astroYear - entry.start.y + 1;
+  return {
+    dynasty: entry.dynasty,
+    emperor: entry.emperor,
+    name: entry.name,
+    note: entry.note,
+    eraText: yearInEra > 0 ? eraYearText(entry.name, yearInEra) : entry.name,
+    yearInEra,
+    gongyuan: formatGongyuan(bc, year),
+    span: formatSpan(entry)
+  };
+}
+
 /**
  * 查询某个公历日期对应的年号与皇帝
  * @param bc 是否公元前
@@ -251,33 +332,42 @@ export const COVERAGE = {
 export function queryNianHao(bc: boolean, year: number, month: number, day: number): QueryResult {
   const ay = toAstro(bc, year);
   const point: DatePoint = { y: ay, m: month, d: day };
+  const ganzhi = ganzhiOf(ay);
 
   const matched = ERA_ENTRIES.filter(e => cmpDate(e.start, point) <= 0 && cmpDate(point, e.end) <= 0);
   if (matched.length > 0) {
-    // 主要王朝优先，其余（割据/并立政权）按数据顺序排列
-    matched.sort((a, b) => Number(MAJOR_DYNASTIES.has(b.dynasty)) - Number(MAJOR_DYNASTIES.has(a.dynasty)));
-    const matches: NianHaoMatch[] = matched.map(e => {
-      // 年号年数：默认按公历年份差推算；结束年若指定 yn 则以 yn 为准（0 表示不显示年数）
-      const useOverride = e.yn !== undefined && ay === e.end.y;
-      const yearInEra = useOverride ? (e.yn as number) : ay - e.start.y + 1;
-      return {
-        dynasty: e.dynasty,
-        emperor: e.emperor,
-        name: e.name,
-        note: e.note,
-        eraText: yearInEra > 0 ? eraYearText(e.name, yearInEra) : e.name,
-        yearInEra,
-        gongyuan: formatGongyuan(bc, year),
-        span: formatSpan(e)
-      };
+    // 同一政权在改元之年可能命中两个年号：以起始较晚的为当年主年号，其余作为「年初旧年号」
+    const byDynasty = new Map<string, EraEntry[]>();
+    for (const entry of matched) {
+      const list = byDynasty.get(entry.dynasty);
+      if (list) list.push(entry);
+      else byDynasty.set(entry.dynasty, [entry]);
+    }
+    const primaries: EraEntry[] = [];
+    const alternatives: EraEntry[] = [];
+    byDynasty.forEach(list => {
+      list.sort((a, b) => cmpDate(a.start, b.start));
+      primaries.push(list[list.length - 1]);
+      alternatives.push(...list.slice(0, -1));
     });
-    return { status: 'ok', matches };
+    // 主要王朝优先，其次按起始时间排列
+    primaries.sort((a, b) => {
+      const majorDiff = Number(MAJOR_DYNASTIES.has(b.dynasty)) - Number(MAJOR_DYNASTIES.has(a.dynasty));
+      return majorDiff !== 0 ? majorDiff : cmpDate(a.start, b.start);
+    });
+    alternatives.sort((a, b) => cmpDate(a.start, b.start));
+    return {
+      status: 'ok',
+      matches: primaries.map(e => toMatch(e, bc, year, ay)),
+      alternatives: alternatives.map(e => toMatch(e, bc, year, ay)),
+      ganzhi
+    };
   }
   if (cmpDate(point, EARLIEST) < 0) {
-    return { status: 'before', matches: [] };
+    return { status: 'before', matches: [], alternatives: [], ganzhi };
   }
   if (cmpDate(point, NIANHAO_END) > 0) {
-    return { status: 'ended', matches: [] };
+    return { status: 'ended', matches: [], alternatives: [], ganzhi };
   }
-  return { status: 'gap', matches: [] };
+  return { status: 'gap', matches: [], alternatives: [], ganzhi };
 }

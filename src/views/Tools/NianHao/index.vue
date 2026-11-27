@@ -19,7 +19,7 @@
           </div>
           <label class="join">
             <span class="join-item btn btn-sm pointer-events-none">年</span>
-            <input v-model.number="yearInput" type="number" min="1" :max="isBC ? 9999 : 9999" class="input input-sm join-item input-bordered w-28 font-mono"/>
+            <input v-model.number="yearInput" type="number" min="1" :max="isBC ? 140 : 1912" class="input input-sm join-item input-bordered w-28 font-mono"/>
           </label>
           <select v-model.number="month" class="select select-sm w-20">
             <option v-for="m in 12" :key="m" :value="m">{{ m }} 月</option>
@@ -72,8 +72,9 @@
             <span class="badge badge-primary badge-outline font-semibold">{{ primary.dynasty }}</span>
             <div class="text-5xl font-serif font-bold tracking-widest select-all">{{ primary.eraText }}</div>
             <div class="text-lg">{{ primary.emperor }}</div>
-            <div class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs opacity-70 font-mono">
+            <div class="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-xs opacity-70 font-mono">
               <span>{{ primary.gongyuan }}</span>
+              <span class="badge badge-sm badge-primary badge-outline badge-ghost font-serif">{{ result.ganzhi }}年</span>
               <span>年号行用：{{ primary.span }}</span>
             </div>
             <p v-if="primary.note" class="text-xs opacity-60 max-w-md">{{ primary.note }}</p>
@@ -82,6 +83,18 @@
               <Copy v-else :size="16"/>
               复制结果
             </button>
+          </div>
+
+          <!-- 同年改元（具体月日不详） -->
+          <div v-if="result.alternatives.length" class="alert alert-info alert-soft text-sm py-2.5">
+            <div class="flex flex-col gap-0.5">
+              <span>该年发生改元，具体月日不详；年初可能仍行用以下年号：</span>
+              <span
+                  v-for="m in result.alternatives"
+                  :key="m.dynasty + m.name + m.eraText"
+                  class="font-mono text-xs opacity-80"
+              >{{ m.dynasty }} · {{ m.eraText }}（{{ m.span }}）</span>
+            </div>
           </div>
 
           <!-- 并立政权年号 -->
@@ -141,7 +154,8 @@
     <!-- 数据说明 -->
     <p class="text-xs opacity-60 text-center">
       数据覆盖{{ coverage.startText }}至{{ coverage.endText }}，共收录 {{ coverage.total }} 个年号（含主要并立政权）。
-      改元多在农历岁首，边界年份按整年近似；数据整理自常见史表，短命政权年号或有缺漏，仅供学习参考。
+      改元多在农历岁首，有明确史料记载的改元已精确到月/日，其余边界按整年近似；干支纪年按公历年份推算，年初春节前可能仍属上一干支年。
+      数据整理自常见史表，短命政权年号或有缺漏，仅供学习参考。
     </p>
   </div>
 </template>
@@ -173,9 +187,9 @@ const PRESETS: Preset[] = [
 
 const coverage = COVERAGE;
 const isBC = ref(false);
-const yearInput = ref<number | ''>(new Date().getFullYear());
-const month = ref(new Date().getMonth() + 1);
-const day = ref(new Date().getDate());
+const yearInput = ref<number | ''>(1917);
+const month = ref(7);
+const day = ref(12);
 const copied = ref(false);
 
 /** 输入是否有效 */
@@ -200,7 +214,7 @@ watch(daysInMonth, (max) => {
 const result = computed(() =>
   validInput.value
     ? queryNianHao(isBC.value, yearInput.value as number, month.value, day.value)
-    : { status: 'gap' as const, matches: [] }
+    : { status: 'gap' as const, matches: [], alternatives: [], ganzhi: '' }
 );
 
 /** 主结果 */
@@ -257,7 +271,7 @@ function applyPreset(p: Preset) {
 async function copyResult() {
   const m = primary.value;
   if (!m) return;
-  const text = `${inputDateText.value}：${m.dynasty} ${m.emperor}，${m.eraText}`;
+  const text = `${inputDateText.value}：${m.dynasty} ${m.emperor}，${m.eraText}（${result.value.ganzhi}年）`;
   await copyText(text);
   copied.value = true;
   popupToast('已复制到剪贴板', { type: 'success', duration: 1500, vertical: 'bottom' });
