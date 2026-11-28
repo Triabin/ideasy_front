@@ -81,14 +81,14 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, useTemplateRef, watch } from 'vue';
-import { useRoute } from 'vue-router';
 import NavbarRight from '@/components/NavbarRight';
 import NavbarLeft from '@/components/NavbarLeft';
 import ThemeController from '@/components/ThemeController';
 import GitHub from '@/components/icons/GitHub.vue';
-import useWheelOuter2Inner from '@/composables/useWheelOuter2Inner.ts';
+import { ref, useTemplateRef } from 'vue';
 import { openUrl } from '@/common/utils.ts';
+import useWheelOuter2Inner from '@/composables/useWheelOuter2Inner.ts';
+import useScrollRestoration from '@/composables/useScrollRestoration.ts';
 
 /* ---------------- 移动端抽屉 ---------------- */
 // 抽屉开合状态（绑定 drawer-toggle checkbox 的 v-model）
@@ -105,10 +105,5 @@ const mainWrapper = useTemplateRef<HTMLElement>('mainWrapper');
 const contentArea = useTemplateRef<HTMLElement>('contentArea');
 /* ---------------- 侧边滚轮 → 内容区平滑滚动 ---------------- */
 useWheelOuter2Inner(mainWrapper, contentArea);
-
-/* ---------------- 路由切换 → 滚动位置归零 ----------------
-   contentArea 是跨路由持久存在的滚动容器：若不重置，旧页面的 scrollTop 会带到新页面，
-   新页面内容较短时被浏览器钳制到新页面底部，表现为"点进工具页自动滑到最底部"。 */
-const route = useRoute();
-watch(() => route.fullPath, () => contentArea.value?.scrollTo({ top: 0 }));
+useScrollRestoration(contentArea);
 </script>

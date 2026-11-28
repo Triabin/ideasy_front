@@ -103,9 +103,9 @@
            class="relative flex flex-col justify-start gap-2.5 border border-accent/10 rounded-md p-6 overflow-hidden bg-base-200/55
              max-h-56 shadow-sm cursor-pointer hover:border-primary hover:shadow-[0_0_10px_var(--color-primary)] hover:-translate-y-1.25
              transition-all duration-200 ease-in-out group">
-        <!-- 收藏按钮 -->
+        <!-- 收藏按钮：桌面端悬浮显示；触屏设备（pointer:coarse，无 hover）常显，否则手机上无法点击收藏 -->
         <button class="btn btn-ghost btn-sm btn-circle absolute top-2 right-2 z-10
-                       opacity-0 group-hover:opacity-100 transition-opacity"
+                       opacity-0 group-hover:opacity-100 pointer-coarse:opacity-100 transition-opacity"
                 :class="appData.favoriteTools.includes(card.path) ? 'text-warning opacity-100!' : 'text-base-content/50'"
                 :title="appData.favoriteTools.includes(card.path) ? '取消收藏' : '收藏'"
                 @click.stop="appData.toggleFavoriteTool(card.path)">
@@ -215,7 +215,6 @@ const tagColor = (tag: string): string => {
   return TAG_COLORS[Math.abs(hash) % TAG_COLORS.length];
 };
 </script>
-
 <style lang="css" scoped>
 /* 点阵背景：中心清晰，向四周淡出，避免与数字抢视觉 */
 .dot-grid {
