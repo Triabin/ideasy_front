@@ -11,7 +11,8 @@
   <div title="我的博客"
        class="hidden md:flex gap-1 items-center cursor-pointer"
        @click="openUrl('https://spirit.triabin.cn')">
-    <img src="https://spirit.triabin.cn/icons/favicon.png" alt="spirit-favicon" class="size-6"/>
+    <!-- 屏幕宽度小于lg时隐藏，不然后面的文字会被挤到主题按钮上去 -->
+    <img src="https://spirit.triabin.cn/icons/favicon.png" alt="spirit-favicon" class="max-lg:hidden size-6"/>
     <span class="text-sm whitespace-nowrap">博客</span>
   </div>
   <!-- 主题按钮组（md 及以上显示；移动端的完整主题设定收在抽屉里） -->
