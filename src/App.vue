@@ -27,11 +27,11 @@
             <NavbarLeft/>
           </div>
           <!-- 导航栏中间 -->
-          <div class="navbar-center">
+          <!-- <div class="navbar-center"> -->
             <!-- <TopNav :routes="navs"/>-->
-          </div>
+          <!-- </div> -->
           <!-- 导航栏右侧 -->
-          <div class="navbar-end gap-1.5 md:gap-3">
+          <div class="navbar-end gap-1.5 md:gap-3 md:flex-1">
             <NavbarRight/>
           </div>
         </div>
