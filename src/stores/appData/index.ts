@@ -54,7 +54,7 @@ const useAppDataStore = defineStore('appData', () => {
   /** 记录一次工具使用 */
   const pushRecentTool = (path: string) => recentTools.value = [
     { path, time: Date.now() },
-    ...recentTools.value.filter(r => r.path !== path).slice(0, 7)
+    ...recentTools.value.filter(r => r.path !== path).slice(0, 15)
   ];
 
   /** 密码生成最近记录（最多100条，最新在前） */
